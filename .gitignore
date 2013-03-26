@@ -7,7 +7,10 @@
 *.o
 *.so
 *.*~
-
+*.a
+*.sreg
+*.sky
+*.elf
 # Packages #
 ############
 # it's better to unpack these files and commit the raw source
