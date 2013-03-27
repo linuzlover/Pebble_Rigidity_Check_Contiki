@@ -46,8 +46,13 @@
 #include "packages.h"
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
-static unsigned char START_FLAG=0;
+typedef unsigned char uchar;
+
+static uchar START_FLAG=0;
+static uchar NUM_NODES=0;
+static uchar *adj_matrix=NULL;
 /*---------------------------------------------------------------------------*/
 PROCESS(example_broadcast_process, "Broadcast example");
 AUTOSTART_PROCESSES(&example_broadcast_process);
@@ -59,11 +64,12 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from)
   pkg_hdr rec_hdr;
   /*Copy the broadcast buffer in the header structure*/
   memcpy(&rec_hdr,packetbuf_dataptr(),sizeof(pkg_hdr));
-
+  uchar len=rec_hdr.data_len;
   /*Switch on the type of pkg*/
   switch(rec_hdr.type){
   /*Color Of the led to set*/
-  unsigned char color;
+  uchar color;
+  
 		case CHANGE_LED:
 		  /*Change the active LED*/
 			memcpy(&color,packetbuf_dataptr()+sizeof(pkg_hdr),1);
@@ -93,8 +99,23 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from)
 			break;
 			/*PKG to stop the algorithms*/
 		case STOP_PKG:
-		  /*Set flag and send an event*/
-		  START_FLAG=0;
+		  	/*Set flag and send an event*/
+		  	START_FLAG=0;
+			process_post(&example_broadcast_process,PROCESS_EVENT_MSG,NULL);
+			break;
+		case ADJ_MATR_PKG:
+			if(adj_matrix==NULL)
+				adj_matrix=malloc(len);
+			else
+				{
+					if(!(sqrt(rec_hdr.data_len)==NUM_NODES))
+                    			{
+						NUM_NODES= sqrt(rec_hdr.data_len);
+						realloc(adj_matrix,len);
+					}
+				}
+			memcpy(adj_matrix,packetbuf_dataptr()+sizeof(pkg_hdr),len);
+			printf("First=%d, Second=%d\n",adj_matrix[0],adj_matrix[3]);
 			process_post(&example_broadcast_process,PROCESS_EVENT_MSG,NULL);
 			break;
 		default:
@@ -108,7 +129,7 @@ static struct broadcast_conn broadcast;
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(example_broadcast_process, ev, data)
 {
-  //static struct etimer et;
+   static struct etimer et;
 
   PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
 
@@ -121,9 +142,10 @@ PROCESS_THREAD(example_broadcast_process, ev, data)
 
 	/*Main loop*/
   while(1) {
+    
     printf("Alive\n");
   }
-
+  free(adj_matrix);
   PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/

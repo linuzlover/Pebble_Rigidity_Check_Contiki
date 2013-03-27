@@ -48,6 +48,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef unsigned char uchar;
+
 void send_start_pkg_broad(struct broadcast_conn *broadcast)
 {
    pkg_hdr to_send;
@@ -72,6 +74,22 @@ void send_stop_pkg_broad(struct broadcast_conn *broadcast)
    
 }
 
+void send_adj_pkg_broad(struct broadcast_conn *broadcast, uchar n,uchar *adj)
+{
+   pkg_hdr to_send;
+   uchar pkg_length=sizeof(pkg_hdr)+n*n;
+   uchar *buffer_to_send=malloc(pkg_length);
+   to_send.type=ADJ_MATR_PKG;
+   to_send.receiver=0;
+   to_send.data_len=n*n;
+   memcpy(buffer_to_send,&to_send,sizeof(pkg_hdr));
+   memcpy(buffer_to_send+sizeof(pkg_hdr),adj,n*n);
+   packetbuf_clear();
+   packetbuf_copyfrom(buffer_to_send,pkg_length);
+   broadcast_send(broadcast); 
+   free(buffer_to_send);
+}
+
 /*---------------------------------------------------------------------------*/
 PROCESS(example_broadcast_process, "Broadcast example");
 AUTOSTART_PROCESSES(&example_broadcast_process);
@@ -88,7 +106,14 @@ static struct broadcast_conn broadcast;
 PROCESS_THREAD(example_broadcast_process, ev, data)
 {
   static struct etimer et;
-  
+  uchar n=4;
+  uchar adj[n*n];
+
+  memset(adj,0,sizeof(adj));
+
+  adj[3]=1;
+  adj[7]=1;  
+
   PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
 
   PROCESS_BEGIN();
@@ -96,9 +121,9 @@ PROCESS_THREAD(example_broadcast_process, ev, data)
   broadcast_open(&broadcast, 129, &broadcast_call);
 
   while(1) {
-    etimer_set(&et, 5*CLOCK_SECOND);
+    etimer_set(&et, CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    send_start_pkg_broad(&broadcast);
+    send_adj_pkg_broad(&broadcast,n,adj);
   }
     
     PROCESS_END();
