@@ -50,6 +50,78 @@
 
 typedef unsigned char uchar;
 
+rimeaddr_t nodes_addr_list[16];
+
+static void set_addr_list()
+{
+	rimeaddr_t temp;
+
+	temp.u8[0]=0;
+	temp.u8[1]=0;
+	nodes_addr_list[0]=temp;
+
+	temp.u8[0]=0;
+        temp.u8[1]=15;
+        nodes_addr_list[1]=temp;
+
+	temp.u8[0]=6;
+        temp.u8[1]=251;
+        nodes_addr_list[2]=temp;
+
+	temp.u8[0]=13;
+        temp.u8[1]=4;
+        nodes_addr_list[3]=temp;
+
+	temp.u8[0]=31;
+        temp.u8[1]=70;
+        nodes_addr_list[4]=temp;
+
+	temp.u8[0]=83;
+        temp.u8[1]=12;
+        nodes_addr_list[5]=temp;
+
+	temp.u8[0]=91;
+        temp.u8[1]=19;
+        nodes_addr_list[6]=temp;
+
+	temp.u8[0]=127;
+        temp.u8[1]=108;
+        nodes_addr_list[7]=temp;
+
+	temp.u8[0]=128;
+        temp.u8[1]=101;
+        nodes_addr_list[8]=temp;
+
+	temp.u8[0]=158;
+        temp.u8[1]=128;
+        nodes_addr_list[9]=temp;
+
+	temp.u8[0]=196;
+        temp.u8[1]=115;
+        nodes_addr_list[10]=temp;
+
+	temp.u8[0]=212;
+        temp.u8[1]=108;
+        nodes_addr_list[11]=temp;
+
+	temp.u8[0]=217;
+        temp.u8[1]=209;
+        nodes_addr_list[12]=temp;
+
+	temp.u8[0]=226;
+        temp.u8[1]=100;
+        nodes_addr_list[13]=temp;
+
+	temp.u8[0]=255;
+        temp.u8[1]=255;
+        nodes_addr_list[14]=temp;
+	
+	temp.u8[0]=255;
+        temp.u8[1]=255;
+        nodes_addr_list[15]=temp;
+
+}
+
 static uchar START_FLAG=0;
 static uchar NUM_NODES=0;
 static uchar *adj_matrix=NULL;
