@@ -48,10 +48,39 @@
 #include <string.h>
 #include <math.h>
 
+#define TOT_NUM_NODES 16
+
 typedef unsigned char uchar;
 
-rimeaddr_t nodes_addr_list[16];
+static uchar START_FLAG=0;
+static uchar NUM_NODES=0;
+static uchar *adj_matrix=NULL;
+static uchar MY_ID=255;
 
+rimeaddr_t nodes_addr_list[TOT_NUM_NODES];
+
+
+static uchar get_id(rimeaddr_t from)
+{
+	uchar i;
+	uchar high=from.u8[0];
+	uchar low=from.u8[1];
+	for(i=0;i<TOT_NUM_NODES;i++)
+	{
+		if(high==nodes_addr_list[i].u8[0] && low==nodes_addr_list[i].u8[1])
+			return i;
+	}
+	return 255;
+}
+
+static uchar is_directed_to_me(rimeaddr_t from)
+{
+	if(adj_matrix==NULL)
+		return 0;
+	uchar from_id=get_id(from);
+	if(adj_matrix[MY_ID*NUM_NODES+from_id]==1)
+		return 1;
+}
 static void set_addr_list()
 {
 	rimeaddr_t temp;
@@ -122,9 +151,7 @@ static void set_addr_list()
 
 }
 
-static uchar START_FLAG=0;
-static uchar NUM_NODES=0;
-static uchar *adj_matrix=NULL;
+
 /*---------------------------------------------------------------------------*/
 PROCESS(example_broadcast_process, "Broadcast example");
 AUTOSTART_PROCESSES(&example_broadcast_process);
@@ -206,6 +233,8 @@ PROCESS_THREAD(example_broadcast_process, ev, data)
   PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
 
   PROCESS_BEGIN();
+
+  MY_ID=get_id(rimeaddr_node_addr);
 
   broadcast_open(&broadcast, 129, &broadcast_call);
   
