@@ -319,7 +319,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
     /*Main loop*/
     while (1) {
 
-        /*PROCESS_WAIT_EVENT_UNTIL(GOT_TOKEN);
+        PROCESS_WAIT_EVENT_UNTIL(GOT_TOKEN);
         leds_toggle(LEDS_ALL);        
         etimer_set(&et, 2*CLOCK_SECOND);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
