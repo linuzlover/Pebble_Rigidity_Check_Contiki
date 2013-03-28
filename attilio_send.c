@@ -69,25 +69,25 @@ PROCESS_THREAD(example_broadcast_process, ev, data)
   static struct etimer et;
   rimeaddr_t dest;
   pkg_hdr to_send;
-  dest.u8[0]=0;
+  dest.u8[0]=1;
   dest.u8[1]=0;
 
 
 
   uchar adj[TOT_NUM_NODES*TOT_NUM_NODES];
 
-  memset(adj,1,TOT_NUM_NODES*TOT_NUM_NODES);
+  memset(adj,0,TOT_NUM_NODES*TOT_NUM_NODES);
 
   /*adj[1]=1;
   adj[1*4+2]=1;
   adj[2*4+3]=1;
   adj[3*4]=1;
    */
-//  adj[mat2vec(1,1)]=1;  
+  adj[mat2vec(0,1)]=1;  
 
-//  adj[mat2vec(2,3)]=1;
+  adj[mat2vec(1,2)]=1;
 
-  //adj[mat2vec(4,4)]=1;  
+  adj[mat2vec(2,0)]=1;  
   
 
   PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
@@ -111,7 +111,7 @@ etimer_set(&et, CLOCK_SECOND);
    to_send.receiver=dest;
    packetbuf_clear();
    packetbuf_copyfrom(&to_send,sizeof(pkg_hdr));
-   //broadcast_send(&broadcast); 
+   broadcast_send(&broadcast); 
    
 //  while(1) {
 //    etimer_set(&et, CLOCK_SECOND);

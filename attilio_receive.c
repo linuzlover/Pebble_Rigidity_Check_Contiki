@@ -77,7 +77,7 @@ static uchar GOT_TOKEN = 0;
 /**
  * \var nodes_addr_list List of the nodes addresses in global order.
  */
-rimeaddr_t nodes_addr_list[TOT_NUM_NODES];
+static rimeaddr_t nodes_addr_list[TOT_NUM_NODES];
 
 /**
  * Function to retrieve the global ID
@@ -88,6 +88,7 @@ static uchar get_id(rimeaddr_t *from) {
     uchar i;
 
     for (i = 0; i < TOT_NUM_NODES; i++) {
+	printf("Agent:%d.%d node_list:%d.%d\n",from->u8[0],from->u8[1],(&nodes_addr_list[i])->u8[0],(&nodes_addr_list[i])->u8[1]);
         if (rimeaddr_cmp(&nodes_addr_list[i], from))
             return i;
     }
@@ -108,23 +109,18 @@ static uchar get_id(rimeaddr_t *from) {
  * Function to initialize the global list of addresses.
  */
 static void set_addr_list() {
-    rimeaddr_t temp;
 
-    temp.u8[0] = 1;
-    temp.u8[1] = 0;
-    nodes_addr_list[0] = temp;
+    nodes_addr_list[0].u8[0] = 1;
+    nodes_addr_list[0].u8[1] = 0;
 
-    temp.u8[0] = 2;
-    temp.u8[1] = 0;
-    nodes_addr_list[1] = temp;
+    nodes_addr_list[1].u8[0] = 2;
+    nodes_addr_list[1].u8[1] = 0;
 
-    temp.u8[0] = 3;
-    temp.u8[1] = 0;
-    nodes_addr_list[2] = temp;
+    nodes_addr_list[2].u8[0] = 3;
+    nodes_addr_list[2].u8[1] = 0;
 
-    temp.u8[0] = 4;
-    temp.u8[1] = 0;
-    nodes_addr_list[3] = temp;
+    nodes_addr_list[3].u8[0] = 4;
+    nodes_addr_list[3].u8[1] = 0;
 
 
     /*/
@@ -270,6 +266,8 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             if (rimeaddr_cmp(&rec_hdr.receiver, &rimeaddr_node_addr)) {
                 //I have the token!
                 GOT_TOKEN = 1;
+
+		leds_toggle(LEDS_ALL);
                 /*Send the event to unlock the main process*/
                 process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             }
@@ -288,12 +286,15 @@ static struct broadcast_conn broadcast;
 /*Main thread of the process*/
 PROCESS_THREAD(pebble_process, ev, data) {
     static struct etimer et;
+
+    
     //Variables to iterate on.... temporary
-    int i, j;
+ //   int i, j;
     //Set the exit handler
     PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
     //Begin the process
     PROCESS_BEGIN();
+    set_addr_list();
 
     //Get the global ID
     MY_ID = get_id(&rimeaddr_node_addr);
@@ -309,23 +310,24 @@ PROCESS_THREAD(pebble_process, ev, data) {
 
 
     //Temporary: print the adjacency matrix
+/*/
     for (i = 0; i < TOT_NUM_NODES; i++) {
         for (j = 0; j < TOT_NUM_NODES; j++) {
             printf("%d  ", adj_matrix[mat2vec(i, j)]);
         }
         printf("\n");
     }
-
+//*/
     /*Main loop*/
     while (1) {
 
         PROCESS_WAIT_EVENT_UNTIL(GOT_TOKEN);
-        leds_toggle(LEDS_ALL);        
         etimer_set(&et, 2*CLOCK_SECOND);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+        leds_toggle(LEDS_ALL);        
         //send_token_pkg(struct broadcast_conn *broadcast, uchar n,uchar i,uchar *adj,rimeaddr_t nodes_addr_list[TOT_NUM_NODES])
         send_token_pkg(&broadcast, MY_ID,adj_matrix,nodes_addr_list);
-        leds_toggle(LEDS_ALL);
+//        leds_toggle(LEDS_ALL);
         //printf("Alive\n");
     }
     /*End the process*/
