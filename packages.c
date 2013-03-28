@@ -17,6 +17,7 @@ void send_start_pkg_broad(struct broadcast_conn *broadcast)
    to_send.data_len=0;
    //Clearing the buffer for sending the package
    packetbuf_clear();
+   packetbuf_set_datalen(sizeof(pkg_hdr));
    //Copying the data in the buffer
    packetbuf_copyfrom(&to_send,sizeof(pkg_hdr));
    //Broadcast send
@@ -35,6 +36,7 @@ void send_stop_pkg_broad(struct broadcast_conn *broadcast)
    to_send.receiver=dest;
    to_send.data_len=0;
    packetbuf_clear();
+   packetbuf_set_datalen(sizeof(pkg_hdr));
    packetbuf_copyfrom(&to_send,sizeof(pkg_hdr));
    broadcast_send(broadcast); 
    
@@ -60,6 +62,7 @@ void send_adj_pkg_broad(struct broadcast_conn *broadcast,uchar *adj)
    //Copying the adjacency matrix in the buffer with an offset of sizeof(pkg_hdr)
    memcpy(buffer_to_send+sizeof(pkg_hdr),adj,len);
    packetbuf_clear();
+   packetbuf_set_datalen(pkg_length);
    packetbuf_copyfrom(buffer_to_send,pkg_length);
    broadcast_send(broadcast); 
    free(buffer_to_send);
@@ -91,6 +94,7 @@ void send_token_pkg(struct broadcast_conn *broadcast,uchar i,uchar *adj,rimeaddr
    to_send.receiver=dest;
    memcpy(buffer_to_send,&to_send,sizeof(pkg_hdr));
    packetbuf_clear();
+   packetbuf_set_datalen(pkg_length);
    packetbuf_copyfrom(buffer_to_send,pkg_length);
    broadcast_send(broadcast); 
    //Debugging
