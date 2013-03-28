@@ -65,7 +65,7 @@ void send_adj_pkg_broad(struct broadcast_conn *broadcast,uchar *adj)
    free(buffer_to_send);
 }
 
-void send_token_pkg(struct broadcast_conn *broadcast, uchar n,uchar i,uchar *adj,rimeaddr_t nodes_addr_list[TOT_NUM_NODES])
+void send_token_pkg(struct broadcast_conn *broadcast,uchar i,uchar *adj,rimeaddr_t nodes_addr_list[TOT_NUM_NODES])
 {
    pkg_hdr to_send;
    rimeaddr_t dest;
@@ -80,7 +80,7 @@ void send_token_pkg(struct broadcast_conn *broadcast, uchar n,uchar i,uchar *adj
    to_send.data_len=0;
    
    //Send the token to the first element in the i-th row equal to 1.
-   for(j=0;j<n;j++)
+   for(j=0;j<TOT_NUM_NODES;j++)
 	{
 		if(adj[mat2vec(i,j)]==1)
 			{

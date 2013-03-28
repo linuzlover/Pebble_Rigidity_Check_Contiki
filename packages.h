@@ -122,7 +122,7 @@ void send_token_pkg(struct broadcast_conn *broadcast, uchar i, uchar *adj, rimea
  * @param j J-th index
  * @return The value of the index in the array
  */
-inline uint16 mat2vec(uchar i, uchar j) {
+static inline uint16 mat2vec(uchar i, uchar j) {
     uint16 res;
     res = i * TOT_NUM_NODES + j;
     return res;

@@ -1,21 +1,21 @@
 Archive member included because of file (symbol)
 
-contiki-micaz.a(rimeaddr.o)   attilio_receive.co (rimeaddr_cmp)
-contiki-micaz.a(broadcast.o)  attilio_receive.co (broadcast_open)
+contiki-micaz.a(broadcast.o)  attilio_send.co (broadcast_open)
 contiki-micaz.a(abc.o)        contiki-micaz.a(broadcast.o) (abc_open)
 contiki-micaz.a(channel.o)    contiki-micaz.a(abc.o) (channel_open)
-contiki-micaz.a(process.o)    attilio_receive.co (process_post)
 contiki-micaz.a(list.o)       contiki-micaz.a(channel.o) (list_init)
-contiki-micaz.a(packetbuf.o)  attilio_receive.co (packetbuf_dataptr)
+contiki-micaz.a(etimer.o)     attilio_send.co (etimer_set)
+contiki-micaz.a(packetbuf.o)  contiki-micaz.a(broadcast.o) (packetbuf_addrs)
 contiki-micaz.a(contiki-micaz-m)
                               /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/crtm128.o (main)
 contiki-micaz.a(init-net.o)   contiki-micaz.a(contiki-micaz-m) (init_net)
 contiki-micaz.a(node-id.o)    contiki-micaz.a(contiki-micaz-m) (node_id_restore)
 contiki-micaz.a(clock.o)      contiki-micaz.a(contiki-micaz-m) (clock_init)
 contiki-micaz.a(ds2401.o)     contiki-micaz.a(contiki-micaz-m) (ds2401_init)
-contiki-micaz.a(packages.o)   attilio_receive.co (mat2vec)
+contiki-micaz.a(packages.o)   attilio_send.co (send_start_pkg_broad)
 contiki-micaz.a(eeprom.o)     contiki-micaz.a(node-id.o) (eeprom_write)
 contiki-micaz.a(leds.o)       contiki-micaz.a(contiki-micaz-m) (leds_init)
+contiki-micaz.a(rimeaddr.o)   contiki-micaz.a(broadcast.o) (rimeaddr_copy)
 contiki-micaz.a(rime.o)       contiki-micaz.a(abc.o) (rime_output)
 contiki-micaz.a(rimestats.o)  contiki-micaz.a(rime.o) (rimestats)
 contiki-micaz.a(announcement.o)
@@ -30,10 +30,11 @@ contiki-micaz.a(nullmac.o)    contiki-micaz.a(init-net.o) (nullmac_driver)
 contiki-micaz.a(mac.o)        contiki-micaz.a(cxmac.o) (mac_call_sent_callback)
 contiki-micaz.a(framer-802154.o)
                               contiki-micaz.a(cxmac.o) (framer_802154)
+contiki-micaz.a(process.o)    contiki-micaz.a(etimer.o) (process_current)
 contiki-micaz.a(autostart.o)  contiki-micaz.a(contiki-micaz-m) (autostart_start)
 contiki-micaz.a(compower.o)   contiki-micaz.a(cxmac.o) (compower_idle_activity)
 contiki-micaz.a(memb.o)       contiki-micaz.a(cxmac.o) (memb_init)
-contiki-micaz.a(etimer.o)     contiki-micaz.a(clock.o) (etimer_request_poll)
+contiki-micaz.a(timer.o)      contiki-micaz.a(etimer.o) (timer_set)
 contiki-micaz.a(ctimer.o)     contiki-micaz.a(contiki-micaz-m) (ctimer_init)
 contiki-micaz.a(energest.o)   contiki-micaz.a(compower.o) (energest_type_time)
 contiki-micaz.a(rtimer.o)     contiki-micaz.a(contiki-micaz-m) (rtimer_init)
@@ -49,16 +50,15 @@ contiki-micaz.a(rtimer-arch.o)
 contiki-micaz.a(watchdog.o)   contiki-micaz.a(cxmac.o) (watchdog_start)
 contiki-micaz.a(frame802154.o)
                               contiki-micaz.a(framer-802154.o) (frame802154_hdrlen)
-contiki-micaz.a(timer.o)      contiki-micaz.a(etimer.o) (timer_set)
 contiki-micaz.a(spi.o)        contiki-micaz.a(cc2420-arch.o) (spi_init)
 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodhi4.o)
                               contiki-micaz.a(init-net.o) (__udivmodhi4)
 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_exit.o)
                               /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/crtm128.o (exit)
 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_copy_data.o)
-                              attilio_receive.co (__do_copy_data)
+                              attilio_send.co (__do_copy_data)
 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_clear_bss.o)
-                              attilio_receive.co (__do_clear_bss)
+                              attilio_send.co (__do_clear_bss)
 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(malloc.o)
                               contiki-micaz.a(packages.o) (malloc)
 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(rand.o)
@@ -66,15 +66,13 @@ contiki-micaz.a(spi.o)        contiki-micaz.a(cc2420-arch.o) (spi_init)
 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memcpy.o)
                               contiki-micaz.a(packetbuf.o) (memcpy)
 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memset.o)
-                              contiki-micaz.a(chameleon-bitop) (memset)
+                              attilio_send.co (memset)
 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(iob.o)
                               contiki-micaz.a(rs232.o) (__iob)
 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(printf.o)
-                              attilio_receive.co (printf)
+                              contiki-micaz.a(packages.o) (printf)
 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(printf_p.o)
                               contiki-micaz.a(contiki-micaz-m) (printf_P)
-/usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(putchar.o)
-                              attilio_receive.co (putchar)
 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(vfprintf_std.o)
                               /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(printf.o) (vfprintf)
 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eerd_block_atmega128.o)
@@ -88,7 +86,7 @@ contiki-micaz.a(spi.o)        contiki-micaz.a(cc2420-arch.o) (spi_init)
 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(strnlen.o)
                               /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(vfprintf_std.o) (strnlen)
 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(fputc.o)
-                              /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(putchar.o) (fputc)
+                              /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(vfprintf_std.o) (fputc)
 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(ultoa_invert.o)
                               /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(vfprintf_std.o) (__ultoa_invert)
 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_mulsi3.o)
@@ -132,7 +130,6 @@ __flp               0x2               /usr/lib/gcc/avr/4.5.3/../../../avr/lib/av
 cc2420_sfd_end_time
                     0x2               contiki-micaz.a(cc2420.o)
 __iob               0x6               /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(iob.o)
-nodes_addr_list     0x8               attilio_receive.co
 
 Memory Configuration
 
@@ -150,7 +147,7 @@ Linker script and memory map
 Address of section .data set to 0x800100
 LOAD /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/crtm128.o
 Address of section .bootloader set to 0x1f800
-LOAD attilio_receive.co
+LOAD attilio_send.co
 LOAD contiki-micaz.a
 LOAD /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a
 LOAD /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a
@@ -246,7 +243,7 @@ LOAD /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a
 .rela.plt
  *(.rela.plt)
 
-.text           0x00000000     0x54c0
+.text           0x00000000     0x53c6
  *(.vectors)
  .vectors       0x00000000       0x8c /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/crtm128.o
                 0x00000000                __vectors
@@ -334,345 +331,340 @@ LOAD /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a
                 0x0000016e                __vector_10
                 0x0000016e                __vector_16
                 0x0000016e                __vector_20
- .text          0x00000172      0x204 attilio_receive.co
- .text          0x00000376       0x46 contiki-micaz.a(rimeaddr.o)
-                0x00000376                rimeaddr_copy
-                0x00000388                rimeaddr_cmp
-                0x000003ac                rimeaddr_set_node_addr
- .text          0x000003bc       0xc0 contiki-micaz.a(broadcast.o)
-                0x00000422                broadcast_open
-                0x00000458                broadcast_close
-                0x0000045e                broadcast_send
- .text          0x0000047c       0x66 contiki-micaz.a(abc.o)
-                0x0000047c                abc_open
-                0x000004ae                abc_close
-                0x000004b4                abc_send
-                0x000004ba                abc_input
-                0x000004ca                abc_sent
- .text          0x000004e2       0x82 contiki-micaz.a(channel.o)
-                0x000004e2                channel_init
-                0x000004ec                channel_open
-                0x000004fe                channel_close
-                0x0000050a                channel_lookup
-                0x0000053a                channel_set_attributes
- .text          0x00000564      0x372 contiki-micaz.a(process.o)
-                0x000006cc                process_alloc_event
-                0x000006da                process_exit
-                0x000006e8                process_init
-                0x0000070c                process_run
-                0x000007de                process_nevents
-                0x000007f0                process_post
-                0x00000846                process_post_synch
-                0x00000864                process_start
-                0x000008aa                process_poll
-                0x000008c2                process_is_running
- .text          0x000008d6      0x1a8 contiki-micaz.a(list.o)
-                0x000008d6                list_init
-                0x000008de                list_head
-                0x000008e6                list_copy
-                0x000008f4                list_tail
-                0x00000918                list_chop
-                0x00000960                list_pop
-                0x0000097a                list_remove
-                0x000009c4                list_push
-                0x000009ec                list_add
-                0x00000a2a                list_length
-                0x00000a4a                list_insert
-                0x00000a6a                list_item_next
- .text          0x00000a7e      0x364 contiki-micaz.a(packetbuf.o)
-                0x00000a7e                packetbuf_clear_hdr
-                0x00000a86                packetbuf_copyto_hdr
-                0x00000ab4                packetbuf_copyto
-                0x00000b3c                packetbuf_hdr_remove
-                0x00000b48                packetbuf_hdrreduce
-                0x00000b86                packetbuf_set_datalen
-                0x00000b90                packetbuf_dataptr
-                0x00000ba0                packetbuf_hdrptr
-                0x00000bae                packetbuf_is_reference
-                0x00000bca                packetbuf_compact
-                0x00000c2a                packetbuf_reference_ptr
-                0x00000c34                packetbuf_datalen
-                0x00000c3e                packetbuf_hdrlen
-                0x00000c48                packetbuf_totlen
-                0x00000c60                packetbuf_hdralloc
-                0x00000c9e                packetbuf_attr_clear
-                0x00000cd6                packetbuf_clear
-                0x00000cfe                packetbuf_reference
-                0x00000d28                packetbuf_copyfrom
-                0x00000d8e                packetbuf_attr_copyto
-                0x00000db8                packetbuf_attr_copyfrom
- .text          0x00000de2       0xa4 contiki-micaz.a(contiki-micaz-m)
-                0x00000de2                init_usart
-                0x00000df4                main
- .text          0x00000e86      0x20e contiki-micaz.a(init-net.o)
-                0x00000e86                init_net
- .text          0x00001094       0x9e contiki-micaz.a(node-id.o)
-                0x00001094                node_id_restore
-                0x000010ec                node_id_burn
- .text          0x00001132      0x17a contiki-micaz.a(clock.o)
-                0x00001132                __vector_15
-                0x000011ea                clock_init
-                0x00001222                clock_time
-                0x0000123c                clock_delay
-                0x00001252                clock_wait
-                0x0000127a                clock_set_seconds
-                0x0000127c                clock_seconds
- .text          0x000012ac      0x190 contiki-micaz.a(ds2401.o)
-                0x00001316                ds2401_init
- .text          0x0000143c      0x224 contiki-micaz.a(packages.o)
-                0x0000143c                send_start_pkg_broad
-                0x00001488                send_stop_pkg_broad
-                0x000014d4                send_adj_pkg_broad
-                0x0000156a                send_token_pkg
-                0x0000164c                mat2vec
- .text          0x00001660       0x20 contiki-micaz.a(eeprom.o)
-                0x00001660                eeprom_write
-                0x00001670                eeprom_read
- .text          0x00001680       0x82 contiki-micaz.a(leds.o)
-                0x00001690                leds_init
-                0x0000169e                leds_get
-                0x000016a4                leds_on
-                0x000016b4                leds_off
-                0x000016c6                leds_invert
-                0x000016d6                leds_toggle
-                0x000016dc                leds_blink
- .text          0x00001702      0x16a contiki-micaz.a(rime.o)
-                0x000017f8                rime_sniffer_add
-                0x00001804                rime_sniffer_remove
-                0x00001810                rime_output
- .text          0x0000186c        0x0 contiki-micaz.a(rimestats.o)
- .text          0x0000186c      0x17e contiki-micaz.a(announcement.o)
-                0x0000186c                announcement_init
-                0x00001876                announcement_register
-                0x000018b8                announcement_remove
-                0x000018c4                announcement_remove_value
-                0x000018f4                announcement_set_value
-                0x00001930                announcement_bump
-                0x0000195e                announcement_listen
-                0x0000196e                announcement_register_listen_callback
-                0x00001978                announcement_register_observer_callback
-                0x00001982                announcement_list
-                0x0000198c                announcement_heard
- .text          0x000019ea      0x23a contiki-micaz.a(broadcast-annou)
-                0x00001ba6                broadcast_announcement_init
-                0x00001bf6                broadcast_announcement_stop
-                0x00001c1a                broadcast_announcement_beacon_interval
- .text          0x00001c24       0x62 contiki-micaz.a(chameleon.o)
-                0x00001c24                chameleon_init
-                0x00001c2a                chameleon_parse
-                0x00001c4a                chameleon_create
-                0x00001c7a                chameleon_hdrsize
- .text          0x00001c86      0x4d2 contiki-micaz.a(chameleon-bitop)
-                0x00001ca0                get_bits_in_byte
-                0x00001cde                get_bits
-                0x00001f0c                set_bits_in_byte
-                0x00001f34                set_bits
- .text          0x00002158      0x82e contiki-micaz.a(cxmac.o)
-                0x00002954                cxmac_init
-                0x00002984                cxmac_set_announcement_radio_txpower
- .text          0x00002986       0x38 contiki-micaz.a(nullmac.o)
- .text          0x000029be       0x10 contiki-micaz.a(mac.o)
-                0x000029be                mac_call_sent_callback
- .text          0x000029ce      0x216 contiki-micaz.a(framer-802154.o)
- .text          0x00002be4       0x58 contiki-micaz.a(autostart.o)
-                0x00002be4                autostart_start
-                0x00002c12                autostart_exit
- .text          0x00002c3c      0x16e contiki-micaz.a(compower.o)
-                0x00002c3c                compower_init
-                0x00002c5e                compower_accumulate
-                0x00002d16                compower_clear
-                0x00002d2a                compower_attrconv
-                0x00002d5e                compower_accumulate_attrs
- .text          0x00002daa      0x110 contiki-micaz.a(memb.o)
-                0x00002daa                memb_init
-                0x00002dea                memb_alloc
-                0x00002e36                memb_free
-                0x00002e80                memb_inmemb
- .text          0x00002eba      0x2ea contiki-micaz.a(etimer.o)
-                0x00002f1e                etimer_request_poll
-                0x00003098                etimer_set
-                0x000030ae                etimer_reset
-                0x000030c4                etimer_restart
-                0x000030da                etimer_adjust
-                0x000030ee                etimer_expired
-                0x00003104                etimer_expiration_time
-                0x00003116                etimer_start_time
-                0x0000311e                etimer_pending
-                0x00003136                etimer_next_expiration_time
-                0x00003154                etimer_stop
- .text          0x000031a4      0x288 contiki-micaz.a(ctimer.o)
-                0x0000328a                ctimer_init
-                0x000032a4                ctimer_set
-                0x0000330a                ctimer_reset
-                0x0000335e                ctimer_restart
-                0x000033b2                ctimer_stop
-                0x000033e2                ctimer_expired
- .text          0x0000342c        0xe contiki-micaz.a(energest.o)
-                0x0000342c                energest_type_set
-                0x0000342e                energest_init
-                0x00003430                energest_type_time
-                0x00003438                energest_flush
- .text          0x0000343a       0x7c contiki-micaz.a(rtimer.o)
-                0x0000343a                rtimer_init
-                0x00003440                rtimer_set
-                0x00003478                rtimer_run_next
- .text          0x000034b6        0xc contiki-micaz.a(random.o)
-                0x000034b6                random_init
-                0x000034bc                random_rand
- .text          0x000034c2      0x210 contiki-micaz.a(queuebuf.o)
-                0x000034c2                queuebuf_init
-                0x000034dc                queuebuf_new_from_packetbuf
-                0x0000357a                queuebuf_update_attr_from_packetbuf
-                0x00003590                queuebuf_free
-                0x000035d4                queuebuf_to_packetbuf
-                0x00003650                queuebuf_dataptr
-                0x0000368e                queuebuf_datalen
-                0x0000369c                queuebuf_addr
-                0x000036b4                queuebuf_attr
-                0x000036d0                queuebuf_debug_print
- .text          0x000036d2      0x1b8 contiki-micaz.a(rs232.o)
-                0x000036d2                __vector_18
-                0x0000372e                __vector_30
-                0x0000378c                rs232_init
-                0x000037c8                rs232_send
-                0x000037e6                rs232_stdout_putchar
-                0x00003810                rs232_set_input
-                0x0000382c                rs232_print
-                0x0000386e                slip_arch_writeb
-                0x00003878                rs232_redirect_stdout
- .text          0x0000388a       0x56 contiki-micaz.a(leds-arch.o)
-                0x0000388a                leds_arch_init
-                0x00003898                leds_arch_get
-                0x000038b8                leds_arch_set
- .text          0x000038e0      0xb26 contiki-micaz.a(cc2420.o)
-                0x00003b1a                cc2420_on
-                0x00003b46                cc2420_off
-                0x00003e82                cc2420_get_channel
-                0x00003e8c                cc2420_set_channel
-                0x00003f2c                cc2420_set_pan_addr
-                0x00004040                cc2420_init
-                0x00004108                cc2420_interrupt
-                0x00004146                cc2420_set_txpower
-                0x0000415a                cc2420_get_txpower
-                0x00004326                cc2420_rssi
-                0x000043ae                cc2420_cca_valid
-                0x000043ea                cc2420_set_cca_threshold
- .text          0x00004406       0x6e contiki-micaz.a(cc2420-arch.o)
-                0x00004406                cc2420_arch_init
-                0x00004424                __vector_7
- .text          0x00004474       0xb6 contiki-micaz.a(rtimer-arch.o)
-                0x00004474                __vector_26
-                0x000044ce                rtimer_arch_init
-                0x00004506                rtimer_arch_schedule
- .text          0x0000452a       0x50 contiki-micaz.a(watchdog.o)
-                0x0000452a                watchdog_init
-                0x0000453e                watchdog_start
-                0x00004552                watchdog_periodic
-                0x00004556                watchdog_stop
-                0x00004564                watchdog_reboot
- .text          0x0000457a      0x452 contiki-micaz.a(frame802154.o)
-                0x0000462c                frame802154_hdrlen
-                0x00004668                frame802154_create
-                0x0000483e                frame802154_parse
- .text          0x000049cc       0x98 contiki-micaz.a(timer.o)
-                0x000049cc                timer_set
-                0x000049e4                timer_reset
-                0x000049f8                timer_restart
-                0x00004a0c                timer_expired
-                0x00004a3a                timer_remaining
- .text          0x00004a64       0x16 contiki-micaz.a(spi.o)
-                0x00004a64                spi_init
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodhi4.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_exit.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_copy_data.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_clear_bss.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(malloc.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(rand.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memcpy.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memset.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(iob.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(printf.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(printf_p.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(putchar.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(vfprintf_std.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eerd_block_atmega128.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_block_atmega128.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_byte_atmega128.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(strnlen_P.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(strnlen.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(fputc.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(ultoa_invert.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_mulsi3.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_divmodsi4.o)
- .text          0x00004a7a        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodsi4.o)
-                0x00004a7a                . = ALIGN (0x2)
+ .text          0x00000172      0x130 attilio_send.co
+ .text          0x000002a2       0xc0 contiki-micaz.a(broadcast.o)
+                0x00000308                broadcast_open
+                0x0000033e                broadcast_close
+                0x00000344                broadcast_send
+ .text          0x00000362       0x66 contiki-micaz.a(abc.o)
+                0x00000362                abc_open
+                0x00000394                abc_close
+                0x0000039a                abc_send
+                0x000003a0                abc_input
+                0x000003b0                abc_sent
+ .text          0x000003c8       0x82 contiki-micaz.a(channel.o)
+                0x000003c8                channel_init
+                0x000003d2                channel_open
+                0x000003e4                channel_close
+                0x000003f0                channel_lookup
+                0x00000420                channel_set_attributes
+ .text          0x0000044a      0x1a8 contiki-micaz.a(list.o)
+                0x0000044a                list_init
+                0x00000452                list_head
+                0x0000045a                list_copy
+                0x00000468                list_tail
+                0x0000048c                list_chop
+                0x000004d4                list_pop
+                0x000004ee                list_remove
+                0x00000538                list_push
+                0x00000560                list_add
+                0x0000059e                list_length
+                0x000005be                list_insert
+                0x000005de                list_item_next
+ .text          0x000005f2      0x2ea contiki-micaz.a(etimer.o)
+                0x00000656                etimer_request_poll
+                0x000007d0                etimer_set
+                0x000007e6                etimer_reset
+                0x000007fc                etimer_restart
+                0x00000812                etimer_adjust
+                0x00000826                etimer_expired
+                0x0000083c                etimer_expiration_time
+                0x0000084e                etimer_start_time
+                0x00000856                etimer_pending
+                0x0000086e                etimer_next_expiration_time
+                0x0000088c                etimer_stop
+ .text          0x000008dc      0x364 contiki-micaz.a(packetbuf.o)
+                0x000008dc                packetbuf_clear_hdr
+                0x000008e4                packetbuf_copyto_hdr
+                0x00000912                packetbuf_copyto
+                0x0000099a                packetbuf_hdr_remove
+                0x000009a6                packetbuf_hdrreduce
+                0x000009e4                packetbuf_set_datalen
+                0x000009ee                packetbuf_dataptr
+                0x000009fe                packetbuf_hdrptr
+                0x00000a0c                packetbuf_is_reference
+                0x00000a28                packetbuf_compact
+                0x00000a88                packetbuf_reference_ptr
+                0x00000a92                packetbuf_datalen
+                0x00000a9c                packetbuf_hdrlen
+                0x00000aa6                packetbuf_totlen
+                0x00000abe                packetbuf_hdralloc
+                0x00000afc                packetbuf_attr_clear
+                0x00000b34                packetbuf_clear
+                0x00000b5c                packetbuf_reference
+                0x00000b86                packetbuf_copyfrom
+                0x00000bec                packetbuf_attr_copyto
+                0x00000c16                packetbuf_attr_copyfrom
+ .text          0x00000c40       0xa4 contiki-micaz.a(contiki-micaz-m)
+                0x00000c40                init_usart
+                0x00000c52                main
+ .text          0x00000ce4      0x20e contiki-micaz.a(init-net.o)
+                0x00000ce4                init_net
+ .text          0x00000ef2       0x9e contiki-micaz.a(node-id.o)
+                0x00000ef2                node_id_restore
+                0x00000f4a                node_id_burn
+ .text          0x00000f90      0x17a contiki-micaz.a(clock.o)
+                0x00000f90                __vector_15
+                0x00001048                clock_init
+                0x00001080                clock_time
+                0x0000109a                clock_delay
+                0x000010b0                clock_wait
+                0x000010d8                clock_set_seconds
+                0x000010da                clock_seconds
+ .text          0x0000110a      0x190 contiki-micaz.a(ds2401.o)
+                0x00001174                ds2401_init
+ .text          0x0000129a      0x20c contiki-micaz.a(packages.o)
+                0x0000129a                send_start_pkg_broad
+                0x000012e6                send_stop_pkg_broad
+                0x00001332                send_adj_pkg_broad
+                0x000013c8                send_token_pkg
+ .text          0x000014a6       0x20 contiki-micaz.a(eeprom.o)
+                0x000014a6                eeprom_write
+                0x000014b6                eeprom_read
+ .text          0x000014c6       0x82 contiki-micaz.a(leds.o)
+                0x000014d6                leds_init
+                0x000014e4                leds_get
+                0x000014ea                leds_on
+                0x000014fa                leds_off
+                0x0000150c                leds_invert
+                0x0000151c                leds_toggle
+                0x00001522                leds_blink
+ .text          0x00001548       0x46 contiki-micaz.a(rimeaddr.o)
+                0x00001548                rimeaddr_copy
+                0x0000155a                rimeaddr_cmp
+                0x0000157e                rimeaddr_set_node_addr
+ .text          0x0000158e      0x16a contiki-micaz.a(rime.o)
+                0x00001684                rime_sniffer_add
+                0x00001690                rime_sniffer_remove
+                0x0000169c                rime_output
+ .text          0x000016f8        0x0 contiki-micaz.a(rimestats.o)
+ .text          0x000016f8      0x17e contiki-micaz.a(announcement.o)
+                0x000016f8                announcement_init
+                0x00001702                announcement_register
+                0x00001744                announcement_remove
+                0x00001750                announcement_remove_value
+                0x00001780                announcement_set_value
+                0x000017bc                announcement_bump
+                0x000017ea                announcement_listen
+                0x000017fa                announcement_register_listen_callback
+                0x00001804                announcement_register_observer_callback
+                0x0000180e                announcement_list
+                0x00001818                announcement_heard
+ .text          0x00001876      0x23a contiki-micaz.a(broadcast-annou)
+                0x00001a32                broadcast_announcement_init
+                0x00001a82                broadcast_announcement_stop
+                0x00001aa6                broadcast_announcement_beacon_interval
+ .text          0x00001ab0       0x62 contiki-micaz.a(chameleon.o)
+                0x00001ab0                chameleon_init
+                0x00001ab6                chameleon_parse
+                0x00001ad6                chameleon_create
+                0x00001b06                chameleon_hdrsize
+ .text          0x00001b12      0x4d2 contiki-micaz.a(chameleon-bitop)
+                0x00001b2c                get_bits_in_byte
+                0x00001b6a                get_bits
+                0x00001d98                set_bits_in_byte
+                0x00001dc0                set_bits
+ .text          0x00001fe4      0x82e contiki-micaz.a(cxmac.o)
+                0x000027e0                cxmac_init
+                0x00002810                cxmac_set_announcement_radio_txpower
+ .text          0x00002812       0x38 contiki-micaz.a(nullmac.o)
+ .text          0x0000284a       0x10 contiki-micaz.a(mac.o)
+                0x0000284a                mac_call_sent_callback
+ .text          0x0000285a      0x216 contiki-micaz.a(framer-802154.o)
+ .text          0x00002a70      0x372 contiki-micaz.a(process.o)
+                0x00002bd8                process_alloc_event
+                0x00002be6                process_exit
+                0x00002bf4                process_init
+                0x00002c18                process_run
+                0x00002cea                process_nevents
+                0x00002cfc                process_post
+                0x00002d52                process_post_synch
+                0x00002d70                process_start
+                0x00002db6                process_poll
+                0x00002dce                process_is_running
+ .text          0x00002de2       0x58 contiki-micaz.a(autostart.o)
+                0x00002de2                autostart_start
+                0x00002e10                autostart_exit
+ .text          0x00002e3a      0x16e contiki-micaz.a(compower.o)
+                0x00002e3a                compower_init
+                0x00002e5c                compower_accumulate
+                0x00002f14                compower_clear
+                0x00002f28                compower_attrconv
+                0x00002f5c                compower_accumulate_attrs
+ .text          0x00002fa8      0x110 contiki-micaz.a(memb.o)
+                0x00002fa8                memb_init
+                0x00002fe8                memb_alloc
+                0x00003034                memb_free
+                0x0000307e                memb_inmemb
+ .text          0x000030b8       0x98 contiki-micaz.a(timer.o)
+                0x000030b8                timer_set
+                0x000030d0                timer_reset
+                0x000030e4                timer_restart
+                0x000030f8                timer_expired
+                0x00003126                timer_remaining
+ .text          0x00003150      0x288 contiki-micaz.a(ctimer.o)
+                0x00003236                ctimer_init
+                0x00003250                ctimer_set
+                0x000032b6                ctimer_reset
+                0x0000330a                ctimer_restart
+                0x0000335e                ctimer_stop
+                0x0000338e                ctimer_expired
+ .text          0x000033d8        0xe contiki-micaz.a(energest.o)
+                0x000033d8                energest_type_set
+                0x000033da                energest_init
+                0x000033dc                energest_type_time
+                0x000033e4                energest_flush
+ .text          0x000033e6       0x7c contiki-micaz.a(rtimer.o)
+                0x000033e6                rtimer_init
+                0x000033ec                rtimer_set
+                0x00003424                rtimer_run_next
+ .text          0x00003462        0xc contiki-micaz.a(random.o)
+                0x00003462                random_init
+                0x00003468                random_rand
+ .text          0x0000346e      0x210 contiki-micaz.a(queuebuf.o)
+                0x0000346e                queuebuf_init
+                0x00003488                queuebuf_new_from_packetbuf
+                0x00003526                queuebuf_update_attr_from_packetbuf
+                0x0000353c                queuebuf_free
+                0x00003580                queuebuf_to_packetbuf
+                0x000035fc                queuebuf_dataptr
+                0x0000363a                queuebuf_datalen
+                0x00003648                queuebuf_addr
+                0x00003660                queuebuf_attr
+                0x0000367c                queuebuf_debug_print
+ .text          0x0000367e      0x1b8 contiki-micaz.a(rs232.o)
+                0x0000367e                __vector_18
+                0x000036da                __vector_30
+                0x00003738                rs232_init
+                0x00003774                rs232_send
+                0x00003792                rs232_stdout_putchar
+                0x000037bc                rs232_set_input
+                0x000037d8                rs232_print
+                0x0000381a                slip_arch_writeb
+                0x00003824                rs232_redirect_stdout
+ .text          0x00003836       0x56 contiki-micaz.a(leds-arch.o)
+                0x00003836                leds_arch_init
+                0x00003844                leds_arch_get
+                0x00003864                leds_arch_set
+ .text          0x0000388c      0xb26 contiki-micaz.a(cc2420.o)
+                0x00003ac6                cc2420_on
+                0x00003af2                cc2420_off
+                0x00003e2e                cc2420_get_channel
+                0x00003e38                cc2420_set_channel
+                0x00003ed8                cc2420_set_pan_addr
+                0x00003fec                cc2420_init
+                0x000040b4                cc2420_interrupt
+                0x000040f2                cc2420_set_txpower
+                0x00004106                cc2420_get_txpower
+                0x000042d2                cc2420_rssi
+                0x0000435a                cc2420_cca_valid
+                0x00004396                cc2420_set_cca_threshold
+ .text          0x000043b2       0x6e contiki-micaz.a(cc2420-arch.o)
+                0x000043b2                cc2420_arch_init
+                0x000043d0                __vector_7
+ .text          0x00004420       0xb6 contiki-micaz.a(rtimer-arch.o)
+                0x00004420                __vector_26
+                0x0000447a                rtimer_arch_init
+                0x000044b2                rtimer_arch_schedule
+ .text          0x000044d6       0x50 contiki-micaz.a(watchdog.o)
+                0x000044d6                watchdog_init
+                0x000044ea                watchdog_start
+                0x000044fe                watchdog_periodic
+                0x00004502                watchdog_stop
+                0x00004510                watchdog_reboot
+ .text          0x00004526      0x452 contiki-micaz.a(frame802154.o)
+                0x000045d8                frame802154_hdrlen
+                0x00004614                frame802154_create
+                0x000047ea                frame802154_parse
+ .text          0x00004978       0x16 contiki-micaz.a(spi.o)
+                0x00004978                spi_init
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodhi4.o)
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_exit.o)
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_copy_data.o)
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_clear_bss.o)
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(malloc.o)
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(rand.o)
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memcpy.o)
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memset.o)
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(iob.o)
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(printf.o)
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(printf_p.o)
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(vfprintf_std.o)
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eerd_block_atmega128.o)
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_block_atmega128.o)
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_byte_atmega128.o)
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(strnlen_P.o)
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(strnlen.o)
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(fputc.o)
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(ultoa_invert.o)
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_mulsi3.o)
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_divmodsi4.o)
+ .text          0x0000498e        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodsi4.o)
+                0x0000498e                . = ALIGN (0x2)
  *(.text.*)
- .text.libgcc   0x00004a7a       0x28 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodhi4.o)
-                0x00004a7a                __udivmodhi4
- .text.libgcc   0x00004aa2        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_exit.o)
- .text.libgcc   0x00004aa2        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_copy_data.o)
- .text.libgcc   0x00004aa2        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_clear_bss.o)
+ .text.libgcc   0x0000498e       0x28 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodhi4.o)
+                0x0000498e                __udivmodhi4
+ .text.libgcc   0x000049b6        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_exit.o)
+ .text.libgcc   0x000049b6        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_copy_data.o)
+ .text.libgcc   0x000049b6        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_clear_bss.o)
  .text.avr-libc
-                0x00004aa2      0x266 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(malloc.o)
-                0x00004aa2                malloc
-                0x00004bd6                free
+                0x000049b6      0x266 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(malloc.o)
+                0x000049b6                malloc
+                0x00004aea                free
  .text.avr-libc
-                0x00004d08       0xbc /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(rand.o)
-                0x00004d9e                rand_r
-                0x00004da4                rand
-                0x00004dae                srand
+                0x00004c1c       0xbc /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(rand.o)
+                0x00004cb2                rand_r
+                0x00004cb8                rand
+                0x00004cc2                srand
  .text.avr-libc
-                0x00004dc4       0x12 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memcpy.o)
-                0x00004dc4                memcpy
+                0x00004cd8       0x12 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memcpy.o)
+                0x00004cd8                memcpy
  .text.avr-libc
-                0x00004dd6        0xe /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memset.o)
-                0x00004dd6                memset
+                0x00004cea        0xe /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memset.o)
+                0x00004cea                memset
  .text.avr-libc
-                0x00004de4       0x24 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(printf.o)
-                0x00004de4                printf
+                0x00004cf8       0x24 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(printf.o)
+                0x00004cf8                printf
  .text.avr-libc
-                0x00004e08       0x40 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(printf_p.o)
-                0x00004e08                printf_P
+                0x00004d1c       0x40 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(printf_p.o)
+                0x00004d1c                printf_P
  .text.avr-libc
-                0x00004e48        0xe /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(putchar.o)
-                0x00004e48                putchar
+                0x00004d5c      0x420 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(vfprintf_std.o)
+                0x00004d5c                vfprintf
  .text.avr-libc
-                0x00004e56      0x420 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(vfprintf_std.o)
-                0x00004e56                vfprintf
+                0x0000517c       0x20 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eerd_block_atmega128.o)
+                0x0000517c                __eerd_block_m128
+                0x00005180                __eerd_blraw_m128
  .text.avr-libc
-                0x00005276       0x20 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eerd_block_atmega128.o)
-                0x00005276                __eerd_block_m128
-                0x0000527a                __eerd_blraw_m128
+                0x0000519c       0x14 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_block_atmega128.o)
+                0x0000519c                __eewr_block_m128
  .text.avr-libc
-                0x00005296       0x14 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_block_atmega128.o)
-                0x00005296                __eewr_block_m128
+                0x000051b0       0x1a /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_byte_atmega128.o)
+                0x000051b0                __eewr_byte_m128
+                0x000051b2                __eewr_r18_m128
  .text.avr-libc
-                0x000052aa       0x1a /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_byte_atmega128.o)
-                0x000052aa                __eewr_byte_m128
-                0x000052ac                __eewr_r18_m128
+                0x000051ca       0x16 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(strnlen_P.o)
+                0x000051ca                strnlen_P
  .text.avr-libc
-                0x000052c4       0x16 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(strnlen_P.o)
-                0x000052c4                strnlen_P
+                0x000051e0       0x16 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(strnlen.o)
+                0x000051e0                strnlen
  .text.avr-libc
-                0x000052da       0x16 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(strnlen.o)
-                0x000052da                strnlen
+                0x000051f6       0x58 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(fputc.o)
+                0x000051f6                fputc
  .text.avr-libc
-                0x000052f0       0x58 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(fputc.o)
-                0x000052f0                fputc
- .text.avr-libc
-                0x00005348       0xbc /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(ultoa_invert.o)
-                0x00005348                __ultoa_invert
- .text.libgcc   0x00005404       0x3e /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_mulsi3.o)
-                0x00005404                __mulsi3
- .text.libgcc   0x00005442       0x36 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_divmodsi4.o)
-                0x00005442                __divmodsi4
- .text.libgcc   0x00005478       0x44 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodsi4.o)
-                0x00005478                __udivmodsi4
-                0x000054bc                . = ALIGN (0x2)
+                0x0000524e       0xbc /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(ultoa_invert.o)
+                0x0000524e                __ultoa_invert
+ .text.libgcc   0x0000530a       0x3e /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_mulsi3.o)
+                0x0000530a                __mulsi3
+ .text.libgcc   0x00005348       0x36 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_divmodsi4.o)
+                0x00005348                __divmodsi4
+ .text.libgcc   0x0000537e       0x44 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodsi4.o)
+                0x0000537e                __udivmodsi4
+                0x000053c2                . = ALIGN (0x2)
  *(.fini9)
- .fini9         0x000054bc        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_exit.o)
-                0x000054bc                exit
-                0x000054bc                _exit
+ .fini9         0x000053c2        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_exit.o)
+                0x000053c2                exit
+                0x000053c2                _exit
  *(.fini9)
  *(.fini8)
  *(.fini8)
@@ -691,24 +683,23 @@ LOAD /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a
  *(.fini1)
  *(.fini1)
  *(.fini0)
- .fini0         0x000054bc        0x4 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_exit.o)
+ .fini0         0x000053c2        0x4 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_exit.o)
  *(.fini0)
-                0x000054c0                _etext = .
+                0x000053c6                _etext = .
 
-.data           0x00800100       0xf0 load address 0x000054c0
+.data           0x00800100       0xea load address 0x000053c6
                 0x00800100                PROVIDE (__data_start, .)
  *(.data)
  .data          0x00800100        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/crtm128.o
- .data          0x00800100       0x16 attilio_receive.co
-                0x00800105                example_broadcast_process
-                0x0080010d                autostart_processes
- .data          0x00800116        0x2 contiki-micaz.a(rimeaddr.o)
-                0x00800116                rimeaddr_null
- .data          0x00800118        0x8 contiki-micaz.a(broadcast.o)
- .data          0x00800120        0x2 contiki-micaz.a(abc.o)
- .data          0x00800122        0x0 contiki-micaz.a(channel.o)
- .data          0x00800122        0x0 contiki-micaz.a(process.o)
- .data          0x00800122        0x0 contiki-micaz.a(list.o)
+ .data          0x00800100       0x10 attilio_send.co
+                0x00800100                example_broadcast_process
+                0x00800108                autostart_processes
+ .data          0x00800110        0x8 contiki-micaz.a(broadcast.o)
+ .data          0x00800118        0x2 contiki-micaz.a(abc.o)
+ .data          0x0080011a        0x0 contiki-micaz.a(channel.o)
+ .data          0x0080011a        0x0 contiki-micaz.a(list.o)
+ .data          0x0080011a        0x8 contiki-micaz.a(etimer.o)
+                0x0080011a                etimer_process
  .data          0x00800122        0x0 contiki-micaz.a(packetbuf.o)
  .data          0x00800122        0x0 contiki-micaz.a(contiki-micaz-m)
  .data          0x00800122        0x0 contiki-micaz.a(init-net.o)
@@ -718,200 +709,197 @@ LOAD /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a
  .data          0x00800122       0x10 contiki-micaz.a(packages.o)
  .data          0x00800132        0x0 contiki-micaz.a(eeprom.o)
  .data          0x00800132        0x0 contiki-micaz.a(leds.o)
- .data          0x00800132        0xb contiki-micaz.a(rime.o)
-                0x00800137                rime_driver
- .data          0x0080013d        0x0 contiki-micaz.a(rimestats.o)
- .data          0x0080013d        0x0 contiki-micaz.a(announcement.o)
- .data          0x0080013d        0x4 contiki-micaz.a(broadcast-annou)
- .data          0x00800141        0x0 contiki-micaz.a(chameleon.o)
- .data          0x00800141        0xf contiki-micaz.a(chameleon-bitop)
-                0x00800141                chameleon_bitopt
- .data          0x00800150       0x27 contiki-micaz.a(cxmac.o)
-                0x00800150                cxmac_config
-                0x0080015f                cxmac_driver
- .data          0x00800177       0x16 contiki-micaz.a(nullmac.o)
-                0x0080017f                nullmac_driver
- .data          0x0080018d        0x0 contiki-micaz.a(mac.o)
- .data          0x0080018d        0x4 contiki-micaz.a(framer-802154.o)
-                0x0080018d                framer_802154
- .data          0x00800191        0x0 contiki-micaz.a(autostart.o)
- .data          0x00800191        0x0 contiki-micaz.a(compower.o)
- .data          0x00800191        0x0 contiki-micaz.a(memb.o)
- .data          0x00800191        0x8 contiki-micaz.a(etimer.o)
-                0x00800191                etimer_process
- .data          0x00800199        0x8 contiki-micaz.a(ctimer.o)
-                0x00800199                ctimer_process
- .data          0x008001a1        0x0 contiki-micaz.a(energest.o)
- .data          0x008001a1        0x0 contiki-micaz.a(rtimer.o)
- .data          0x008001a1        0x0 contiki-micaz.a(random.o)
- .data          0x008001a1       0x18 contiki-micaz.a(queuebuf.o)
- .data          0x008001b9        0xe contiki-micaz.a(rs232.o)
- .data          0x008001c7        0x0 contiki-micaz.a(leds-arch.o)
- .data          0x008001c7       0x1c contiki-micaz.a(cc2420.o)
-                0x008001c7                cc2420_process
-                0x008001cf                cc2420_driver
- .data          0x008001e3        0x0 contiki-micaz.a(cc2420-arch.o)
- .data          0x008001e3        0x0 contiki-micaz.a(rtimer-arch.o)
- .data          0x008001e3        0x0 contiki-micaz.a(watchdog.o)
- .data          0x008001e3        0x2 contiki-micaz.a(frame802154.o)
- .data          0x008001e5        0x0 contiki-micaz.a(timer.o)
- .data          0x008001e5        0x0 contiki-micaz.a(spi.o)
- .data          0x008001e5        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodhi4.o)
- .data          0x008001e5        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_exit.o)
- .data          0x008001e5        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_copy_data.o)
- .data          0x008001e5        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_clear_bss.o)
- .data          0x008001e5        0x6 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(malloc.o)
-                0x008001e5                __malloc_margin
-                0x008001e7                __malloc_heap_start
-                0x008001e9                __malloc_heap_end
- .data          0x008001eb        0x4 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(rand.o)
- .data          0x008001ef        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memcpy.o)
- .data          0x008001ef        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memset.o)
- .data          0x008001ef        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(iob.o)
- .data          0x008001ef        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(printf.o)
- .data          0x008001ef        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(printf_p.o)
- .data          0x008001ef        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(putchar.o)
- .data          0x008001ef        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(vfprintf_std.o)
- .data          0x008001ef        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eerd_block_atmega128.o)
- .data          0x008001ef        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_block_atmega128.o)
- .data          0x008001ef        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_byte_atmega128.o)
- .data          0x008001ef        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(strnlen_P.o)
- .data          0x008001ef        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(strnlen.o)
- .data          0x008001ef        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(fputc.o)
- .data          0x008001ef        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(ultoa_invert.o)
- .data          0x008001ef        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_mulsi3.o)
- .data          0x008001ef        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_divmodsi4.o)
- .data          0x008001ef        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodsi4.o)
+ .data          0x00800132        0x2 contiki-micaz.a(rimeaddr.o)
+                0x00800132                rimeaddr_null
+ .data          0x00800134        0xb contiki-micaz.a(rime.o)
+                0x00800139                rime_driver
+ .data          0x0080013f        0x0 contiki-micaz.a(rimestats.o)
+ .data          0x0080013f        0x0 contiki-micaz.a(announcement.o)
+ .data          0x0080013f        0x4 contiki-micaz.a(broadcast-annou)
+ .data          0x00800143        0x0 contiki-micaz.a(chameleon.o)
+ .data          0x00800143        0xf contiki-micaz.a(chameleon-bitop)
+                0x00800143                chameleon_bitopt
+ .data          0x00800152       0x27 contiki-micaz.a(cxmac.o)
+                0x00800152                cxmac_config
+                0x00800161                cxmac_driver
+ .data          0x00800179       0x16 contiki-micaz.a(nullmac.o)
+                0x00800181                nullmac_driver
+ .data          0x0080018f        0x0 contiki-micaz.a(mac.o)
+ .data          0x0080018f        0x4 contiki-micaz.a(framer-802154.o)
+                0x0080018f                framer_802154
+ .data          0x00800193        0x0 contiki-micaz.a(process.o)
+ .data          0x00800193        0x0 contiki-micaz.a(autostart.o)
+ .data          0x00800193        0x0 contiki-micaz.a(compower.o)
+ .data          0x00800193        0x0 contiki-micaz.a(memb.o)
+ .data          0x00800193        0x0 contiki-micaz.a(timer.o)
+ .data          0x00800193        0x8 contiki-micaz.a(ctimer.o)
+                0x00800193                ctimer_process
+ .data          0x0080019b        0x0 contiki-micaz.a(energest.o)
+ .data          0x0080019b        0x0 contiki-micaz.a(rtimer.o)
+ .data          0x0080019b        0x0 contiki-micaz.a(random.o)
+ .data          0x0080019b       0x18 contiki-micaz.a(queuebuf.o)
+ .data          0x008001b3        0xe contiki-micaz.a(rs232.o)
+ .data          0x008001c1        0x0 contiki-micaz.a(leds-arch.o)
+ .data          0x008001c1       0x1c contiki-micaz.a(cc2420.o)
+                0x008001c1                cc2420_process
+                0x008001c9                cc2420_driver
+ .data          0x008001dd        0x0 contiki-micaz.a(cc2420-arch.o)
+ .data          0x008001dd        0x0 contiki-micaz.a(rtimer-arch.o)
+ .data          0x008001dd        0x0 contiki-micaz.a(watchdog.o)
+ .data          0x008001dd        0x2 contiki-micaz.a(frame802154.o)
+ .data          0x008001df        0x0 contiki-micaz.a(spi.o)
+ .data          0x008001df        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodhi4.o)
+ .data          0x008001df        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_exit.o)
+ .data          0x008001df        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_copy_data.o)
+ .data          0x008001df        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_clear_bss.o)
+ .data          0x008001df        0x6 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(malloc.o)
+                0x008001df                __malloc_margin
+                0x008001e1                __malloc_heap_start
+                0x008001e3                __malloc_heap_end
+ .data          0x008001e5        0x4 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(rand.o)
+ .data          0x008001e9        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memcpy.o)
+ .data          0x008001e9        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memset.o)
+ .data          0x008001e9        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(iob.o)
+ .data          0x008001e9        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(printf.o)
+ .data          0x008001e9        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(printf_p.o)
+ .data          0x008001e9        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(vfprintf_std.o)
+ .data          0x008001e9        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eerd_block_atmega128.o)
+ .data          0x008001e9        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_block_atmega128.o)
+ .data          0x008001e9        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_byte_atmega128.o)
+ .data          0x008001e9        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(strnlen_P.o)
+ .data          0x008001e9        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(strnlen.o)
+ .data          0x008001e9        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(fputc.o)
+ .data          0x008001e9        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(ultoa_invert.o)
+ .data          0x008001e9        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_mulsi3.o)
+ .data          0x008001e9        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_divmodsi4.o)
+ .data          0x008001e9        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodsi4.o)
  *(.data*)
  *(.rodata)
  *(.rodata*)
  *(.gnu.linkonce.d*)
-                0x008001f0                . = ALIGN (0x2)
- *fill*         0x008001ef        0x1 00
-                0x008001f0                _edata = .
-                0x008001f0                PROVIDE (__data_end, .)
+                0x008001ea                . = ALIGN (0x2)
+ *fill*         0x008001e9        0x1 00
+                0x008001ea                _edata = .
+                0x008001ea                PROVIDE (__data_end, .)
 
-.bss            0x008001f0      0x8d2
-                0x008001f0                PROVIDE (__bss_start, .)
+.bss            0x008001ea      0x8bf
+                0x008001ea                PROVIDE (__bss_start, .)
  *(.bss)
- .bss           0x008001f0        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/crtm128.o
- .bss           0x008001f0       0x1e attilio_receive.co
- .bss           0x0080020e        0x0 contiki-micaz.a(rimeaddr.o)
- .bss           0x0080020e        0x0 contiki-micaz.a(broadcast.o)
- .bss           0x0080020e        0x0 contiki-micaz.a(abc.o)
- .bss           0x0080020e        0x2 contiki-micaz.a(channel.o)
- .bss           0x00800210       0x38 contiki-micaz.a(process.o)
-                0x00800210                process_list
-                0x00800212                process_current
- .bss           0x00800248        0x0 contiki-micaz.a(list.o)
- .bss           0x00800248       0xb9 contiki-micaz.a(packetbuf.o)
- .bss           0x00800301        0x0 contiki-micaz.a(contiki-micaz-m)
- .bss           0x00800301        0x0 contiki-micaz.a(init-net.o)
- .bss           0x00800301        0x2 contiki-micaz.a(node-id.o)
-                0x00800301                node_id
- .bss           0x00800303        0x8 contiki-micaz.a(clock.o)
- .bss           0x0080030b        0x0 contiki-micaz.a(ds2401.o)
- .bss           0x0080030b        0x0 contiki-micaz.a(packages.o)
- .bss           0x0080030b        0x0 contiki-micaz.a(eeprom.o)
- .bss           0x0080030b        0x2 contiki-micaz.a(leds.o)
- .bss           0x0080030d        0x2 contiki-micaz.a(rime.o)
- .bss           0x0080030f        0x0 contiki-micaz.a(rimestats.o)
- .bss           0x0080030f        0x6 contiki-micaz.a(announcement.o)
- .bss           0x00800315       0x35 contiki-micaz.a(broadcast-annou)
- .bss           0x0080034a        0x0 contiki-micaz.a(chameleon.o)
- .bss           0x0080034a        0x0 contiki-micaz.a(chameleon-bitop)
- .bss           0x0080034a       0x44 contiki-micaz.a(cxmac.o)
- .bss           0x0080038e        0x0 contiki-micaz.a(nullmac.o)
- .bss           0x0080038e        0x0 contiki-micaz.a(mac.o)
- .bss           0x0080038e        0x2 contiki-micaz.a(framer-802154.o)
- .bss           0x00800390        0x0 contiki-micaz.a(autostart.o)
- .bss           0x00800390        0x8 contiki-micaz.a(compower.o)
- .bss           0x00800398        0x0 contiki-micaz.a(memb.o)
- .bss           0x00800398        0x4 contiki-micaz.a(etimer.o)
- .bss           0x0080039c        0x3 contiki-micaz.a(ctimer.o)
- .bss           0x0080039f        0x0 contiki-micaz.a(energest.o)
- .bss           0x0080039f        0x2 contiki-micaz.a(rtimer.o)
- .bss           0x008003a1        0x0 contiki-micaz.a(random.o)
- .bss           0x008003a1      0x65c contiki-micaz.a(queuebuf.o)
- .bss           0x008009fd        0x1 contiki-micaz.a(rs232.o)
- .bss           0x008009fe        0x0 contiki-micaz.a(leds-arch.o)
- .bss           0x008009fe        0x9 contiki-micaz.a(cc2420.o)
- .bss           0x00800a07        0x0 contiki-micaz.a(cc2420-arch.o)
- .bss           0x00800a07        0x0 contiki-micaz.a(rtimer-arch.o)
- .bss           0x00800a07        0x0 contiki-micaz.a(watchdog.o)
- .bss           0x00800a07        0x0 contiki-micaz.a(frame802154.o)
- .bss           0x00800a07        0x0 contiki-micaz.a(timer.o)
- .bss           0x00800a07        0x1 contiki-micaz.a(spi.o)
-                0x00800a07                spi_busy
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodhi4.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_exit.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_copy_data.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_clear_bss.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(malloc.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(rand.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memcpy.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memset.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(iob.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(printf.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(printf_p.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(putchar.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(vfprintf_std.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eerd_block_atmega128.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_block_atmega128.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_byte_atmega128.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(strnlen_P.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(strnlen.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(fputc.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(ultoa_invert.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_mulsi3.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_divmodsi4.o)
- .bss           0x00800a08        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodsi4.o)
+ .bss           0x008001ea        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/crtm128.o
+ .bss           0x008001ea       0x13 attilio_send.co
+ .bss           0x008001fd        0x0 contiki-micaz.a(broadcast.o)
+ .bss           0x008001fd        0x0 contiki-micaz.a(abc.o)
+ .bss           0x008001fd        0x2 contiki-micaz.a(channel.o)
+ .bss           0x008001ff        0x0 contiki-micaz.a(list.o)
+ .bss           0x008001ff        0x4 contiki-micaz.a(etimer.o)
+ .bss           0x00800203       0xb9 contiki-micaz.a(packetbuf.o)
+ .bss           0x008002bc        0x0 contiki-micaz.a(contiki-micaz-m)
+ .bss           0x008002bc        0x0 contiki-micaz.a(init-net.o)
+ .bss           0x008002bc        0x2 contiki-micaz.a(node-id.o)
+                0x008002bc                node_id
+ .bss           0x008002be        0x8 contiki-micaz.a(clock.o)
+ .bss           0x008002c6        0x0 contiki-micaz.a(ds2401.o)
+ .bss           0x008002c6        0x0 contiki-micaz.a(packages.o)
+ .bss           0x008002c6        0x0 contiki-micaz.a(eeprom.o)
+ .bss           0x008002c6        0x2 contiki-micaz.a(leds.o)
+ .bss           0x008002c8        0x0 contiki-micaz.a(rimeaddr.o)
+ .bss           0x008002c8        0x2 contiki-micaz.a(rime.o)
+ .bss           0x008002ca        0x0 contiki-micaz.a(rimestats.o)
+ .bss           0x008002ca        0x6 contiki-micaz.a(announcement.o)
+ .bss           0x008002d0       0x35 contiki-micaz.a(broadcast-annou)
+ .bss           0x00800305        0x0 contiki-micaz.a(chameleon.o)
+ .bss           0x00800305        0x0 contiki-micaz.a(chameleon-bitop)
+ .bss           0x00800305       0x44 contiki-micaz.a(cxmac.o)
+ .bss           0x00800349        0x0 contiki-micaz.a(nullmac.o)
+ .bss           0x00800349        0x0 contiki-micaz.a(mac.o)
+ .bss           0x00800349        0x2 contiki-micaz.a(framer-802154.o)
+ .bss           0x0080034b       0x38 contiki-micaz.a(process.o)
+                0x0080034b                process_list
+                0x0080034d                process_current
+ .bss           0x00800383        0x0 contiki-micaz.a(autostart.o)
+ .bss           0x00800383        0x8 contiki-micaz.a(compower.o)
+ .bss           0x0080038b        0x0 contiki-micaz.a(memb.o)
+ .bss           0x0080038b        0x0 contiki-micaz.a(timer.o)
+ .bss           0x0080038b        0x3 contiki-micaz.a(ctimer.o)
+ .bss           0x0080038e        0x0 contiki-micaz.a(energest.o)
+ .bss           0x0080038e        0x2 contiki-micaz.a(rtimer.o)
+ .bss           0x00800390        0x0 contiki-micaz.a(random.o)
+ .bss           0x00800390      0x65c contiki-micaz.a(queuebuf.o)
+ .bss           0x008009ec        0x1 contiki-micaz.a(rs232.o)
+ .bss           0x008009ed        0x0 contiki-micaz.a(leds-arch.o)
+ .bss           0x008009ed        0x9 contiki-micaz.a(cc2420.o)
+ .bss           0x008009f6        0x0 contiki-micaz.a(cc2420-arch.o)
+ .bss           0x008009f6        0x0 contiki-micaz.a(rtimer-arch.o)
+ .bss           0x008009f6        0x0 contiki-micaz.a(watchdog.o)
+ .bss           0x008009f6        0x0 contiki-micaz.a(frame802154.o)
+ .bss           0x008009f6        0x1 contiki-micaz.a(spi.o)
+                0x008009f6                spi_busy
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodhi4.o)
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_exit.o)
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_copy_data.o)
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_clear_bss.o)
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(malloc.o)
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(rand.o)
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memcpy.o)
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memset.o)
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(iob.o)
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(printf.o)
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(printf_p.o)
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(vfprintf_std.o)
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eerd_block_atmega128.o)
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_block_atmega128.o)
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_byte_atmega128.o)
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(strnlen_P.o)
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(strnlen.o)
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(fputc.o)
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(ultoa_invert.o)
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_mulsi3.o)
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_divmodsi4.o)
+ .bss           0x008009f7        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodsi4.o)
  *(.bss*)
  *(COMMON)
- COMMON         0x00800a08        0x8 attilio_receive.co
-                0x00800a08                nodes_addr_list
- COMMON         0x00800a10        0x2 contiki-micaz.a(rimeaddr.o)
-                0x00800a10                rimeaddr_node_addr
- COMMON         0x00800a12        0x1 contiki-micaz.a(process.o)
-                0x00800a12                process_maxevents
- COMMON         0x00800a13       0x38 contiki-micaz.a(packetbuf.o)
-                0x00800a13                packetbuf_addrs
-                0x00800a1b                packetbuf_attrs
- COMMON         0x00800a4b        0x8 contiki-micaz.a(ds2401.o)
-                0x00800a4b                ds2401_id
- COMMON         0x00800a53       0x48 contiki-micaz.a(rimestats.o)
-                0x00800a53                rimestats
- COMMON         0x00800a9b        0x8 contiki-micaz.a(compower.o)
-                0x00800a9b                compower_idle_activity
- COMMON         0x00800aa3        0x4 contiki-micaz.a(rs232.o)
-                0x00800aa3                input_handler_1
-                0x00800aa5                input_handler_0
- COMMON         0x00800aa7       0x11 contiki-micaz.a(cc2420.o)
-                0x00800aa7                cc2420_last_rssi
-                0x00800aa8                cc2420_packets_read
-                0x00800aaa                cc2420_packets_seen
-                0x00800aac                cc2420_sfd_start_time
-                0x00800aae                cc2420_time_of_departure
-                0x00800ab0                cc2420_time_of_arrival
-                0x00800ab2                cc2420_last_correlation
-                0x00800ab3                cc2420_authority_level_of_sender
-                0x00800ab5                cc2420_sfd_counter
-                0x00800ab6                cc2420_sfd_end_time
- COMMON         0x00800ab8        0x4 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(malloc.o)
-                0x00800ab8                __brkval
-                0x00800aba                __flp
- COMMON         0x00800abc        0x6 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(iob.o)
-                0x00800abc                __iob
-                0x00800ac2                PROVIDE (__bss_end, .)
-                0x000054c0                __data_load_start = LOADADDR (.data)
-                0x000055b0                __data_load_end = (__data_load_start + SIZEOF (.data))
+ COMMON         0x008009f7       0x38 contiki-micaz.a(packetbuf.o)
+                0x008009f7                packetbuf_addrs
+                0x008009ff                packetbuf_attrs
+ COMMON         0x00800a2f        0x8 contiki-micaz.a(ds2401.o)
+                0x00800a2f                ds2401_id
+ COMMON         0x00800a37        0x2 contiki-micaz.a(rimeaddr.o)
+                0x00800a37                rimeaddr_node_addr
+ COMMON         0x00800a39       0x48 contiki-micaz.a(rimestats.o)
+                0x00800a39                rimestats
+ COMMON         0x00800a81        0x1 contiki-micaz.a(process.o)
+                0x00800a81                process_maxevents
+ COMMON         0x00800a82        0x8 contiki-micaz.a(compower.o)
+                0x00800a82                compower_idle_activity
+ COMMON         0x00800a8a        0x4 contiki-micaz.a(rs232.o)
+                0x00800a8a                input_handler_1
+                0x00800a8c                input_handler_0
+ COMMON         0x00800a8e       0x11 contiki-micaz.a(cc2420.o)
+                0x00800a8e                cc2420_last_rssi
+                0x00800a8f                cc2420_packets_read
+                0x00800a91                cc2420_packets_seen
+                0x00800a93                cc2420_sfd_start_time
+                0x00800a95                cc2420_time_of_departure
+                0x00800a97                cc2420_time_of_arrival
+                0x00800a99                cc2420_last_correlation
+                0x00800a9a                cc2420_authority_level_of_sender
+                0x00800a9c                cc2420_sfd_counter
+                0x00800a9d                cc2420_sfd_end_time
+ COMMON         0x00800a9f        0x4 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(malloc.o)
+                0x00800a9f                __brkval
+                0x00800aa1                __flp
+ COMMON         0x00800aa3        0x6 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(iob.o)
+                0x00800aa3                __iob
+                0x00800aa9                PROVIDE (__bss_end, .)
+                0x000053c6                __data_load_start = LOADADDR (.data)
+                0x000054b0                __data_load_end = (__data_load_start + SIZEOF (.data))
 
-.noinit         0x00800ac2        0x0
-                0x00800ac2                PROVIDE (__noinit_start, .)
+.noinit         0x00800aa9        0x0
+                0x00800aa9                PROVIDE (__noinit_start, .)
  *(.noinit*)
-                0x00800ac2                PROVIDE (__noinit_end, .)
-                0x00800ac2                _end = .
-                0x00800ac2                PROVIDE (__heap_start, .)
+                0x00800aa9                PROVIDE (__noinit_end, .)
+                0x00800aa9                _end = .
+                0x00800aa9                PROVIDE (__heap_start, .)
 
 .eeprom         0x00810000        0x0
  *(.eeprom*)
@@ -929,7 +917,7 @@ LOAD /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a
 .signature
  *(.signature*)
 
-.stab           0x00000000     0x2ce8
+.stab           0x00000000     0x2b68
  *(.stab)
  .stab          0x00000000      0x6cc /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/crtm128.o
  .stab          0x000006cc      0x750 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(malloc.o)
@@ -946,28 +934,26 @@ LOAD /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a
                                 0x36c (size before relaxing)
  .stab          0x000014e8      0x1a4 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(printf_p.o)
                                 0x384 (size before relaxing)
- .stab          0x0000168c      0x180 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(putchar.o)
-                                0x360 (size before relaxing)
- .stab          0x0000180c      0xac8 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(vfprintf_std.o)
+ .stab          0x0000168c      0xac8 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(vfprintf_std.o)
                                 0xcd8 (size before relaxing)
- .stab          0x000022d4      0x108 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eerd_block_atmega128.o)
+ .stab          0x00002154      0x108 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eerd_block_atmega128.o)
                                 0x114 (size before relaxing)
- .stab          0x000023dc       0x9c /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_block_atmega128.o)
+ .stab          0x0000225c       0x9c /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_block_atmega128.o)
                                  0xa8 (size before relaxing)
- .stab          0x00002478       0xd8 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_byte_atmega128.o)
+ .stab          0x000022f8       0xd8 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_byte_atmega128.o)
                                  0xe4 (size before relaxing)
- .stab          0x00002550       0x9c /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(strnlen_P.o)
+ .stab          0x000023d0       0x9c /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(strnlen_P.o)
                                  0xa8 (size before relaxing)
- .stab          0x000025ec       0x9c /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(strnlen.o)
+ .stab          0x0000246c       0x9c /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(strnlen.o)
                                  0xa8 (size before relaxing)
- .stab          0x00002688      0x1e0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(fputc.o)
+ .stab          0x00002508      0x1e0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(fputc.o)
                                 0x3c0 (size before relaxing)
- .stab          0x00002868      0x480 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(ultoa_invert.o)
+ .stab          0x000026e8      0x480 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(ultoa_invert.o)
                                 0x48c (size before relaxing)
 
-.stabstr        0x00000000     0x1012
+.stabstr        0x00000000      0xfe5
  *(.stabstr)
- .stabstr       0x00000000     0x1012 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/crtm128.o
+ .stabstr       0x00000000      0xfe5 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/crtm128.o
 
 .stab.excl
  *(.stab.excl)
@@ -999,37 +985,37 @@ LOAD /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a
 .debug_aranges  0x00000000      0x560
  *(.debug_aranges)
  .debug_aranges
-                0x00000000       0x20 attilio_receive.co
+                0x00000000       0x20 attilio_send.co
  .debug_aranges
-                0x00000020       0x20 contiki-micaz.a(rimeaddr.o)
+                0x00000020       0x20 contiki-micaz.a(broadcast.o)
  .debug_aranges
-                0x00000040       0x20 contiki-micaz.a(broadcast.o)
+                0x00000040       0x20 contiki-micaz.a(abc.o)
  .debug_aranges
-                0x00000060       0x20 contiki-micaz.a(abc.o)
+                0x00000060       0x20 contiki-micaz.a(channel.o)
  .debug_aranges
-                0x00000080       0x20 contiki-micaz.a(channel.o)
+                0x00000080       0x20 contiki-micaz.a(list.o)
  .debug_aranges
-                0x000000a0       0x20 contiki-micaz.a(process.o)
+                0x000000a0       0x20 contiki-micaz.a(etimer.o)
  .debug_aranges
-                0x000000c0       0x20 contiki-micaz.a(list.o)
+                0x000000c0       0x20 contiki-micaz.a(packetbuf.o)
  .debug_aranges
-                0x000000e0       0x20 contiki-micaz.a(packetbuf.o)
+                0x000000e0       0x20 contiki-micaz.a(contiki-micaz-m)
  .debug_aranges
-                0x00000100       0x20 contiki-micaz.a(contiki-micaz-m)
+                0x00000100       0x20 contiki-micaz.a(init-net.o)
  .debug_aranges
-                0x00000120       0x20 contiki-micaz.a(init-net.o)
+                0x00000120       0x20 contiki-micaz.a(node-id.o)
  .debug_aranges
-                0x00000140       0x20 contiki-micaz.a(node-id.o)
+                0x00000140       0x20 contiki-micaz.a(clock.o)
  .debug_aranges
-                0x00000160       0x20 contiki-micaz.a(clock.o)
+                0x00000160       0x20 contiki-micaz.a(ds2401.o)
  .debug_aranges
-                0x00000180       0x20 contiki-micaz.a(ds2401.o)
+                0x00000180       0x20 contiki-micaz.a(packages.o)
  .debug_aranges
-                0x000001a0       0x20 contiki-micaz.a(packages.o)
+                0x000001a0       0x20 contiki-micaz.a(eeprom.o)
  .debug_aranges
-                0x000001c0       0x20 contiki-micaz.a(eeprom.o)
+                0x000001c0       0x20 contiki-micaz.a(leds.o)
  .debug_aranges
-                0x000001e0       0x20 contiki-micaz.a(leds.o)
+                0x000001e0       0x20 contiki-micaz.a(rimeaddr.o)
  .debug_aranges
                 0x00000200       0x20 contiki-micaz.a(rime.o)
  .debug_aranges
@@ -1049,294 +1035,294 @@ LOAD /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a
  .debug_aranges
                 0x00000300       0x20 contiki-micaz.a(framer-802154.o)
  .debug_aranges
-                0x00000320       0x20 contiki-micaz.a(autostart.o)
+                0x00000320       0x20 contiki-micaz.a(process.o)
  .debug_aranges
-                0x00000340       0x20 contiki-micaz.a(compower.o)
+                0x00000340       0x20 contiki-micaz.a(autostart.o)
  .debug_aranges
-                0x00000360       0x20 contiki-micaz.a(memb.o)
+                0x00000360       0x20 contiki-micaz.a(compower.o)
  .debug_aranges
-                0x00000380       0x20 contiki-micaz.a(etimer.o)
+                0x00000380       0x20 contiki-micaz.a(memb.o)
  .debug_aranges
-                0x000003a0       0x20 contiki-micaz.a(ctimer.o)
+                0x000003a0       0x20 contiki-micaz.a(timer.o)
  .debug_aranges
-                0x000003c0       0x20 contiki-micaz.a(energest.o)
+                0x000003c0       0x20 contiki-micaz.a(ctimer.o)
  .debug_aranges
-                0x000003e0       0x20 contiki-micaz.a(rtimer.o)
+                0x000003e0       0x20 contiki-micaz.a(energest.o)
  .debug_aranges
-                0x00000400       0x20 contiki-micaz.a(random.o)
+                0x00000400       0x20 contiki-micaz.a(rtimer.o)
  .debug_aranges
-                0x00000420       0x20 contiki-micaz.a(queuebuf.o)
+                0x00000420       0x20 contiki-micaz.a(random.o)
  .debug_aranges
-                0x00000440       0x20 contiki-micaz.a(rs232.o)
+                0x00000440       0x20 contiki-micaz.a(queuebuf.o)
  .debug_aranges
-                0x00000460       0x20 contiki-micaz.a(leds-arch.o)
+                0x00000460       0x20 contiki-micaz.a(rs232.o)
  .debug_aranges
-                0x00000480       0x20 contiki-micaz.a(cc2420.o)
+                0x00000480       0x20 contiki-micaz.a(leds-arch.o)
  .debug_aranges
-                0x000004a0       0x20 contiki-micaz.a(cc2420-arch.o)
+                0x000004a0       0x20 contiki-micaz.a(cc2420.o)
  .debug_aranges
-                0x000004c0       0x20 contiki-micaz.a(rtimer-arch.o)
+                0x000004c0       0x20 contiki-micaz.a(cc2420-arch.o)
  .debug_aranges
-                0x000004e0       0x20 contiki-micaz.a(watchdog.o)
+                0x000004e0       0x20 contiki-micaz.a(rtimer-arch.o)
  .debug_aranges
-                0x00000500       0x20 contiki-micaz.a(frame802154.o)
+                0x00000500       0x20 contiki-micaz.a(watchdog.o)
  .debug_aranges
-                0x00000520       0x20 contiki-micaz.a(timer.o)
+                0x00000520       0x20 contiki-micaz.a(frame802154.o)
  .debug_aranges
                 0x00000540       0x20 contiki-micaz.a(spi.o)
 
 .debug_pubnames
-                0x00000000     0x1613
+                0x00000000     0x15f3
  *(.debug_pubnames)
  .debug_pubnames
-                0x00000000       0x5c attilio_receive.co
+                0x00000000       0x48 attilio_send.co
  .debug_pubnames
-                0x0000005c       0x79 contiki-micaz.a(rimeaddr.o)
+                0x00000048       0x4c contiki-micaz.a(broadcast.o)
  .debug_pubnames
-                0x000000d5       0x4c contiki-micaz.a(broadcast.o)
+                0x00000094       0x55 contiki-micaz.a(abc.o)
  .debug_pubnames
-                0x00000121       0x55 contiki-micaz.a(abc.o)
+                0x000000e9       0x74 contiki-micaz.a(channel.o)
  .debug_pubnames
-                0x00000176       0x74 contiki-micaz.a(channel.o)
+                0x0000015d       0xc3 contiki-micaz.a(list.o)
  .debug_pubnames
-                0x000001ea      0x10d contiki-micaz.a(process.o)
+                0x00000220      0x109 contiki-micaz.a(etimer.o)
  .debug_pubnames
-                0x000002f7       0xc3 contiki-micaz.a(list.o)
+                0x00000329      0x22c contiki-micaz.a(packetbuf.o)
  .debug_pubnames
-                0x000003ba      0x22c contiki-micaz.a(packetbuf.o)
+                0x00000555       0x2a contiki-micaz.a(contiki-micaz-m)
  .debug_pubnames
-                0x000005e6       0x2a contiki-micaz.a(contiki-micaz-m)
+                0x0000057f       0x1f contiki-micaz.a(init-net.o)
  .debug_pubnames
-                0x00000610       0x1f contiki-micaz.a(init-net.o)
+                0x0000059e       0x43 contiki-micaz.a(node-id.o)
  .debug_pubnames
-                0x0000062f       0x43 contiki-micaz.a(node-id.o)
+                0x000005e1       0x87 contiki-micaz.a(clock.o)
  .debug_pubnames
-                0x00000672       0x87 contiki-micaz.a(clock.o)
+                0x00000668       0x30 contiki-micaz.a(ds2401.o)
  .debug_pubnames
-                0x000006f9       0x30 contiki-micaz.a(ds2401.o)
+                0x00000698       0x6d contiki-micaz.a(packages.o)
  .debug_pubnames
-                0x00000729       0x79 contiki-micaz.a(packages.o)
+                0x00000705       0x33 contiki-micaz.a(eeprom.o)
  .debug_pubnames
-                0x000007a2       0x33 contiki-micaz.a(eeprom.o)
+                0x00000738       0x75 contiki-micaz.a(leds.o)
  .debug_pubnames
-                0x000007d5       0x75 contiki-micaz.a(leds.o)
+                0x000007ad       0x79 contiki-micaz.a(rimeaddr.o)
  .debug_pubnames
-                0x0000084a       0x5f contiki-micaz.a(rime.o)
+                0x00000826       0x5f contiki-micaz.a(rime.o)
  .debug_pubnames
-                0x000008a9       0x20 contiki-micaz.a(rimestats.o)
+                0x00000885       0x20 contiki-micaz.a(rimestats.o)
  .debug_pubnames
-                0x000008c9      0x144 contiki-micaz.a(announcement.o)
+                0x000008a5      0x144 contiki-micaz.a(announcement.o)
  .debug_pubnames
-                0x00000a0d       0x7d contiki-micaz.a(broadcast-annou)
+                0x000009e9       0x7d contiki-micaz.a(broadcast-annou)
  .debug_pubnames
-                0x00000a8a       0x64 contiki-micaz.a(chameleon.o)
+                0x00000a66       0x64 contiki-micaz.a(chameleon.o)
  .debug_pubnames
-                0x00000aee       0x6b contiki-micaz.a(chameleon-bitop)
+                0x00000aca       0x6b contiki-micaz.a(chameleon-bitop)
  .debug_pubnames
-                0x00000b59       0x6c contiki-micaz.a(cxmac.o)
+                0x00000b35       0x6c contiki-micaz.a(cxmac.o)
  .debug_pubnames
-                0x00000bc5       0x25 contiki-micaz.a(nullmac.o)
+                0x00000ba1       0x25 contiki-micaz.a(nullmac.o)
  .debug_pubnames
-                0x00000bea       0x2d contiki-micaz.a(mac.o)
+                0x00000bc6       0x2d contiki-micaz.a(mac.o)
  .debug_pubnames
-                0x00000c17       0x24 contiki-micaz.a(framer-802154.o)
+                0x00000bf3       0x24 contiki-micaz.a(framer-802154.o)
  .debug_pubnames
-                0x00000c3b       0x39 contiki-micaz.a(autostart.o)
+                0x00000c17      0x10d contiki-micaz.a(process.o)
  .debug_pubnames
-                0x00000c74       0x9e contiki-micaz.a(compower.o)
+                0x00000d24       0x39 contiki-micaz.a(autostart.o)
  .debug_pubnames
-                0x00000d12       0x4d contiki-micaz.a(memb.o)
+                0x00000d5d       0x9e contiki-micaz.a(compower.o)
  .debug_pubnames
-                0x00000d5f      0x109 contiki-micaz.a(etimer.o)
+                0x00000dfb       0x4d contiki-micaz.a(memb.o)
  .debug_pubnames
-                0x00000e68       0x8b contiki-micaz.a(ctimer.o)
+                0x00000e48       0x68 contiki-micaz.a(timer.o)
  .debug_pubnames
-                0x00000ef3       0x64 contiki-micaz.a(energest.o)
+                0x00000eb0       0x8b contiki-micaz.a(ctimer.o)
  .debug_pubnames
-                0x00000f57       0x45 contiki-micaz.a(rtimer.o)
+                0x00000f3b       0x64 contiki-micaz.a(energest.o)
  .debug_pubnames
-                0x00000f9c       0x32 contiki-micaz.a(random.o)
+                0x00000f9f       0x45 contiki-micaz.a(rtimer.o)
  .debug_pubnames
-                0x00000fce       0xff contiki-micaz.a(queuebuf.o)
+                0x00000fe4       0x32 contiki-micaz.a(random.o)
  .debug_pubnames
-                0x000010cd       0xe4 contiki-micaz.a(rs232.o)
+                0x00001016       0xff contiki-micaz.a(queuebuf.o)
  .debug_pubnames
-                0x000011b1       0x49 contiki-micaz.a(leds-arch.o)
+                0x00001115       0xe4 contiki-micaz.a(rs232.o)
  .debug_pubnames
-                0x000011fa      0x236 contiki-micaz.a(cc2420.o)
+                0x000011f9       0x49 contiki-micaz.a(leds-arch.o)
  .debug_pubnames
-                0x00001430       0x36 contiki-micaz.a(cc2420-arch.o)
+                0x00001242      0x236 contiki-micaz.a(cc2420.o)
  .debug_pubnames
-                0x00001466       0x50 contiki-micaz.a(rtimer-arch.o)
+                0x00001478       0x36 contiki-micaz.a(cc2420-arch.o)
  .debug_pubnames
-                0x000014b6       0x73 contiki-micaz.a(watchdog.o)
+                0x000014ae       0x50 contiki-micaz.a(rtimer-arch.o)
  .debug_pubnames
-                0x00001529       0x56 contiki-micaz.a(frame802154.o)
+                0x000014fe       0x73 contiki-micaz.a(watchdog.o)
  .debug_pubnames
-                0x0000157f       0x68 contiki-micaz.a(timer.o)
+                0x00001571       0x56 contiki-micaz.a(frame802154.o)
  .debug_pubnames
-                0x000015e7       0x2c contiki-micaz.a(spi.o)
+                0x000015c7       0x2c contiki-micaz.a(spi.o)
 
-.debug_info     0x00000000     0xb394
+.debug_info     0x00000000     0xb2a2
  *(.debug_info)
- .debug_info    0x00000000      0x6e6 attilio_receive.co
- .debug_info    0x000006e6      0x1ed contiki-micaz.a(rimeaddr.o)
- .debug_info    0x000008d3      0x589 contiki-micaz.a(broadcast.o)
- .debug_info    0x00000e5c      0x454 contiki-micaz.a(abc.o)
- .debug_info    0x000012b0      0x2f2 contiki-micaz.a(channel.o)
- .debug_info    0x000015a2      0x574 contiki-micaz.a(process.o)
- .debug_info    0x00001b16      0x349 contiki-micaz.a(list.o)
- .debug_info    0x00001e5f      0x629 contiki-micaz.a(packetbuf.o)
- .debug_info    0x00002488      0x2c2 contiki-micaz.a(contiki-micaz-m)
- .debug_info    0x0000274a      0x487 contiki-micaz.a(init-net.o)
- .debug_info    0x00002bd1      0x149 contiki-micaz.a(node-id.o)
- .debug_info    0x00002d1a      0x1f1 contiki-micaz.a(clock.o)
- .debug_info    0x00002f0b      0x365 contiki-micaz.a(ds2401.o)
- .debug_info    0x00003270      0x569 contiki-micaz.a(packages.o)
- .debug_info    0x000037d9      0x11d contiki-micaz.a(eeprom.o)
- .debug_info    0x000038f6      0x1ca contiki-micaz.a(leds.o)
- .debug_info    0x00003ac0      0x60f contiki-micaz.a(rime.o)
- .debug_info    0x000040cf      0x146 contiki-micaz.a(rimestats.o)
- .debug_info    0x00004215      0x3ed contiki-micaz.a(announcement.o)
- .debug_info    0x00004602      0x858 contiki-micaz.a(broadcast-annou)
- .debug_info    0x00004e5a      0x424 contiki-micaz.a(chameleon.o)
- .debug_info    0x0000527e      0x7c7 contiki-micaz.a(chameleon-bitop)
- .debug_info    0x00005a45     0x10bc contiki-micaz.a(cxmac.o)
- .debug_info    0x00006b01      0x44a contiki-micaz.a(nullmac.o)
- .debug_info    0x00006f4b      0x114 contiki-micaz.a(mac.o)
- .debug_info    0x0000705f      0x657 contiki-micaz.a(framer-802154.o)
- .debug_info    0x000076b6      0x19f contiki-micaz.a(autostart.o)
- .debug_info    0x00007855      0x46a contiki-micaz.a(compower.o)
- .debug_info    0x00007cbf      0x1ad contiki-micaz.a(memb.o)
- .debug_info    0x00007e6c      0x4d2 contiki-micaz.a(etimer.o)
- .debug_info    0x0000833e      0x46c contiki-micaz.a(ctimer.o)
- .debug_info    0x000087aa      0x103 contiki-micaz.a(energest.o)
- .debug_info    0x000088ad      0x1be contiki-micaz.a(rtimer.o)
- .debug_info    0x00008a6b       0xa7 contiki-micaz.a(random.o)
- .debug_info    0x00008b12      0x6e6 contiki-micaz.a(queuebuf.o)
- .debug_info    0x000091f8      0x3b6 contiki-micaz.a(rs232.o)
- .debug_info    0x000095ae       0xc1 contiki-micaz.a(leds-arch.o)
- .debug_info    0x0000966f     0x131e contiki-micaz.a(cc2420.o)
- .debug_info    0x0000a98d      0x16e contiki-micaz.a(cc2420-arch.o)
- .debug_info    0x0000aafb       0xf9 contiki-micaz.a(rtimer-arch.o)
- .debug_info    0x0000abf4       0xdd contiki-micaz.a(watchdog.o)
- .debug_info    0x0000acd1      0x4a8 contiki-micaz.a(frame802154.o)
- .debug_info    0x0000b179      0x184 contiki-micaz.a(timer.o)
- .debug_info    0x0000b2fd       0x97 contiki-micaz.a(spi.o)
+ .debug_info    0x00000000      0x5ee attilio_send.co
+ .debug_info    0x000005ee      0x589 contiki-micaz.a(broadcast.o)
+ .debug_info    0x00000b77      0x454 contiki-micaz.a(abc.o)
+ .debug_info    0x00000fcb      0x2f2 contiki-micaz.a(channel.o)
+ .debug_info    0x000012bd      0x349 contiki-micaz.a(list.o)
+ .debug_info    0x00001606      0x4d2 contiki-micaz.a(etimer.o)
+ .debug_info    0x00001ad8      0x629 contiki-micaz.a(packetbuf.o)
+ .debug_info    0x00002101      0x2c2 contiki-micaz.a(contiki-micaz-m)
+ .debug_info    0x000023c3      0x487 contiki-micaz.a(init-net.o)
+ .debug_info    0x0000284a      0x149 contiki-micaz.a(node-id.o)
+ .debug_info    0x00002993      0x1f1 contiki-micaz.a(clock.o)
+ .debug_info    0x00002b84      0x365 contiki-micaz.a(ds2401.o)
+ .debug_info    0x00002ee9      0x56f contiki-micaz.a(packages.o)
+ .debug_info    0x00003458      0x11d contiki-micaz.a(eeprom.o)
+ .debug_info    0x00003575      0x1ca contiki-micaz.a(leds.o)
+ .debug_info    0x0000373f      0x1ed contiki-micaz.a(rimeaddr.o)
+ .debug_info    0x0000392c      0x60f contiki-micaz.a(rime.o)
+ .debug_info    0x00003f3b      0x146 contiki-micaz.a(rimestats.o)
+ .debug_info    0x00004081      0x3ed contiki-micaz.a(announcement.o)
+ .debug_info    0x0000446e      0x858 contiki-micaz.a(broadcast-annou)
+ .debug_info    0x00004cc6      0x424 contiki-micaz.a(chameleon.o)
+ .debug_info    0x000050ea      0x7c7 contiki-micaz.a(chameleon-bitop)
+ .debug_info    0x000058b1     0x10bc contiki-micaz.a(cxmac.o)
+ .debug_info    0x0000696d      0x44a contiki-micaz.a(nullmac.o)
+ .debug_info    0x00006db7      0x114 contiki-micaz.a(mac.o)
+ .debug_info    0x00006ecb      0x657 contiki-micaz.a(framer-802154.o)
+ .debug_info    0x00007522      0x574 contiki-micaz.a(process.o)
+ .debug_info    0x00007a96      0x19f contiki-micaz.a(autostart.o)
+ .debug_info    0x00007c35      0x46a contiki-micaz.a(compower.o)
+ .debug_info    0x0000809f      0x1ad contiki-micaz.a(memb.o)
+ .debug_info    0x0000824c      0x184 contiki-micaz.a(timer.o)
+ .debug_info    0x000083d0      0x46c contiki-micaz.a(ctimer.o)
+ .debug_info    0x0000883c      0x103 contiki-micaz.a(energest.o)
+ .debug_info    0x0000893f      0x1be contiki-micaz.a(rtimer.o)
+ .debug_info    0x00008afd       0xa7 contiki-micaz.a(random.o)
+ .debug_info    0x00008ba4      0x6e6 contiki-micaz.a(queuebuf.o)
+ .debug_info    0x0000928a      0x3b6 contiki-micaz.a(rs232.o)
+ .debug_info    0x00009640       0xc1 contiki-micaz.a(leds-arch.o)
+ .debug_info    0x00009701     0x131e contiki-micaz.a(cc2420.o)
+ .debug_info    0x0000aa1f      0x16e contiki-micaz.a(cc2420-arch.o)
+ .debug_info    0x0000ab8d       0xf9 contiki-micaz.a(rtimer-arch.o)
+ .debug_info    0x0000ac86       0xdd contiki-micaz.a(watchdog.o)
+ .debug_info    0x0000ad63      0x4a8 contiki-micaz.a(frame802154.o)
+ .debug_info    0x0000b20b       0x97 contiki-micaz.a(spi.o)
  *(.gnu.linkonce.wi.*)
 
-.debug_abbrev   0x00000000     0x40e0
+.debug_abbrev   0x00000000     0x40e5
  *(.debug_abbrev)
- .debug_abbrev  0x00000000      0x237 attilio_receive.co
- .debug_abbrev  0x00000237      0x17d contiki-micaz.a(rimeaddr.o)
- .debug_abbrev  0x000003b4      0x1e7 contiki-micaz.a(broadcast.o)
- .debug_abbrev  0x0000059b      0x182 contiki-micaz.a(abc.o)
- .debug_abbrev  0x0000071d      0x169 contiki-micaz.a(channel.o)
- .debug_abbrev  0x00000886      0x2df contiki-micaz.a(process.o)
- .debug_abbrev  0x00000b65      0x13a contiki-micaz.a(list.o)
- .debug_abbrev  0x00000c9f      0x22b contiki-micaz.a(packetbuf.o)
- .debug_abbrev  0x00000eca      0x137 contiki-micaz.a(contiki-micaz-m)
- .debug_abbrev  0x00001001      0x1a2 contiki-micaz.a(init-net.o)
- .debug_abbrev  0x000011a3       0xcc contiki-micaz.a(node-id.o)
- .debug_abbrev  0x0000126f       0xe4 contiki-micaz.a(clock.o)
- .debug_abbrev  0x00001353      0x196 contiki-micaz.a(ds2401.o)
- .debug_abbrev  0x000014e9      0x1e1 contiki-micaz.a(packages.o)
- .debug_abbrev  0x000016ca       0x8a contiki-micaz.a(eeprom.o)
- .debug_abbrev  0x00001754       0xd4 contiki-micaz.a(leds.o)
- .debug_abbrev  0x00001828      0x1fb contiki-micaz.a(rime.o)
- .debug_abbrev  0x00001a23       0x5d contiki-micaz.a(rimestats.o)
- .debug_abbrev  0x00001a80      0x16a contiki-micaz.a(announcement.o)
- .debug_abbrev  0x00001bea      0x22e contiki-micaz.a(broadcast-annou)
- .debug_abbrev  0x00001e18      0x1cc contiki-micaz.a(chameleon.o)
- .debug_abbrev  0x00001fe4      0x264 contiki-micaz.a(chameleon-bitop)
- .debug_abbrev  0x00002248      0x3b6 contiki-micaz.a(cxmac.o)
- .debug_abbrev  0x000025fe      0x1d4 contiki-micaz.a(nullmac.o)
- .debug_abbrev  0x000027d2       0xa0 contiki-micaz.a(mac.o)
- .debug_abbrev  0x00002872      0x227 contiki-micaz.a(framer-802154.o)
- .debug_abbrev  0x00002a99       0xf5 contiki-micaz.a(autostart.o)
- .debug_abbrev  0x00002b8e      0x203 contiki-micaz.a(compower.o)
- .debug_abbrev  0x00002d91       0xea contiki-micaz.a(memb.o)
- .debug_abbrev  0x00002e7b      0x20b contiki-micaz.a(etimer.o)
- .debug_abbrev  0x00003086      0x1b5 contiki-micaz.a(ctimer.o)
- .debug_abbrev  0x0000323b       0x8d contiki-micaz.a(energest.o)
- .debug_abbrev  0x000032c8      0x12a contiki-micaz.a(rtimer.o)
- .debug_abbrev  0x000033f2       0x67 contiki-micaz.a(random.o)
- .debug_abbrev  0x00003459      0x1f3 contiki-micaz.a(queuebuf.o)
- .debug_abbrev  0x0000364c      0x186 contiki-micaz.a(rs232.o)
- .debug_abbrev  0x000037d2       0x87 contiki-micaz.a(leds-arch.o)
- .debug_abbrev  0x00003859      0x412 contiki-micaz.a(cc2420.o)
- .debug_abbrev  0x00003c6b       0xc8 contiki-micaz.a(cc2420-arch.o)
- .debug_abbrev  0x00003d33       0x96 contiki-micaz.a(rtimer-arch.o)
- .debug_abbrev  0x00003dc9       0x4c contiki-micaz.a(watchdog.o)
- .debug_abbrev  0x00003e15      0x19c contiki-micaz.a(frame802154.o)
- .debug_abbrev  0x00003fb1       0xd2 contiki-micaz.a(timer.o)
- .debug_abbrev  0x00004083       0x5d contiki-micaz.a(spi.o)
+ .debug_abbrev  0x00000000      0x211 attilio_send.co
+ .debug_abbrev  0x00000211      0x1e7 contiki-micaz.a(broadcast.o)
+ .debug_abbrev  0x000003f8      0x182 contiki-micaz.a(abc.o)
+ .debug_abbrev  0x0000057a      0x169 contiki-micaz.a(channel.o)
+ .debug_abbrev  0x000006e3      0x13a contiki-micaz.a(list.o)
+ .debug_abbrev  0x0000081d      0x20b contiki-micaz.a(etimer.o)
+ .debug_abbrev  0x00000a28      0x22b contiki-micaz.a(packetbuf.o)
+ .debug_abbrev  0x00000c53      0x137 contiki-micaz.a(contiki-micaz-m)
+ .debug_abbrev  0x00000d8a      0x1a2 contiki-micaz.a(init-net.o)
+ .debug_abbrev  0x00000f2c       0xcc contiki-micaz.a(node-id.o)
+ .debug_abbrev  0x00000ff8       0xe4 contiki-micaz.a(clock.o)
+ .debug_abbrev  0x000010dc      0x196 contiki-micaz.a(ds2401.o)
+ .debug_abbrev  0x00001272      0x20c contiki-micaz.a(packages.o)
+ .debug_abbrev  0x0000147e       0x8a contiki-micaz.a(eeprom.o)
+ .debug_abbrev  0x00001508       0xd4 contiki-micaz.a(leds.o)
+ .debug_abbrev  0x000015dc      0x17d contiki-micaz.a(rimeaddr.o)
+ .debug_abbrev  0x00001759      0x1fb contiki-micaz.a(rime.o)
+ .debug_abbrev  0x00001954       0x5d contiki-micaz.a(rimestats.o)
+ .debug_abbrev  0x000019b1      0x16a contiki-micaz.a(announcement.o)
+ .debug_abbrev  0x00001b1b      0x22e contiki-micaz.a(broadcast-annou)
+ .debug_abbrev  0x00001d49      0x1cc contiki-micaz.a(chameleon.o)
+ .debug_abbrev  0x00001f15      0x264 contiki-micaz.a(chameleon-bitop)
+ .debug_abbrev  0x00002179      0x3b6 contiki-micaz.a(cxmac.o)
+ .debug_abbrev  0x0000252f      0x1d4 contiki-micaz.a(nullmac.o)
+ .debug_abbrev  0x00002703       0xa0 contiki-micaz.a(mac.o)
+ .debug_abbrev  0x000027a3      0x227 contiki-micaz.a(framer-802154.o)
+ .debug_abbrev  0x000029ca      0x2df contiki-micaz.a(process.o)
+ .debug_abbrev  0x00002ca9       0xf5 contiki-micaz.a(autostart.o)
+ .debug_abbrev  0x00002d9e      0x203 contiki-micaz.a(compower.o)
+ .debug_abbrev  0x00002fa1       0xea contiki-micaz.a(memb.o)
+ .debug_abbrev  0x0000308b       0xd2 contiki-micaz.a(timer.o)
+ .debug_abbrev  0x0000315d      0x1b5 contiki-micaz.a(ctimer.o)
+ .debug_abbrev  0x00003312       0x8d contiki-micaz.a(energest.o)
+ .debug_abbrev  0x0000339f      0x12a contiki-micaz.a(rtimer.o)
+ .debug_abbrev  0x000034c9       0x67 contiki-micaz.a(random.o)
+ .debug_abbrev  0x00003530      0x1f3 contiki-micaz.a(queuebuf.o)
+ .debug_abbrev  0x00003723      0x186 contiki-micaz.a(rs232.o)
+ .debug_abbrev  0x000038a9       0x87 contiki-micaz.a(leds-arch.o)
+ .debug_abbrev  0x00003930      0x412 contiki-micaz.a(cc2420.o)
+ .debug_abbrev  0x00003d42       0xc8 contiki-micaz.a(cc2420-arch.o)
+ .debug_abbrev  0x00003e0a       0x96 contiki-micaz.a(rtimer-arch.o)
+ .debug_abbrev  0x00003ea0       0x4c contiki-micaz.a(watchdog.o)
+ .debug_abbrev  0x00003eec      0x19c contiki-micaz.a(frame802154.o)
+ .debug_abbrev  0x00004088       0x5d contiki-micaz.a(spi.o)
 
-.debug_line     0x00000000     0x6b0a
+.debug_line     0x00000000     0x6a3e
  *(.debug_line)
- .debug_line    0x00000000      0x2ec attilio_receive.co
- .debug_line    0x000002ec       0xf8 contiki-micaz.a(rimeaddr.o)
- .debug_line    0x000003e4      0x19e contiki-micaz.a(broadcast.o)
- .debug_line    0x00000582      0x181 contiki-micaz.a(abc.o)
- .debug_line    0x00000703      0x1a2 contiki-micaz.a(channel.o)
- .debug_line    0x000008a5      0x44e contiki-micaz.a(process.o)
- .debug_line    0x00000cf3      0x2b8 contiki-micaz.a(list.o)
- .debug_line    0x00000fab      0x3d6 contiki-micaz.a(packetbuf.o)
- .debug_line    0x00001381      0x228 contiki-micaz.a(contiki-micaz-m)
- .debug_line    0x000015a9      0x216 contiki-micaz.a(init-net.o)
- .debug_line    0x000017bf      0x12f contiki-micaz.a(node-id.o)
- .debug_line    0x000018ee      0x21e contiki-micaz.a(clock.o)
- .debug_line    0x00001b0c      0x2d5 contiki-micaz.a(ds2401.o)
- .debug_line    0x00001de1      0x298 contiki-micaz.a(packages.o)
- .debug_line    0x00002079       0xef contiki-micaz.a(eeprom.o)
- .debug_line    0x00002168      0x151 contiki-micaz.a(leds.o)
- .debug_line    0x000022b9      0x274 contiki-micaz.a(rime.o)
- .debug_line    0x0000252d       0x70 contiki-micaz.a(rimestats.o)
- .debug_line    0x0000259d      0x25d contiki-micaz.a(announcement.o)
- .debug_line    0x000027fa      0x33e contiki-micaz.a(broadcast-annou)
- .debug_line    0x00002b38      0x189 contiki-micaz.a(chameleon.o)
- .debug_line    0x00002cc1      0x459 contiki-micaz.a(chameleon-bitop)
- .debug_line    0x0000311a      0x95e contiki-micaz.a(cxmac.o)
- .debug_line    0x00003a78      0x187 contiki-micaz.a(nullmac.o)
- .debug_line    0x00003bff       0x7b contiki-micaz.a(mac.o)
- .debug_line    0x00003c7a      0x2e9 contiki-micaz.a(framer-802154.o)
- .debug_line    0x00003f63       0xe0 contiki-micaz.a(autostart.o)
- .debug_line    0x00004043      0x1d2 contiki-micaz.a(compower.o)
- .debug_line    0x00004215      0x15b contiki-micaz.a(memb.o)
- .debug_line    0x00004370      0x3e1 contiki-micaz.a(etimer.o)
- .debug_line    0x00004751      0x323 contiki-micaz.a(ctimer.o)
- .debug_line    0x00004a74       0x9b contiki-micaz.a(energest.o)
- .debug_line    0x00004b0f       0xf5 contiki-micaz.a(rtimer.o)
- .debug_line    0x00004c04       0x89 contiki-micaz.a(random.o)
- .debug_line    0x00004c8d      0x2d3 contiki-micaz.a(queuebuf.o)
- .debug_line    0x00004f60      0x269 contiki-micaz.a(rs232.o)
- .debug_line    0x000051c9      0x126 contiki-micaz.a(leds-arch.o)
- .debug_line    0x000052ef      0xdf3 contiki-micaz.a(cc2420.o)
- .debug_line    0x000060e2      0x165 contiki-micaz.a(cc2420-arch.o)
- .debug_line    0x00006247      0x172 contiki-micaz.a(rtimer-arch.o)
- .debug_line    0x000063b9      0x114 contiki-micaz.a(watchdog.o)
- .debug_line    0x000064cd      0x46b contiki-micaz.a(frame802154.o)
- .debug_line    0x00006938      0x113 contiki-micaz.a(timer.o)
- .debug_line    0x00006a4b       0xbf contiki-micaz.a(spi.o)
+ .debug_line    0x00000000      0x253 attilio_send.co
+ .debug_line    0x00000253      0x19e contiki-micaz.a(broadcast.o)
+ .debug_line    0x000003f1      0x181 contiki-micaz.a(abc.o)
+ .debug_line    0x00000572      0x1a2 contiki-micaz.a(channel.o)
+ .debug_line    0x00000714      0x2b8 contiki-micaz.a(list.o)
+ .debug_line    0x000009cc      0x3e1 contiki-micaz.a(etimer.o)
+ .debug_line    0x00000dad      0x3d6 contiki-micaz.a(packetbuf.o)
+ .debug_line    0x00001183      0x228 contiki-micaz.a(contiki-micaz-m)
+ .debug_line    0x000013ab      0x216 contiki-micaz.a(init-net.o)
+ .debug_line    0x000015c1      0x12f contiki-micaz.a(node-id.o)
+ .debug_line    0x000016f0      0x21e contiki-micaz.a(clock.o)
+ .debug_line    0x0000190e      0x2d5 contiki-micaz.a(ds2401.o)
+ .debug_line    0x00001be3      0x265 contiki-micaz.a(packages.o)
+ .debug_line    0x00001e48       0xef contiki-micaz.a(eeprom.o)
+ .debug_line    0x00001f37      0x151 contiki-micaz.a(leds.o)
+ .debug_line    0x00002088       0xf8 contiki-micaz.a(rimeaddr.o)
+ .debug_line    0x00002180      0x274 contiki-micaz.a(rime.o)
+ .debug_line    0x000023f4       0x70 contiki-micaz.a(rimestats.o)
+ .debug_line    0x00002464      0x25d contiki-micaz.a(announcement.o)
+ .debug_line    0x000026c1      0x33e contiki-micaz.a(broadcast-annou)
+ .debug_line    0x000029ff      0x189 contiki-micaz.a(chameleon.o)
+ .debug_line    0x00002b88      0x459 contiki-micaz.a(chameleon-bitop)
+ .debug_line    0x00002fe1      0x95e contiki-micaz.a(cxmac.o)
+ .debug_line    0x0000393f      0x187 contiki-micaz.a(nullmac.o)
+ .debug_line    0x00003ac6       0x7b contiki-micaz.a(mac.o)
+ .debug_line    0x00003b41      0x2e9 contiki-micaz.a(framer-802154.o)
+ .debug_line    0x00003e2a      0x44e contiki-micaz.a(process.o)
+ .debug_line    0x00004278       0xe0 contiki-micaz.a(autostart.o)
+ .debug_line    0x00004358      0x1d2 contiki-micaz.a(compower.o)
+ .debug_line    0x0000452a      0x15b contiki-micaz.a(memb.o)
+ .debug_line    0x00004685      0x113 contiki-micaz.a(timer.o)
+ .debug_line    0x00004798      0x323 contiki-micaz.a(ctimer.o)
+ .debug_line    0x00004abb       0x9b contiki-micaz.a(energest.o)
+ .debug_line    0x00004b56       0xf5 contiki-micaz.a(rtimer.o)
+ .debug_line    0x00004c4b       0x89 contiki-micaz.a(random.o)
+ .debug_line    0x00004cd4      0x2d3 contiki-micaz.a(queuebuf.o)
+ .debug_line    0x00004fa7      0x269 contiki-micaz.a(rs232.o)
+ .debug_line    0x00005210      0x126 contiki-micaz.a(leds-arch.o)
+ .debug_line    0x00005336      0xdf3 contiki-micaz.a(cc2420.o)
+ .debug_line    0x00006129      0x165 contiki-micaz.a(cc2420-arch.o)
+ .debug_line    0x0000628e      0x172 contiki-micaz.a(rtimer-arch.o)
+ .debug_line    0x00006400      0x114 contiki-micaz.a(watchdog.o)
+ .debug_line    0x00006514      0x46b contiki-micaz.a(frame802154.o)
+ .debug_line    0x0000697f       0xbf contiki-micaz.a(spi.o)
 
-.debug_frame    0x00000000     0x1370
+.debug_frame    0x00000000     0x1360
  *(.debug_frame)
- .debug_frame   0x00000000       0x30 attilio_receive.co
- .debug_frame   0x00000030       0x40 contiki-micaz.a(rimeaddr.o)
- .debug_frame   0x00000070       0x60 contiki-micaz.a(broadcast.o)
- .debug_frame   0x000000d0       0x60 contiki-micaz.a(abc.o)
- .debug_frame   0x00000130       0x60 contiki-micaz.a(channel.o)
- .debug_frame   0x00000190       0xe0 contiki-micaz.a(process.o)
- .debug_frame   0x00000270       0xd0 contiki-micaz.a(list.o)
- .debug_frame   0x00000340      0x160 contiki-micaz.a(packetbuf.o)
- .debug_frame   0x000004a0       0x30 contiki-micaz.a(contiki-micaz-m)
- .debug_frame   0x000004d0       0x20 contiki-micaz.a(init-net.o)
- .debug_frame   0x000004f0       0x30 contiki-micaz.a(node-id.o)
- .debug_frame   0x00000520       0x80 contiki-micaz.a(clock.o)
- .debug_frame   0x000005a0       0x40 contiki-micaz.a(ds2401.o)
- .debug_frame   0x000005e0       0x60 contiki-micaz.a(packages.o)
- .debug_frame   0x00000640       0x30 contiki-micaz.a(eeprom.o)
- .debug_frame   0x00000670       0x90 contiki-micaz.a(leds.o)
+ .debug_frame   0x00000000       0x30 attilio_send.co
+ .debug_frame   0x00000030       0x60 contiki-micaz.a(broadcast.o)
+ .debug_frame   0x00000090       0x60 contiki-micaz.a(abc.o)
+ .debug_frame   0x000000f0       0x60 contiki-micaz.a(channel.o)
+ .debug_frame   0x00000150       0xd0 contiki-micaz.a(list.o)
+ .debug_frame   0x00000220       0xf0 contiki-micaz.a(etimer.o)
+ .debug_frame   0x00000310      0x160 contiki-micaz.a(packetbuf.o)
+ .debug_frame   0x00000470       0x30 contiki-micaz.a(contiki-micaz-m)
+ .debug_frame   0x000004a0       0x20 contiki-micaz.a(init-net.o)
+ .debug_frame   0x000004c0       0x30 contiki-micaz.a(node-id.o)
+ .debug_frame   0x000004f0       0x80 contiki-micaz.a(clock.o)
+ .debug_frame   0x00000570       0x40 contiki-micaz.a(ds2401.o)
+ .debug_frame   0x000005b0       0x50 contiki-micaz.a(packages.o)
+ .debug_frame   0x00000600       0x30 contiki-micaz.a(eeprom.o)
+ .debug_frame   0x00000630       0x90 contiki-micaz.a(leds.o)
+ .debug_frame   0x000006c0       0x40 contiki-micaz.a(rimeaddr.o)
  .debug_frame   0x00000700       0x70 contiki-micaz.a(rime.o)
  .debug_frame   0x00000770       0xc0 contiki-micaz.a(announcement.o)
  .debug_frame   0x00000830       0xa0 contiki-micaz.a(broadcast-annou)
@@ -1346,159 +1332,159 @@ LOAD /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a
  .debug_frame   0x00000a80       0x70 contiki-micaz.a(nullmac.o)
  .debug_frame   0x00000af0       0x20 contiki-micaz.a(mac.o)
  .debug_frame   0x00000b10       0x30 contiki-micaz.a(framer-802154.o)
- .debug_frame   0x00000b40       0x30 contiki-micaz.a(autostart.o)
- .debug_frame   0x00000b70       0x60 contiki-micaz.a(compower.o)
- .debug_frame   0x00000bd0       0x50 contiki-micaz.a(memb.o)
- .debug_frame   0x00000c20       0xf0 contiki-micaz.a(etimer.o)
- .debug_frame   0x00000d10       0x80 contiki-micaz.a(ctimer.o)
- .debug_frame   0x00000d90       0x50 contiki-micaz.a(energest.o)
- .debug_frame   0x00000de0       0x40 contiki-micaz.a(rtimer.o)
- .debug_frame   0x00000e20       0x30 contiki-micaz.a(random.o)
- .debug_frame   0x00000e50       0xb0 contiki-micaz.a(queuebuf.o)
- .debug_frame   0x00000f00       0xa0 contiki-micaz.a(rs232.o)
- .debug_frame   0x00000fa0       0x40 contiki-micaz.a(leds-arch.o)
- .debug_frame   0x00000fe0      0x1f0 contiki-micaz.a(cc2420.o)
- .debug_frame   0x000011d0       0x30 contiki-micaz.a(cc2420-arch.o)
- .debug_frame   0x00001200       0x40 contiki-micaz.a(rtimer-arch.o)
- .debug_frame   0x00001240       0x60 contiki-micaz.a(watchdog.o)
- .debug_frame   0x000012a0       0x50 contiki-micaz.a(frame802154.o)
- .debug_frame   0x000012f0       0x60 contiki-micaz.a(timer.o)
- .debug_frame   0x00001350       0x20 contiki-micaz.a(spi.o)
+ .debug_frame   0x00000b40       0xe0 contiki-micaz.a(process.o)
+ .debug_frame   0x00000c20       0x30 contiki-micaz.a(autostart.o)
+ .debug_frame   0x00000c50       0x60 contiki-micaz.a(compower.o)
+ .debug_frame   0x00000cb0       0x50 contiki-micaz.a(memb.o)
+ .debug_frame   0x00000d00       0x60 contiki-micaz.a(timer.o)
+ .debug_frame   0x00000d60       0x80 contiki-micaz.a(ctimer.o)
+ .debug_frame   0x00000de0       0x50 contiki-micaz.a(energest.o)
+ .debug_frame   0x00000e30       0x40 contiki-micaz.a(rtimer.o)
+ .debug_frame   0x00000e70       0x30 contiki-micaz.a(random.o)
+ .debug_frame   0x00000ea0       0xb0 contiki-micaz.a(queuebuf.o)
+ .debug_frame   0x00000f50       0xa0 contiki-micaz.a(rs232.o)
+ .debug_frame   0x00000ff0       0x40 contiki-micaz.a(leds-arch.o)
+ .debug_frame   0x00001030      0x1f0 contiki-micaz.a(cc2420.o)
+ .debug_frame   0x00001220       0x30 contiki-micaz.a(cc2420-arch.o)
+ .debug_frame   0x00001250       0x40 contiki-micaz.a(rtimer-arch.o)
+ .debug_frame   0x00001290       0x60 contiki-micaz.a(watchdog.o)
+ .debug_frame   0x000012f0       0x50 contiki-micaz.a(frame802154.o)
+ .debug_frame   0x00001340       0x20 contiki-micaz.a(spi.o)
 
-.debug_str      0x00000000     0x2ca9
+.debug_str      0x00000000     0x2c4b
  *(.debug_str)
- .debug_str     0x00000000      0x2e9 attilio_receive.co
-                                0x3a5 (size before relaxing)
- .debug_str     0x000002e9       0x70 contiki-micaz.a(rimeaddr.o)
-                                0x156 (size before relaxing)
- .debug_str     0x00000359      0x355 contiki-micaz.a(broadcast.o)
+ .debug_str     0x00000000      0x284 attilio_send.co
+                                0x348 (size before relaxing)
+ .debug_str     0x00000284      0x368 contiki-micaz.a(broadcast.o)
                                 0x53d (size before relaxing)
- .debug_str     0x000006ae       0x49 contiki-micaz.a(abc.o)
+ .debug_str     0x000005ec       0x49 contiki-micaz.a(abc.o)
                                 0x4ce (size before relaxing)
- .debug_str     0x000006f7       0x92 contiki-micaz.a(channel.o)
+ .debug_str     0x00000635       0x92 contiki-micaz.a(channel.o)
                                 0x207 (size before relaxing)
- .debug_str     0x00000789      0x16f contiki-micaz.a(process.o)
-                                0x299 (size before relaxing)
- .debug_str     0x000008f8       0xa8 contiki-micaz.a(list.o)
+ .debug_str     0x000006c7       0xa8 contiki-micaz.a(list.o)
                                 0x109 (size before relaxing)
- .debug_str     0x000009a0      0x1df contiki-micaz.a(packetbuf.o)
-                                0x61c (size before relaxing)
- .debug_str     0x00000b7f       0x5a contiki-micaz.a(contiki-micaz-m)
-                                0x1f2 (size before relaxing)
- .debug_str     0x00000bd9       0xe5 contiki-micaz.a(init-net.o)
-                                0x22b (size before relaxing)
- .debug_str     0x00000cbe       0x62 contiki-micaz.a(node-id.o)
-                                0x142 (size before relaxing)
- .debug_str     0x00000d20       0x81 contiki-micaz.a(clock.o)
-                                0x16f (size before relaxing)
- .debug_str     0x00000da1       0x72 contiki-micaz.a(ds2401.o)
-                                0x162 (size before relaxing)
- .debug_str     0x00000e13       0x8f contiki-micaz.a(packages.o)
-                                0x2d4 (size before relaxing)
- .debug_str     0x00000ea2       0x29 contiki-micaz.a(eeprom.o)
-                                0x122 (size before relaxing)
- .debug_str     0x00000ecb       0x74 contiki-micaz.a(leds.o)
-                                0x140 (size before relaxing)
- .debug_str     0x00000f3f      0x16a contiki-micaz.a(rime.o)
-                                0x37c (size before relaxing)
- .debug_str     0x000010a9       0x20 contiki-micaz.a(rimestats.o)
-                                0x10b (size before relaxing)
- .debug_str     0x000010c9      0x19f contiki-micaz.a(announcement.o)
-                                0x2e1 (size before relaxing)
- .debug_str     0x00001268      0x187 contiki-micaz.a(broadcast-annou)
-                                0x434 (size before relaxing)
- .debug_str     0x000013ef       0x97 contiki-micaz.a(chameleon.o)
-                                0x4e5 (size before relaxing)
- .debug_str     0x00001486       0xc4 contiki-micaz.a(chameleon-bitop)
-                                0x57c (size before relaxing)
- .debug_str     0x0000154a      0x370 contiki-micaz.a(cxmac.o)
-                                0xa44 (size before relaxing)
- .debug_str     0x000018ba       0x2a contiki-micaz.a(nullmac.o)
-                                0x223 (size before relaxing)
- .debug_str     0x000018e4       0x30 contiki-micaz.a(mac.o)
-                                0x16b (size before relaxing)
- .debug_str     0x00001914      0x1b3 contiki-micaz.a(framer-802154.o)
-                                0x62b (size before relaxing)
- .debug_str     0x00001ac7       0x3a contiki-micaz.a(autostart.o)
-                                0x151 (size before relaxing)
- .debug_str     0x00001b01      0x1b8 contiki-micaz.a(compower.o)
-                                0x60e (size before relaxing)
- .debug_str     0x00001cb9       0x46 contiki-micaz.a(memb.o)
-                                0x11b (size before relaxing)
- .debug_str     0x00001cff      0x133 contiki-micaz.a(etimer.o)
+ .debug_str     0x0000076f      0x143 contiki-micaz.a(etimer.o)
                                 0x2a6 (size before relaxing)
- .debug_str     0x00001e32       0xad contiki-micaz.a(ctimer.o)
-                                0x23a (size before relaxing)
- .debug_str     0x00001edf       0x5c contiki-micaz.a(energest.o)
-                                0x121 (size before relaxing)
- .debug_str     0x00001f3b       0xb8 contiki-micaz.a(rtimer.o)
-                                0x198 (size before relaxing)
- .debug_str     0x00001ff3       0x35 contiki-micaz.a(random.o)
-                                 0xf5 (size before relaxing)
- .debug_str     0x00002028      0x18a contiki-micaz.a(queuebuf.o)
-                                0x5ea (size before relaxing)
- .debug_str     0x000021b2      0x10a contiki-micaz.a(rs232.o)
-                                0x1ed (size before relaxing)
- .debug_str     0x000022bc       0x50 contiki-micaz.a(leds-arch.o)
-                                0x11d (size before relaxing)
- .debug_str     0x0000230c      0x789 contiki-micaz.a(cc2420.o)
-                                0xded (size before relaxing)
- .debug_str     0x00002a95       0x43 contiki-micaz.a(cc2420-arch.o)
-                                0x178 (size before relaxing)
- .debug_str     0x00002ad8       0x50 contiki-micaz.a(rtimer-arch.o)
-                                0x13a (size before relaxing)
- .debug_str     0x00002b28       0x68 contiki-micaz.a(watchdog.o)
-                                0x126 (size before relaxing)
- .debug_str     0x00002b90       0xca contiki-micaz.a(frame802154.o)
-                                0x314 (size before relaxing)
- .debug_str     0x00002c5a       0x27 contiki-micaz.a(timer.o)
+ .debug_str     0x000008b2      0x1ed contiki-micaz.a(packetbuf.o)
+                                0x61c (size before relaxing)
+ .debug_str     0x00000a9f       0x5a contiki-micaz.a(contiki-micaz-m)
+                                0x1f2 (size before relaxing)
+ .debug_str     0x00000af9       0xe5 contiki-micaz.a(init-net.o)
+                                0x22b (size before relaxing)
+ .debug_str     0x00000bde       0x62 contiki-micaz.a(node-id.o)
+                                0x142 (size before relaxing)
+ .debug_str     0x00000c40       0x81 contiki-micaz.a(clock.o)
+                                0x16f (size before relaxing)
+ .debug_str     0x00000cc1       0x72 contiki-micaz.a(ds2401.o)
+                                0x162 (size before relaxing)
+ .debug_str     0x00000d33       0x88 contiki-micaz.a(packages.o)
+                                0x2bd (size before relaxing)
+ .debug_str     0x00000dbb       0x29 contiki-micaz.a(eeprom.o)
+                                0x122 (size before relaxing)
+ .debug_str     0x00000de4       0x74 contiki-micaz.a(leds.o)
                                 0x140 (size before relaxing)
- .debug_str     0x00002c81       0x28 contiki-micaz.a(spi.o)
+ .debug_str     0x00000e58       0x5d contiki-micaz.a(rimeaddr.o)
+                                0x156 (size before relaxing)
+ .debug_str     0x00000eb5      0x16a contiki-micaz.a(rime.o)
+                                0x37c (size before relaxing)
+ .debug_str     0x0000101f       0x20 contiki-micaz.a(rimestats.o)
+                                0x10b (size before relaxing)
+ .debug_str     0x0000103f      0x19f contiki-micaz.a(announcement.o)
+                                0x2e1 (size before relaxing)
+ .debug_str     0x000011de      0x187 contiki-micaz.a(broadcast-annou)
+                                0x434 (size before relaxing)
+ .debug_str     0x00001365       0x97 contiki-micaz.a(chameleon.o)
+                                0x4e5 (size before relaxing)
+ .debug_str     0x000013fc       0xc4 contiki-micaz.a(chameleon-bitop)
+                                0x57c (size before relaxing)
+ .debug_str     0x000014c0      0x370 contiki-micaz.a(cxmac.o)
+                                0xa44 (size before relaxing)
+ .debug_str     0x00001830       0x2a contiki-micaz.a(nullmac.o)
+                                0x223 (size before relaxing)
+ .debug_str     0x0000185a       0x30 contiki-micaz.a(mac.o)
+                                0x16b (size before relaxing)
+ .debug_str     0x0000188a      0x1b3 contiki-micaz.a(framer-802154.o)
+                                0x62b (size before relaxing)
+ .debug_str     0x00001a3d      0x15f contiki-micaz.a(process.o)
+                                0x299 (size before relaxing)
+ .debug_str     0x00001b9c       0x3a contiki-micaz.a(autostart.o)
+                                0x151 (size before relaxing)
+ .debug_str     0x00001bd6      0x1b8 contiki-micaz.a(compower.o)
+                                0x60e (size before relaxing)
+ .debug_str     0x00001d8e       0x46 contiki-micaz.a(memb.o)
+                                0x11b (size before relaxing)
+ .debug_str     0x00001dd4       0x27 contiki-micaz.a(timer.o)
+                                0x140 (size before relaxing)
+ .debug_str     0x00001dfb       0xad contiki-micaz.a(ctimer.o)
+                                0x23a (size before relaxing)
+ .debug_str     0x00001ea8       0x5c contiki-micaz.a(energest.o)
+                                0x121 (size before relaxing)
+ .debug_str     0x00001f04       0xb8 contiki-micaz.a(rtimer.o)
+                                0x198 (size before relaxing)
+ .debug_str     0x00001fbc       0x35 contiki-micaz.a(random.o)
+                                 0xf5 (size before relaxing)
+ .debug_str     0x00001ff1      0x18a contiki-micaz.a(queuebuf.o)
+                                0x5ea (size before relaxing)
+ .debug_str     0x0000217b      0x10a contiki-micaz.a(rs232.o)
+                                0x1ed (size before relaxing)
+ .debug_str     0x00002285       0x50 contiki-micaz.a(leds-arch.o)
+                                0x11d (size before relaxing)
+ .debug_str     0x000022d5      0x789 contiki-micaz.a(cc2420.o)
+                                0xded (size before relaxing)
+ .debug_str     0x00002a5e       0x43 contiki-micaz.a(cc2420-arch.o)
+                                0x178 (size before relaxing)
+ .debug_str     0x00002aa1       0x50 contiki-micaz.a(rtimer-arch.o)
+                                0x13a (size before relaxing)
+ .debug_str     0x00002af1       0x68 contiki-micaz.a(watchdog.o)
+                                0x126 (size before relaxing)
+ .debug_str     0x00002b59       0xca contiki-micaz.a(frame802154.o)
+                                0x314 (size before relaxing)
+ .debug_str     0x00002c23       0x28 contiki-micaz.a(spi.o)
                                  0xf0 (size before relaxing)
 
-.debug_loc      0x00000000     0x47a2
+.debug_loc      0x00000000     0x4690
  *(.debug_loc)
- .debug_loc     0x00000000      0x16f attilio_receive.co
- .debug_loc     0x0000016f      0x118 contiki-micaz.a(rimeaddr.o)
- .debug_loc     0x00000287      0x158 contiki-micaz.a(broadcast.o)
- .debug_loc     0x000003df      0x138 contiki-micaz.a(abc.o)
- .debug_loc     0x00000517      0x12c contiki-micaz.a(channel.o)
- .debug_loc     0x00000643      0x38f contiki-micaz.a(process.o)
- .debug_loc     0x000009d2      0x41c contiki-micaz.a(list.o)
- .debug_loc     0x00000dee      0x217 contiki-micaz.a(packetbuf.o)
- .debug_loc     0x00001005       0x5c contiki-micaz.a(init-net.o)
- .debug_loc     0x00001061       0x63 contiki-micaz.a(node-id.o)
- .debug_loc     0x000010c4       0x68 contiki-micaz.a(clock.o)
- .debug_loc     0x0000112c      0x2bb contiki-micaz.a(ds2401.o)
- .debug_loc     0x000013e7      0x1a8 contiki-micaz.a(packages.o)
- .debug_loc     0x0000158f       0xd0 contiki-micaz.a(eeprom.o)
- .debug_loc     0x0000165f       0xbe contiki-micaz.a(leds.o)
- .debug_loc     0x0000171d      0x168 contiki-micaz.a(rime.o)
- .debug_loc     0x00001885      0x224 contiki-micaz.a(announcement.o)
- .debug_loc     0x00001aa9      0x26b contiki-micaz.a(broadcast-annou)
- .debug_loc     0x00001d14       0xd4 contiki-micaz.a(chameleon.o)
- .debug_loc     0x00001de8      0x688 contiki-micaz.a(chameleon-bitop)
- .debug_loc     0x00002470      0x7ae contiki-micaz.a(cxmac.o)
- .debug_loc     0x00002c1e       0x48 contiki-micaz.a(nullmac.o)
- .debug_loc     0x00002c66       0x90 contiki-micaz.a(mac.o)
- .debug_loc     0x00002cf6       0xd1 contiki-micaz.a(framer-802154.o)
- .debug_loc     0x00002dc7       0x58 contiki-micaz.a(autostart.o)
- .debug_loc     0x00002e1f       0xac contiki-micaz.a(compower.o)
- .debug_loc     0x00002ecb      0x1b0 contiki-micaz.a(memb.o)
- .debug_loc     0x0000307b      0x42e contiki-micaz.a(etimer.o)
- .debug_loc     0x000034a9      0x311 contiki-micaz.a(ctimer.o)
- .debug_loc     0x000037ba       0xc7 contiki-micaz.a(rtimer.o)
- .debug_loc     0x00003881       0x18 contiki-micaz.a(random.o)
- .debug_loc     0x00003899      0x203 contiki-micaz.a(queuebuf.o)
- .debug_loc     0x00003a9c      0x123 contiki-micaz.a(rs232.o)
- .debug_loc     0x00003bbf      0x7a0 contiki-micaz.a(cc2420.o)
- .debug_loc     0x0000435f       0x24 contiki-micaz.a(rtimer-arch.o)
- .debug_loc     0x00004383      0x313 contiki-micaz.a(frame802154.o)
- .debug_loc     0x00004696      0x10c contiki-micaz.a(timer.o)
+ .debug_loc     0x00000000       0xc6 attilio_send.co
+ .debug_loc     0x000000c6      0x158 contiki-micaz.a(broadcast.o)
+ .debug_loc     0x0000021e      0x138 contiki-micaz.a(abc.o)
+ .debug_loc     0x00000356      0x12c contiki-micaz.a(channel.o)
+ .debug_loc     0x00000482      0x41c contiki-micaz.a(list.o)
+ .debug_loc     0x0000089e      0x42e contiki-micaz.a(etimer.o)
+ .debug_loc     0x00000ccc      0x217 contiki-micaz.a(packetbuf.o)
+ .debug_loc     0x00000ee3       0x5c contiki-micaz.a(init-net.o)
+ .debug_loc     0x00000f3f       0x63 contiki-micaz.a(node-id.o)
+ .debug_loc     0x00000fa2       0x68 contiki-micaz.a(clock.o)
+ .debug_loc     0x0000100a      0x2bb contiki-micaz.a(ds2401.o)
+ .debug_loc     0x000012c5      0x13f contiki-micaz.a(packages.o)
+ .debug_loc     0x00001404       0xd0 contiki-micaz.a(eeprom.o)
+ .debug_loc     0x000014d4       0xbe contiki-micaz.a(leds.o)
+ .debug_loc     0x00001592      0x118 contiki-micaz.a(rimeaddr.o)
+ .debug_loc     0x000016aa      0x168 contiki-micaz.a(rime.o)
+ .debug_loc     0x00001812      0x224 contiki-micaz.a(announcement.o)
+ .debug_loc     0x00001a36      0x26b contiki-micaz.a(broadcast-annou)
+ .debug_loc     0x00001ca1       0xd4 contiki-micaz.a(chameleon.o)
+ .debug_loc     0x00001d75      0x688 contiki-micaz.a(chameleon-bitop)
+ .debug_loc     0x000023fd      0x7ae contiki-micaz.a(cxmac.o)
+ .debug_loc     0x00002bab       0x48 contiki-micaz.a(nullmac.o)
+ .debug_loc     0x00002bf3       0x90 contiki-micaz.a(mac.o)
+ .debug_loc     0x00002c83       0xd1 contiki-micaz.a(framer-802154.o)
+ .debug_loc     0x00002d54      0x38f contiki-micaz.a(process.o)
+ .debug_loc     0x000030e3       0x58 contiki-micaz.a(autostart.o)
+ .debug_loc     0x0000313b       0xac contiki-micaz.a(compower.o)
+ .debug_loc     0x000031e7      0x1b0 contiki-micaz.a(memb.o)
+ .debug_loc     0x00003397      0x10c contiki-micaz.a(timer.o)
+ .debug_loc     0x000034a3      0x311 contiki-micaz.a(ctimer.o)
+ .debug_loc     0x000037b4       0xc7 contiki-micaz.a(rtimer.o)
+ .debug_loc     0x0000387b       0x18 contiki-micaz.a(random.o)
+ .debug_loc     0x00003893      0x203 contiki-micaz.a(queuebuf.o)
+ .debug_loc     0x00003a96      0x123 contiki-micaz.a(rs232.o)
+ .debug_loc     0x00003bb9      0x7a0 contiki-micaz.a(cc2420.o)
+ .debug_loc     0x00004359       0x24 contiki-micaz.a(rtimer-arch.o)
+ .debug_loc     0x0000437d      0x313 contiki-micaz.a(frame802154.o)
 
 .debug_macinfo
  *(.debug_macinfo)
-OUTPUT(attilio_receive.micaz elf32-avr)
+OUTPUT(attilio_send.micaz elf32-avr)
 LOAD linker stubs
 
 .bootloader     0x0001f800        0x0
@@ -1506,97 +1492,96 @@ LOAD linker stubs
 .debug_pubtypes
                 0x00000000     0x1733
  .debug_pubtypes
-                0x00000000      0x16c attilio_receive.co
+                0x00000000      0x16c attilio_send.co
  .debug_pubtypes
-                0x0000016c       0x2d contiki-micaz.a(rimeaddr.o)
+                0x0000016c       0xe2 contiki-micaz.a(broadcast.o)
  .debug_pubtypes
-                0x00000199       0xe2 contiki-micaz.a(broadcast.o)
+                0x0000024e       0xb7 contiki-micaz.a(abc.o)
  .debug_pubtypes
-                0x0000027b       0xb7 contiki-micaz.a(abc.o)
+                0x00000305       0xa3 contiki-micaz.a(channel.o)
  .debug_pubtypes
-                0x00000332       0xa3 contiki-micaz.a(channel.o)
+                0x000003a8       0x26 contiki-micaz.a(list.o)
  .debug_pubtypes
-                0x000003d5       0x7d contiki-micaz.a(process.o)
+                0x000003ce       0x7b contiki-micaz.a(etimer.o)
  .debug_pubtypes
-                0x00000452       0x26 contiki-micaz.a(list.o)
+                0x00000449       0x75 contiki-micaz.a(packetbuf.o)
  .debug_pubtypes
-                0x00000478       0x75 contiki-micaz.a(packetbuf.o)
+                0x000004be       0xac contiki-micaz.a(contiki-micaz-m)
  .debug_pubtypes
-                0x000004ed       0xac contiki-micaz.a(contiki-micaz-m)
+                0x0000056a       0x8f contiki-micaz.a(init-net.o)
  .debug_pubtypes
-                0x00000599       0x8f contiki-micaz.a(init-net.o)
+                0x000005f9       0x2b contiki-micaz.a(node-id.o)
  .debug_pubtypes
-                0x00000628       0x2b contiki-micaz.a(node-id.o)
+                0x00000624       0x2f contiki-micaz.a(clock.o)
  .debug_pubtypes
-                0x00000653       0x2f contiki-micaz.a(clock.o)
+                0x00000653       0x2b contiki-micaz.a(ds2401.o)
  .debug_pubtypes
-                0x00000682       0x2b contiki-micaz.a(ds2401.o)
+                0x0000067e      0x103 contiki-micaz.a(packages.o)
  .debug_pubtypes
-                0x000006ad      0x103 contiki-micaz.a(packages.o)
+                0x00000781       0x3d contiki-micaz.a(eeprom.o)
  .debug_pubtypes
-                0x000007b0       0x3d contiki-micaz.a(eeprom.o)
+                0x000007be       0x12 contiki-micaz.a(leds.o)
  .debug_pubtypes
-                0x000007ed       0x12 contiki-micaz.a(leds.o)
+                0x000007d0       0x2d contiki-micaz.a(rimeaddr.o)
  .debug_pubtypes
-                0x000007ff       0xf7 contiki-micaz.a(rime.o)
+                0x000007fd       0xf7 contiki-micaz.a(rime.o)
  .debug_pubtypes
-                0x000008f6       0x20 contiki-micaz.a(rimestats.o)
+                0x000008f4       0x20 contiki-micaz.a(rimestats.o)
  .debug_pubtypes
-                0x00000916       0x8c contiki-micaz.a(announcement.o)
+                0x00000914       0x8c contiki-micaz.a(announcement.o)
  .debug_pubtypes
-                0x000009a2      0x1cf contiki-micaz.a(broadcast-annou)
+                0x000009a0      0x1cf contiki-micaz.a(broadcast-annou)
  .debug_pubtypes
-                0x00000b71       0xad contiki-micaz.a(chameleon.o)
+                0x00000b6f       0xad contiki-micaz.a(chameleon.o)
  .debug_pubtypes
-                0x00000c1e       0xbc contiki-micaz.a(chameleon-bitop)
+                0x00000c1c       0xbc contiki-micaz.a(chameleon-bitop)
  .debug_pubtypes
-                0x00000cda      0x1cc contiki-micaz.a(cxmac.o)
+                0x00000cd8      0x1cc contiki-micaz.a(cxmac.o)
  .debug_pubtypes
-                0x00000ea6       0xbe contiki-micaz.a(nullmac.o)
+                0x00000ea4       0xbe contiki-micaz.a(nullmac.o)
  .debug_pubtypes
-                0x00000f64       0x25 contiki-micaz.a(mac.o)
+                0x00000f62       0x25 contiki-micaz.a(mac.o)
  .debug_pubtypes
-                0x00000f89       0xe5 contiki-micaz.a(framer-802154.o)
+                0x00000f87       0xe5 contiki-micaz.a(framer-802154.o)
  .debug_pubtypes
-                0x0000106e       0x55 contiki-micaz.a(autostart.o)
+                0x0000106c       0x7d contiki-micaz.a(process.o)
  .debug_pubtypes
-                0x000010c3       0xaa contiki-micaz.a(compower.o)
+                0x000010e9       0x55 contiki-micaz.a(autostart.o)
  .debug_pubtypes
-                0x0000116d       0x1b contiki-micaz.a(memb.o)
+                0x0000113e       0xaa contiki-micaz.a(compower.o)
  .debug_pubtypes
-                0x00001188       0x7b contiki-micaz.a(etimer.o)
+                0x000011e8       0x1b contiki-micaz.a(memb.o)
  .debug_pubtypes
-                0x00001203       0x91 contiki-micaz.a(ctimer.o)
+                0x00001203       0x2d contiki-micaz.a(timer.o)
  .debug_pubtypes
-                0x00001294       0x12 contiki-micaz.a(energest.o)
+                0x00001230       0x91 contiki-micaz.a(ctimer.o)
  .debug_pubtypes
-                0x000012a6       0x46 contiki-micaz.a(rtimer.o)
+                0x000012c1       0x12 contiki-micaz.a(energest.o)
  .debug_pubtypes
-                0x000012ec       0x12 contiki-micaz.a(random.o)
+                0x000012d3       0x46 contiki-micaz.a(rtimer.o)
  .debug_pubtypes
-                0x000012fe       0xae contiki-micaz.a(queuebuf.o)
+                0x00001319       0x12 contiki-micaz.a(random.o)
  .debug_pubtypes
-                0x000013ac       0x29 contiki-micaz.a(rs232.o)
+                0x0000132b       0xae contiki-micaz.a(queuebuf.o)
  .debug_pubtypes
-                0x000013d5       0x1e contiki-micaz.a(leds-arch.o)
+                0x000013d9       0x29 contiki-micaz.a(rs232.o)
  .debug_pubtypes
-                0x000013f3      0x165 contiki-micaz.a(cc2420.o)
+                0x00001402       0x1e contiki-micaz.a(leds-arch.o)
  .debug_pubtypes
-                0x00001558       0x75 contiki-micaz.a(cc2420-arch.o)
+                0x00001420      0x165 contiki-micaz.a(cc2420.o)
  .debug_pubtypes
-                0x000015cd       0x3e contiki-micaz.a(rtimer-arch.o)
+                0x00001585       0x75 contiki-micaz.a(cc2420-arch.o)
  .debug_pubtypes
-                0x0000160b       0x2b contiki-micaz.a(watchdog.o)
+                0x000015fa       0x3e contiki-micaz.a(rtimer-arch.o)
  .debug_pubtypes
-                0x00001636       0xb2 contiki-micaz.a(frame802154.o)
+                0x00001638       0x2b contiki-micaz.a(watchdog.o)
  .debug_pubtypes
-                0x000016e8       0x2d contiki-micaz.a(timer.o)
+                0x00001663       0xb2 contiki-micaz.a(frame802154.o)
  .debug_pubtypes
                 0x00001715       0x1e contiki-micaz.a(spi.o)
 
-.debug_ranges   0x00000000      0x1c8
- .debug_ranges  0x00000000       0x30 attilio_receive.co
- .debug_ranges  0x00000030       0xa8 contiki-micaz.a(ds2401.o)
- .debug_ranges  0x000000d8       0x48 contiki-micaz.a(chameleon-bitop)
- .debug_ranges  0x00000120       0x90 contiki-micaz.a(cxmac.o)
- .debug_ranges  0x000001b0       0x18 contiki-micaz.a(cc2420.o)
+.debug_ranges   0x00000000      0x198
+ .debug_ranges  0x00000000       0xa8 contiki-micaz.a(ds2401.o)
+ .debug_ranges  0x000000a8       0x48 contiki-micaz.a(chameleon-bitop)
+ .debug_ranges  0x000000f0       0x90 contiki-micaz.a(cxmac.o)
+ .debug_ranges  0x00000180       0x18 contiki-micaz.a(cc2420.o)

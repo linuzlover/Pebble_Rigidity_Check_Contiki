@@ -287,7 +287,7 @@ static struct broadcast_conn broadcast;
 
 /*Main thread of the process*/
 PROCESS_THREAD(pebble_process, ev, data) {
-    //static struct etimer et;
+    static struct etimer et;
     //Variables to iterate on.... temporary
     int i, j;
     //Set the exit handler
@@ -324,8 +324,8 @@ PROCESS_THREAD(pebble_process, ev, data) {
         etimer_set(&et, 2*CLOCK_SECOND);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         //send_token_pkg(struct broadcast_conn *broadcast, uchar n,uchar i,uchar *adj,rimeaddr_t nodes_addr_list[TOT_NUM_NODES])
-        send_token_pkg(&broadcast, TOT_NUM_NODES,MY_ID,adj_matrix,nodes_addr_list);
-        leds_toggle(LEDS_ALL);*/
+        send_token_pkg(&broadcast, MY_ID,adj_matrix,nodes_addr_list);
+        leds_toggle(LEDS_ALL);
         //printf("Alive\n");
     }
     /*End the process*/
