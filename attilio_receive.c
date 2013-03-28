@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2007, Swedish Institute of Computer Science.
+ * Modified by Attilio Priolo, University of Roma Tre
+ * <priolo@dia.uniroma3.it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +28,15 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * This file is part of the Contiki operating system.
  *
- * $Id: example-broadcast.c,v 1.3 2010/11/06 15:03:48 adamdunkels Exp $
  */
 
 /**
  * \file
- *         Testing the broadcast layer in Rime
+ *         Implementing the Pebble Rigidity Check over Rime
  * \author
+ *         Attilio Priolo <priolo@dia.uniroma3.it>
+ * Based on the original work by
  *         Adam Dunkels <adam@sics.se>
  */
 
@@ -49,231 +51,258 @@
 #include <stdlib.h>
 #include <math.h>
 
-
-static uchar START_FLAG=0;
-static uchar ADJ_FLAG=0;
+/**
+ * \var START_FLAG Variable to store the start Flag
+ */
+static uchar START_FLAG = 0;
+/**
+ * \var ADJ_FLAG Variable to store the adj Flag used to understand if an adjacency
+ * matrix has been sent to the agent
+ */
+static uchar ADJ_FLAG = 0;
+/*
+ * \var adj_matrix Array representing the adjacency matrix
+ */
 static uchar adj_matrix[TOT_NUM_NODES*TOT_NUM_NODES];
-static uchar MY_ID=255;
-static uchar GOT_TOKEN=0;
+/**
+ * \var MY_ID Id or index of the node in global ordering
+ */
+static uchar MY_ID = 255;
+/**
+ * \var GOT_TOKEN Variable to store the token
+ */
 
+static uchar GOT_TOKEN = 0;
+
+/**
+ * \var nodes_addr_list List of the nodes addresses in global order.
+ */
 rimeaddr_t nodes_addr_list[TOT_NUM_NODES];
 
+/**
+ * Function to retrieve the global ID
+ * @param from Rime address of the node used to retrieve the global ID
+ * @return Return the global ID
+ */
+static uchar get_id(rimeaddr_t *from) {
+    uchar i;
 
-static uchar get_id(rimeaddr_t *from)
+    for (i = 0; i < TOT_NUM_NODES; i++) {
+        if (rimeaddr_cmp(&nodes_addr_list[i], from))
+            return i;
+    }
+    return 255;
+}
+
+/*static uchar is_directed_to_me(rimeaddr_t *from)
 {
-	uchar i;
+        if(adj_matrix==NULL)
+                return 0;
+        uchar from_id=get_id(from);
+        if(adj_matrix[MY_ID*TOT_NUM_NODES+from_id]==1)
+                return 1;
+}
+ */
+
+/**
+ * Function to initialize the global list of addresses.
+ */
+static void set_addr_list() {
+    rimeaddr_t temp;
+
+    temp.u8[0] = 1;
+    temp.u8[1] = 0;
+    nodes_addr_list[0] = temp;
+
+    temp.u8[0] = 2;
+    temp.u8[1] = 0;
+    nodes_addr_list[1] = temp;
+
+    temp.u8[0] = 3;
+    temp.u8[1] = 0;
+    nodes_addr_list[2] = temp;
+
+    temp.u8[0] = 4;
+    temp.u8[1] = 0;
+    nodes_addr_list[3] = temp;
+
+
+    /*/
+            temp.u8[0]=0;
+            temp.u8[1]=0;
+            nodes_addr_list[0]=temp;
+
+            temp.u8[0]=0;
+            temp.u8[1]=15;
+            nodes_addr_list[1]=temp;
+
+            temp.u8[0]=6;
+            temp.u8[1]=251;
+            nodes_addr_list[2]=temp;
+
+            temp.u8[0]=13;
+            temp.u8[1]=4;
+            nodes_addr_list[3]=temp;
+
+            temp.u8[0]=31;
+            temp.u8[1]=70;
+            nodes_addr_list[4]=temp;
+
+            temp.u8[0]=83;
+            temp.u8[1]=12;
+            nodes_addr_list[5]=temp;
+
+            temp.u8[0]=91;
+            temp.u8[1]=19;
+            nodes_addr_list[6]=temp;
+
+            temp.u8[0]=127;
+            temp.u8[1]=108;
+            nodes_addr_list[7]=temp;
+
+            temp.u8[0]=128;
+            temp.u8[1]=101;
+            nodes_addr_list[8]=temp;
+
+            temp.u8[0]=158;
+            temp.u8[1]=128;
+            nodes_addr_list[9]=temp;
+
+            temp.u8[0]=196;
+            temp.u8[1]=115;
+            nodes_addr_list[10]=temp;
+
+            temp.u8[0]=212;
+            temp.u8[1]=108;
+            nodes_addr_list[11]=temp;
+
+            temp.u8[0]=217;
+            temp.u8[1]=209;
+            nodes_addr_list[12]=temp;
+
+            temp.u8[0]=226;
+            temp.u8[1]=100;
+            nodes_addr_list[13]=temp;
+
+            temp.u8[0]=255;
+            temp.u8[1]=255;
+            nodes_addr_list[14]=temp;
 	
-	for(i=0;i<TOT_NUM_NODES;i++)
-	{
-		if(rimeaddr_cmp(&nodes_addr_list[i],from))
-			return i;
-	}
-	return 255;
+            temp.u8[0]=255;
+            temp.u8[1]=255;
+            nodes_addr_list[15]=temp;
+    //*/
 }
 
-static uchar is_directed_to_me(rimeaddr_t *from)
-{
-	if(adj_matrix==NULL)
-		return 0;
-	uchar from_id=get_id(from);
-	if(adj_matrix[MY_ID*TOT_NUM_NODES+from_id]==1)
-		return 1;
-}
-static void set_addr_list()
-{
-	rimeaddr_t temp;
-
-	temp.u8[0]=0;
-	temp.u8[1]=0;
-	nodes_addr_list[0]=temp;
-
-	temp.u8[0]=1;
-        temp.u8[1]=0;
-        nodes_addr_list[1]=temp;
-
-	temp.u8[0]=2;
-        temp.u8[1]=0;
-        nodes_addr_list[2]=temp;
-
-	temp.u8[0]=3;
-        temp.u8[1]=0;
-        nodes_addr_list[3]=temp;
-
-
-/*/
-	temp.u8[0]=0;
-	temp.u8[1]=0;
-	nodes_addr_list[0]=temp;
-
-	temp.u8[0]=0;
-        temp.u8[1]=15;
-        nodes_addr_list[1]=temp;
-
-	temp.u8[0]=6;
-        temp.u8[1]=251;
-        nodes_addr_list[2]=temp;
-
-	temp.u8[0]=13;
-        temp.u8[1]=4;
-        nodes_addr_list[3]=temp;
-
-	temp.u8[0]=31;
-        temp.u8[1]=70;
-        nodes_addr_list[4]=temp;
-
-	temp.u8[0]=83;
-        temp.u8[1]=12;
-        nodes_addr_list[5]=temp;
-
-	temp.u8[0]=91;
-        temp.u8[1]=19;
-        nodes_addr_list[6]=temp;
-
-	temp.u8[0]=127;
-        temp.u8[1]=108;
-        nodes_addr_list[7]=temp;
-
-	temp.u8[0]=128;
-        temp.u8[1]=101;
-        nodes_addr_list[8]=temp;
-
-	temp.u8[0]=158;
-        temp.u8[1]=128;
-        nodes_addr_list[9]=temp;
-
-	temp.u8[0]=196;
-        temp.u8[1]=115;
-        nodes_addr_list[10]=temp;
-
-	temp.u8[0]=212;
-        temp.u8[1]=108;
-        nodes_addr_list[11]=temp;
-
-	temp.u8[0]=217;
-        temp.u8[1]=209;
-        nodes_addr_list[12]=temp;
-
-	temp.u8[0]=226;
-        temp.u8[1]=100;
-        nodes_addr_list[13]=temp;
-
-	temp.u8[0]=255;
-        temp.u8[1]=255;
-        nodes_addr_list[14]=temp;
-	
-	temp.u8[0]=255;
-        temp.u8[1]=255;
-        nodes_addr_list[15]=temp;
-//*/
-}
-
+/*
+ * Main process
+ */
 
 /*---------------------------------------------------------------------------*/
-PROCESS(example_broadcast_process, "Broadcast example");
-AUTOSTART_PROCESSES(&example_broadcast_process);
+PROCESS(pebble_process, "Pebble Rigidity Process");
+/*Autostarting the process*/
+AUTOSTART_PROCESSES(&pebble_process);
+
 /*---------------------------------------------------------------------------*/
 static void
-broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from)
-{
-  /*Header of the received packet*/
-  pkg_hdr rec_hdr;
-  /*Copy the broadcast buffer in the header structure*/
-  memcpy(&rec_hdr,packetbuf_dataptr(),sizeof(pkg_hdr));
-  /*Switch on the type of pkg*/
-  switch(rec_hdr.type){
-  /*Color Of the led to set*/
-  uchar color;
-  
-		case CHANGE_LED:
-		  /*Change the active LED*/
-			memcpy(&color,packetbuf_dataptr()+sizeof(pkg_hdr),1);
-			switch(color)
-			{
-				case 0:
-					leds_off(LEDS_ALL);
-					leds_toggle(LEDS_RED);
-					break;
-				case 1:
-					leds_off(LEDS_ALL);
-					leds_toggle(LEDS_YELLOW);
-					break;
-				case 2:
-					leds_off(LEDS_ALL);
-					leds_toggle(LEDS_GREEN);
-					break;
-				default:
-					break;
-			}
-			break;
-			/*PKG to start the algorithms*/
-		case START_PKG:
-		  /*Set flag and send an event*/
-			START_FLAG=1;
-			process_post(&example_broadcast_process,PROCESS_EVENT_MSG,NULL);
-			//leds_toggle(LEDS_ALL);
-			break;
-			/*PKG to stop the algorithms*/
-		case STOP_PKG:
-		  	/*Set flag and send an event*/
-		  	START_FLAG=0;
-			process_post(&example_broadcast_process,PROCESS_EVENT_MSG,NULL);
-			break;
-		case ADJ_MATR_PKG:
-			ADJ_FLAG=1;
-			memcpy(adj_matrix,packetbuf_dataptr()+sizeof(pkg_hdr),TOT_NUM_NODES*TOT_NUM_NODES);
-			process_post(&example_broadcast_process,PROCESS_EVENT_MSG,NULL);
-			break;
-		case TOKEN_PKG:
-			if(rimeaddr_cmp(&rec_hdr.receiver,&rimeaddr_node_addr))
-			{
-				GOT_TOKEN=1;
-				process_post(&example_broadcast_process,PROCESS_EVENT_MSG,NULL);
-			}
-			break;
-		default:
-			break;
-	}
+broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
+    /*Header of the received packet*/
+    pkg_hdr rec_hdr;
+    /*Copy the broadcast buffer in the header structure*/
+    memcpy(&rec_hdr, packetbuf_dataptr(), sizeof (pkg_hdr));
+    /*Switch on the type of pkg*/
+    switch (rec_hdr.type) {
+            /*Color Of the led to set*/
+            uchar color;
+
+        case CHANGE_LED:
+            /*Change the active LED*/
+            memcpy(&color, packetbuf_dataptr() + sizeof (pkg_hdr), 1);
+            switch (color) {
+                case 0:
+                    leds_off(LEDS_ALL);
+                    leds_toggle(LEDS_RED);
+                    break;
+                case 1:
+                    leds_off(LEDS_ALL);
+                    leds_toggle(LEDS_YELLOW);
+                    break;
+                case 2:
+                    leds_off(LEDS_ALL);
+                    leds_toggle(LEDS_GREEN);
+                    break;
+                default:
+                    break;
+            }
+            break;
+            /*PKG to start the algorithms*/
+        case START_PKG:
+            /*Set flag and send an event*/
+            START_FLAG = 1;
+            process_post(&example_broadcast_process, PROCESS_EVENT_MSG, NULL);
+            //leds_toggle(LEDS_ALL);
+            break;
+            /*PKG to stop the algorithms*/
+        case STOP_PKG:
+            /*Set flag and send an event*/
+            START_FLAG = 0;
+            process_post(&example_broadcast_process, PROCESS_EVENT_MSG, NULL);
+            break;
+        case ADJ_MATR_PKG:
+            ADJ_FLAG = 1;
+            memcpy(adj_matrix, packetbuf_dataptr() + sizeof (pkg_hdr), TOT_NUM_NODES * TOT_NUM_NODES);
+            process_post(&example_broadcast_process, PROCESS_EVENT_MSG, NULL);
+            break;
+        case TOKEN_PKG:
+            if (rimeaddr_cmp(&rec_hdr.receiver, &rimeaddr_node_addr)) {
+                GOT_TOKEN = 1;
+                process_post(&example_broadcast_process, PROCESS_EVENT_MSG, NULL);
+            }
+            break;
+        default:
+            break;
+    }
 
 }
 
 static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
 static struct broadcast_conn broadcast;
+
 /*---------------------------------------------------------------------------*/
-PROCESS_THREAD(example_broadcast_process, ev, data)
-{
-   static struct etimer et;
-int i,j;
-  PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
+PROCESS_THREAD(pebble_process, ev, data) {
+    static struct etimer et;
+    int i, j;
+    PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
 
-  PROCESS_BEGIN();
+    PROCESS_BEGIN();
 
-  MY_ID=get_id(&rimeaddr_node_addr);
-  packetbuf_clear();
-  broadcast_open(&broadcast, 129, &broadcast_call);
+    MY_ID = get_id(&rimeaddr_node_addr);
+    packetbuf_clear();
+    broadcast_open(&broadcast, 129, &broadcast_call);
 
-  /*Start only when START_PKG has been received*/
-	PROCESS_WAIT_EVENT_UNTIL(START_FLAG);
-	PROCESS_WAIT_EVENT_UNTIL(ADJ_FLAG==1);
-	if(ADJ_FLAG==1){
-	for (i=0;i<TOT_NUM_NODES;i++){
-		for (j=0;j<TOT_NUM_NODES;j++){
-			printf("%d  ",adj_matrix[mat2vec(i,j)]);
-}
-printf("\n");
-}
-}
-	/*Main loop*/
-  while(1) {
-	
-    	/*PROCESS_WAIT_EVENT_UNTIL(GOT_TOKEN);
+    /*Start only when START_PKG has been received*/
+    PROCESS_WAIT_EVENT_UNTIL(START_FLAG);
+    PROCESS_WAIT_EVENT_UNTIL(ADJ_FLAG == 1);
+    if (ADJ_FLAG == 1) {
+        for (i = 0; i < TOT_NUM_NODES; i++) {
+            for (j = 0; j < TOT_NUM_NODES; j++) {
+                printf("%d  ", adj_matrix[mat2vec(i, j)]);
+            }
+            printf("\n");
+        }
+    }
+    /*Main loop*/
+    while (1) {
+
+        /*PROCESS_WAIT_EVENT_UNTIL(GOT_TOKEN);
         leds_toggle(LEDS_ALL);        
         etimer_set(&et, 2*CLOCK_SECOND);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         //send_token_pkg(struct broadcast_conn *broadcast, uchar n,uchar i,uchar *adj,rimeaddr_t nodes_addr_list[TOT_NUM_NODES])
-	send_token_pkg(&broadcast, TOT_NUM_NODES,MY_ID,adj_matrix,nodes_addr_list);
+        send_token_pkg(&broadcast, TOT_NUM_NODES,MY_ID,adj_matrix,nodes_addr_list);
         leds_toggle(LEDS_ALL);*/
-    //printf("Alive\n");
-  }
-  PROCESS_END();
+        //printf("Alive\n");
+    }
+    PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
