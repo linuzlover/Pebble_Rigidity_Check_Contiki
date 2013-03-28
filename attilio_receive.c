@@ -239,24 +239,27 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
         case START_PKG:
             /*Set flag and send an event*/
             START_FLAG = 1;
-            process_post(&example_broadcast_process, PROCESS_EVENT_MSG, NULL);
+            /*Send the event to unlock the main process*/
+            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             //leds_toggle(LEDS_ALL);
             break;
             /*PKG to stop the algorithms*/
         case STOP_PKG:
             /*Set flag and send an event*/
             START_FLAG = 0;
-            process_post(&example_broadcast_process, PROCESS_EVENT_MSG, NULL);
+            /*Send the event to unlock the main process*/
+            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case ADJ_MATR_PKG:
             ADJ_FLAG = 1;
             memcpy(adj_matrix, packetbuf_dataptr() + sizeof (pkg_hdr), TOT_NUM_NODES * TOT_NUM_NODES);
-            process_post(&example_broadcast_process, PROCESS_EVENT_MSG, NULL);
+            /*Send the event to unlock the main process*/
+            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case TOKEN_PKG:
             if (rimeaddr_cmp(&rec_hdr.receiver, &rimeaddr_node_addr)) {
                 GOT_TOKEN = 1;
-                process_post(&example_broadcast_process, PROCESS_EVENT_MSG, NULL);
+                process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             }
             break;
         default:
