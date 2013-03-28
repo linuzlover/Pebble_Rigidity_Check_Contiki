@@ -46,6 +46,110 @@
 #include "packages.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <math.h>
+
+
+static uchar START_FLAG=0;
+static uchar NUM_NODES=0;
+static uchar *adj_matrix=NULL;
+static uchar MY_ID=255;
+static uchar GOT_TOKEN=0;
+
+rimeaddr_t nodes_addr_list[TOT_NUM_NODES];
+
+
+static uchar get_id(rimeaddr_t *from)
+{
+	uchar i;
+	
+	for(i=0;i<TOT_NUM_NODES;i++)
+	{
+		if(rimeaddr_cmp(&nodes_addr_list[i],from))
+			return i;
+	}
+	return 255;
+}
+
+static uchar is_directed_to_me(rimeaddr_t *from)
+{
+	if(adj_matrix==NULL)
+		return 0;
+	uchar from_id=get_id(from);
+	if(adj_matrix[MY_ID*NUM_NODES+from_id]==1)
+		return 1;
+}
+static void set_addr_list()
+{
+	rimeaddr_t temp;
+
+	temp.u8[0]=0;
+	temp.u8[1]=0;
+	nodes_addr_list[0]=temp;
+
+	temp.u8[0]=0;
+        temp.u8[1]=15;
+        nodes_addr_list[1]=temp;
+
+	temp.u8[0]=6;
+        temp.u8[1]=251;
+        nodes_addr_list[2]=temp;
+
+	temp.u8[0]=13;
+        temp.u8[1]=4;
+        nodes_addr_list[3]=temp;
+
+	temp.u8[0]=31;
+        temp.u8[1]=70;
+        nodes_addr_list[4]=temp;
+
+	temp.u8[0]=83;
+        temp.u8[1]=12;
+        nodes_addr_list[5]=temp;
+
+	temp.u8[0]=91;
+        temp.u8[1]=19;
+        nodes_addr_list[6]=temp;
+
+	temp.u8[0]=127;
+        temp.u8[1]=108;
+        nodes_addr_list[7]=temp;
+
+	temp.u8[0]=128;
+        temp.u8[1]=101;
+        nodes_addr_list[8]=temp;
+
+	temp.u8[0]=158;
+        temp.u8[1]=128;
+        nodes_addr_list[9]=temp;
+
+	temp.u8[0]=196;
+        temp.u8[1]=115;
+        nodes_addr_list[10]=temp;
+
+	temp.u8[0]=212;
+        temp.u8[1]=108;
+        nodes_addr_list[11]=temp;
+
+	temp.u8[0]=217;
+        temp.u8[1]=209;
+        nodes_addr_list[12]=temp;
+
+	temp.u8[0]=226;
+        temp.u8[1]=100;
+        nodes_addr_list[13]=temp;
+
+	temp.u8[0]=255;
+        temp.u8[1]=255;
+        nodes_addr_list[14]=temp;
+	
+	temp.u8[0]=255;
+        temp.u8[1]=255;
+        nodes_addr_list[15]=temp;
+
+}
+
+
 /*---------------------------------------------------------------------------*/
 PROCESS(example_broadcast_process, "Broadcast example");
 AUTOSTART_PROCESSES(&example_broadcast_process);
@@ -53,24 +157,30 @@ AUTOSTART_PROCESSES(&example_broadcast_process);
 static void
 broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from)
 {
+  /*Header of the received packet*/
   pkg_hdr rec_hdr;
+  /*Copy the broadcast buffer in the header structure*/
   memcpy(&rec_hdr,packetbuf_dataptr(),sizeof(pkg_hdr));
-
-  switch(rec_hdr.type)
-	{
+  uchar len=rec_hdr.data_len;
+  /*Switch on the type of pkg*/
+  switch(rec_hdr.type){
+  /*Color Of the led to set*/
+  uchar color;
+  
 		case CHANGE_LED:
-			unsigned char color=*(packetbuf_dataptr()+sizeof(pkg_hdr));
+		  /*Change the active LED*/
+			memcpy(&color,packetbuf_dataptr()+sizeof(pkg_hdr),1);
 			switch(color)
 			{
-				case 1:
+				case 0:
 					leds_off(LEDS_ALL);
 					leds_toggle(LEDS_RED);
 					break;
-				case 2:
+				case 1:
 					leds_off(LEDS_ALL);
 					leds_toggle(LEDS_YELLOW);
 					break;
-				case 3:
+				case 2:
 					leds_off(LEDS_ALL);
 					leds_toggle(LEDS_GREEN);
 					break;
@@ -78,10 +188,44 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from)
 					break;
 			}
 			break;
+			/*PKG to start the algorithms*/
+		case START_PKG:
+		  /*Set flag and send an event*/
+			START_FLAG=1;
+			process_post(&example_broadcast_process,PROCESS_EVENT_MSG,NULL);
+			//leds_toggle(LEDS_ALL);
+			break;
+			/*PKG to stop the algorithms*/
+		case STOP_PKG:
+		  	/*Set flag and send an event*/
+		  	START_FLAG=0;
+			process_post(&example_broadcast_process,PROCESS_EVENT_MSG,NULL);
+			break;
+		case ADJ_MATR_PKG:
+			if(adj_matrix==NULL)
+				adj_matrix=malloc(len);
+			else
+				{
+					if(!(sqrt(rec_hdr.data_len)==NUM_NODES))
+                    			{
+						NUM_NODES= sqrt(rec_hdr.data_len);
+						realloc(adj_matrix,len);
+					}
+				}
+			memcpy(adj_matrix,packetbuf_dataptr()+sizeof(pkg_hdr),len);
+			process_post(&example_broadcast_process,PROCESS_EVENT_MSG,NULL);
+			//leds_toggle(LEDS_ALL);
+			break;
+		case TOKEN_PKG:
+			if(rimeaddr_cmp(&rec_hdr.receiver,&rimeaddr_node_addr))
+			{
+				GOT_TOKEN=1;
+				process_post(&example_broadcast_process,PROCESS_EVENT_MSG,NULL);
+			}
+			break;
 		default:
 			break;
 	}
-
 
 }
 
@@ -90,22 +234,42 @@ static struct broadcast_conn broadcast;
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(example_broadcast_process, ev, data)
 {
-  static struct etimer et;
+   static struct etimer et;
 
   PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
 
   PROCESS_BEGIN();
 
+  MY_ID=get_id(&rimeaddr_node_addr);
+
   broadcast_open(&broadcast, 129, &broadcast_call);
-
-  while(1) {
-    etimer_set(&et, CLOCK_SECOND);
-    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    printf("Alive");
- //   packetbuf_copyfrom("H", 2);
-//    broadcast_send(&broadcast);
+  
+  /*Start only when START_PKG has been received*/
+	PROCESS_WAIT_EVENT_UNTIL(START_FLAG);
+	PROCESS_WAIT_EVENT_UNTIL(adj_matrix!=NULL);
+printf("%d\n",sizeof(adj_matrix));	
+//int i,j;
+//
+//for(i=0;i<NUM_NODES;i++)
+//{
+//for(j=0;j<NUM_NODES;j++)
+//	printf("%d\t",adj_matrix[i*NUM_NODES+j]);
+//printf("\n");
+//}
+	/*Main loop*/
+/*  while(1) {
+	
+    	PROCESS_WAIT_EVENT_UNTIL(GOT_TOKEN);
+        leds_toggle(LEDS_ALL);        
+        etimer_set(&et, 2*CLOCK_SECOND);
+        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+        //send_token_pkg(struct broadcast_conn *broadcast, uchar n,uchar i,uchar *adj,rimeaddr_t nodes_addr_list[TOT_NUM_NODES])
+	send_token_pkg(&broadcast, NUM_NODES,MY_ID,adj_matrix,nodes_addr_list);
+        leds_toggle(LEDS_ALL);
+    //printf("Alive\n");
   }
-
+*/
+  free(adj_matrix);
   PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/

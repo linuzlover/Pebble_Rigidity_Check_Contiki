@@ -67,13 +67,28 @@ static struct broadcast_conn broadcast;
 PROCESS_THREAD(example_broadcast_process, ev, data)
 {
   static struct etimer et;
-  uchar n=4;
-  uchar adj[n*n];
+  rimeaddr_t dest;
+  pkg_hdr to_send;
+  dest.u8[0]=0;
+  dest.u8[1]=0;
 
-  memset(adj,0,sizeof(adj));
 
-  adj[3]=1;
-  adj[7]=1;  
+
+  uchar adj[TOT_NUM_NODES*TOT_NUM_NODES];
+
+  memset(adj,1,TOT_NUM_NODES*TOT_NUM_NODES);
+
+  /*adj[1]=1;
+  adj[1*4+2]=1;
+  adj[2*4+3]=1;
+  adj[3*4]=1;
+   */
+//  adj[mat2vec(1,1)]=1;  
+
+//  adj[mat2vec(2,3)]=1;
+
+  //adj[mat2vec(4,4)]=1;  
+  
 
   PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
 
@@ -83,12 +98,26 @@ PROCESS_THREAD(example_broadcast_process, ev, data)
  etimer_set(&et, CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
   send_start_pkg_broad(&broadcast);
-
-  while(1) {
-    etimer_set(&et, CLOCK_SECOND);
+etimer_set(&et, CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    send_adj_pkg_broad(&broadcast,n,adj);
-  }
+      
+send_adj_pkg_broad(&broadcast,adj);
+etimer_set(&et, CLOCK_SECOND);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+ 
+   to_send.type=TOKEN_PKG;
+   //to_send.receiver=dest;
+   to_send.data_len=0;
+   to_send.receiver=dest;
+   packetbuf_clear();
+   packetbuf_copyfrom(&to_send,sizeof(pkg_hdr));
+   //broadcast_send(&broadcast); 
+   
+//  while(1) {
+//    etimer_set(&et, CLOCK_SECOND);
+//    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+//    send_adj_pkg_broad(&broadcast,n,adj);
+//  }
     
     PROCESS_END();
 }
