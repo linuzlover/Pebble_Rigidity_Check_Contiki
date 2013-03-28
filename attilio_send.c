@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2007, Swedish Institute of Computer Science.
+ * Modified by Attilio Priolo, University of Roma Tre
+ * <priolo@dia.uniroma3.it>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +28,15 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * This file is part of the Contiki operating system.
  *
- * $Id: example-broadcast.c,v 1.3 2010/11/06 15:03:48 adamdunkels Exp $
  */
 
 /**
  * \file
- *         Testing the broadcast layer in Rime
+ *         Implementing the Pebble Rigidity Check over Rime
  * \author
+ *         Attilio Priolo <priolo@dia.uniroma3.it>
+ * Based on the original work by
  *         Adam Dunkels <adam@sics.se>
  */
 
@@ -52,73 +54,78 @@
 
 
 /*---------------------------------------------------------------------------*/
+//Broadcast example process. I am keeping the former name
 PROCESS(example_broadcast_process, "Broadcast example");
 AUTOSTART_PROCESSES(&example_broadcast_process);
+
 /*---------------------------------------------------------------------------*/
+//\TODO: Empty... this code will act also as a packet sniffer so it will be implemented later
+
 static void
-broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from)
-{
+broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
 
 }
 
+//Callbacks and broadcast connection structure
 static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
 static struct broadcast_conn broadcast;
+
 /*---------------------------------------------------------------------------*/
-PROCESS_THREAD(example_broadcast_process, ev, data)
-{
-  static struct etimer et;
-  rimeaddr_t dest;
-  pkg_hdr to_send;
-  dest.u8[0]=1;
-  dest.u8[1]=0;
+PROCESS_THREAD(example_broadcast_process, ev, data) {
+    static struct etimer et;
+    rimeaddr_t dest;
+
+    pkg_hdr to_send;
+    //This address will be used to send the token to the first node
+    dest.u8[0] = 1;
+    dest.u8[1] = 0;
 
 
+    //Adjacency matrix to be sent
+    uchar adj[TOT_NUM_NODES * TOT_NUM_NODES];
+    //Filling it
+    memset(adj, 0, TOT_NUM_NODES * TOT_NUM_NODES);
 
-  uchar adj[TOT_NUM_NODES*TOT_NUM_NODES];
+    adj[mat2vec(0, 1)] = 1;
 
-  memset(adj,0,TOT_NUM_NODES*TOT_NUM_NODES);
+    adj[mat2vec(1, 2)] = 1;
 
-  /*adj[1]=1;
-  adj[1*4+2]=1;
-  adj[2*4+3]=1;
-  adj[3*4]=1;
-   */
-  adj[mat2vec(0,1)]=1;  
+    adj[mat2vec(2, 0)] = 1;
+    //---
 
-  adj[mat2vec(1,2)]=1;
+    //Setting handlers and begin
+    PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
 
-  adj[mat2vec(2,0)]=1;  
-  
+    PROCESS_BEGIN();
 
-  PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
-
-  PROCESS_BEGIN();
-
-  broadcast_open(&broadcast, 129, &broadcast_call);
- etimer_set(&et, CLOCK_SECOND);
+    //Send start pkg in broadcast to all the agents
+    broadcast_open(&broadcast, 129, &broadcast_call);
+    etimer_set(&et, CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-  send_start_pkg_broad(&broadcast);
-etimer_set(&et, CLOCK_SECOND);
+    send_start_pkg_broad(&broadcast);
+
+    //Send the adjacency matrix in broadcast to all the agents
+    etimer_set(&et, CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-      
-send_adj_pkg_broad(&broadcast,adj);
-etimer_set(&et, CLOCK_SECOND);
+
+    send_adj_pkg_broad(&broadcast, adj);
+    etimer_set(&et, CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
- 
-   to_send.type=TOKEN_PKG;
-   //to_send.receiver=dest;
-   to_send.data_len=0;
-   to_send.receiver=dest;
-   packetbuf_clear();
-   packetbuf_copyfrom(&to_send,sizeof(pkg_hdr));
-   broadcast_send(&broadcast); 
-   
-//  while(1) {
-//    etimer_set(&et, CLOCK_SECOND);
-//    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-//    send_adj_pkg_broad(&broadcast,n,adj);
-//  }
-    
+
+    //Send the token to the first agent
+    to_send.type = TOKEN_PKG;
+    to_send.data_len = 0;
+    to_send.receiver = dest;
+    packetbuf_clear();
+    packetbuf_copyfrom(&to_send, sizeof (pkg_hdr));
+    broadcast_send(&broadcast);
+
+    //  while(1) {
+    //    etimer_set(&et, CLOCK_SECOND);
+    //    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+    //    send_adj_pkg_broad(&broadcast,n,adj);
+    //  }
+
     PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/

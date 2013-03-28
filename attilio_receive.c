@@ -88,7 +88,6 @@ static uchar get_id(rimeaddr_t *from) {
     uchar i;
 
     for (i = 0; i < TOT_NUM_NODES; i++) {
-	printf("Agent:%d.%d node_list:%d.%d\n",from->u8[0],from->u8[1],(&nodes_addr_list[i])->u8[0],(&nodes_addr_list[i])->u8[1]);
         if (rimeaddr_cmp(&nodes_addr_list[i], from))
             return i;
     }
@@ -308,16 +307,6 @@ PROCESS_THREAD(pebble_process, ev, data) {
     /*Start only when ADJ_PKG has been received*/
     PROCESS_WAIT_EVENT_UNTIL(ADJ_FLAG == 1);
 
-
-    //Temporary: print the adjacency matrix
-/*/
-    for (i = 0; i < TOT_NUM_NODES; i++) {
-        for (j = 0; j < TOT_NUM_NODES; j++) {
-            printf("%d  ", adj_matrix[mat2vec(i, j)]);
-        }
-        printf("\n");
-    }
-//*/
     /*Main loop*/
     while (1) {
 
@@ -325,10 +314,8 @@ PROCESS_THREAD(pebble_process, ev, data) {
         etimer_set(&et, 2*CLOCK_SECOND);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         leds_toggle(LEDS_ALL);        
-        //send_token_pkg(struct broadcast_conn *broadcast, uchar n,uchar i,uchar *adj,rimeaddr_t nodes_addr_list[TOT_NUM_NODES])
         send_token_pkg(&broadcast, MY_ID,adj_matrix,nodes_addr_list);
-//        leds_toggle(LEDS_ALL);
-        //printf("Alive\n");
+
     }
     /*End the process*/
     PROCESS_END();
