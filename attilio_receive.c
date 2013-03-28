@@ -204,6 +204,15 @@ PROCESS(pebble_process, "Pebble Rigidity Process");
 AUTOSTART_PROCESSES(&pebble_process);
 
 /*---------------------------------------------------------------------------*/
+
+/*\TODO: cut the switch using a case handler foreach case. Standard input
+ and output structures should be written to feed/retrieve them to/from the functions*/
+
+/**
+ * Callback function when a packet is received
+ * @param c Connection
+ * @param from Sender
+ */
 static void
 broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
     /*Header of the received packet*/
@@ -257,8 +266,11 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case TOKEN_PKG:
+            //If I am the recipient...
             if (rimeaddr_cmp(&rec_hdr.receiver, &rimeaddr_node_addr)) {
+                //I have the token!
                 GOT_TOKEN = 1;
+                /*Send the event to unlock the main process*/
                 process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             }
             break;
@@ -272,28 +284,38 @@ static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
 static struct broadcast_conn broadcast;
 
 /*---------------------------------------------------------------------------*/
-PROCESS_THREAD(pebble_process, ev, data) {
-    static struct etimer et;
-    int i, j;
-    PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
 
+/*Main thread of the process*/
+PROCESS_THREAD(pebble_process, ev, data) {
+    //static struct etimer et;
+    //Variables to iterate on.... temporary
+    int i, j;
+    //Set the exit handler
+    PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
+    //Begin the process
     PROCESS_BEGIN();
 
+    //Get the global ID
     MY_ID = get_id(&rimeaddr_node_addr);
+    //Clear the RIME buffer 
     packetbuf_clear();
+    //Open the broadcast channel on 129 and set the callback function
     broadcast_open(&broadcast, 129, &broadcast_call);
 
     /*Start only when START_PKG has been received*/
     PROCESS_WAIT_EVENT_UNTIL(START_FLAG);
+    /*Start only when ADJ_PKG has been received*/
     PROCESS_WAIT_EVENT_UNTIL(ADJ_FLAG == 1);
-    if (ADJ_FLAG == 1) {
-        for (i = 0; i < TOT_NUM_NODES; i++) {
-            for (j = 0; j < TOT_NUM_NODES; j++) {
-                printf("%d  ", adj_matrix[mat2vec(i, j)]);
-            }
-            printf("\n");
+
+
+    //Temporary: print the adjacency matrix
+    for (i = 0; i < TOT_NUM_NODES; i++) {
+        for (j = 0; j < TOT_NUM_NODES; j++) {
+            printf("%d  ", adj_matrix[mat2vec(i, j)]);
         }
+        printf("\n");
     }
+
     /*Main loop*/
     while (1) {
 
@@ -306,6 +328,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
         leds_toggle(LEDS_ALL);*/
         //printf("Alive\n");
     }
+    /*End the process*/
     PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
