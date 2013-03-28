@@ -46,34 +46,33 @@
 #include "packages.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <math.h>
 
 #define TOT_NUM_NODES 16
-
-typedef unsigned char uchar;
 
 static uchar START_FLAG=0;
 static uchar NUM_NODES=0;
 static uchar *adj_matrix=NULL;
 static uchar MY_ID=255;
+static uchar GOT_TOKEN=0;
 
 rimeaddr_t nodes_addr_list[TOT_NUM_NODES];
 
 
-static uchar get_id(rimeaddr_t from)
+static uchar get_id(rimeaddr_t *from)
 {
 	uchar i;
-	uchar high=from.u8[0];
-	uchar low=from.u8[1];
+	
 	for(i=0;i<TOT_NUM_NODES;i++)
 	{
-		if(high==nodes_addr_list[i].u8[0] && low==nodes_addr_list[i].u8[1])
+		if(rimeaddr_cmp(&nodes_addr_list[i],from))
 			return i;
 	}
 	return 255;
 }
 
-static uchar is_directed_to_me(rimeaddr_t from)
+static uchar is_directed_to_me(rimeaddr_t *from)
 {
 	if(adj_matrix==NULL)
 		return 0;
@@ -195,6 +194,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from)
 		  /*Set flag and send an event*/
 			START_FLAG=1;
 			process_post(&example_broadcast_process,PROCESS_EVENT_MSG,NULL);
+			//leds_toggle(LEDS_ALL);
 			break;
 			/*PKG to stop the algorithms*/
 		case STOP_PKG:
@@ -214,8 +214,15 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from)
 					}
 				}
 			memcpy(adj_matrix,packetbuf_dataptr()+sizeof(pkg_hdr),len);
-			printf("First=%d, Second=%d\n",adj_matrix[0],adj_matrix[3]);
 			process_post(&example_broadcast_process,PROCESS_EVENT_MSG,NULL);
+			//leds_toggle(LEDS_ALL);
+			break;
+		case TOKEN_PKG:
+			if(rimeaddr_cmp(&rec_hdr.receiver,&rimeaddr_node_addr))
+			{
+				GOT_TOKEN=1;
+				process_post(&example_broadcast_process,PROCESS_EVENT_MSG,NULL);
+			}
 			break;
 		default:
 			break;
@@ -234,17 +241,21 @@ PROCESS_THREAD(example_broadcast_process, ev, data)
 
   PROCESS_BEGIN();
 
-  MY_ID=get_id(rimeaddr_node_addr);
+  MY_ID=get_id(&rimeaddr_node_addr);
 
   broadcast_open(&broadcast, 129, &broadcast_call);
   
   /*Start only when START_PKG has been received*/
 	PROCESS_WAIT_EVENT_UNTIL(START_FLAG);
-
+	PROCESS_WAIT_EVENT_UNTIL(adj_matrix!=NULL);
 	/*Main loop*/
   while(1) {
-    
-    printf("Alive\n");
+    	PROCESS_WAIT_EVENT_UNTIL(GOT_TOKEN);
+        etimer_set(&et, 2*CLOCK_SECOND);
+        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+        //send_token_pkg(struct broadcast_conn *broadcast, uchar n,uchar i,uchar *adj,rimeaddr_t nodes_addr_list[TOT_NUM_NODES])
+	send_token_pkg(&broadcast, NUM_NODES,MY_ID,adj_matrix,nodes_addr_list);
+    //printf("Alive\n");
   }
   free(adj_matrix);
   PROCESS_END();
