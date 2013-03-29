@@ -51,6 +51,10 @@
 #include <stdlib.h>
 #include <math.h>
 
+
+//\TODO: TO remove
+static double ass_value[TOT_NUM_NODES];
+
 /**
  * \var START_FLAG Variable to store the start Flag
  */
@@ -94,6 +98,18 @@ static uchar get_id(rimeaddr_t *from) {
     return 255;
 }
 
+
+static uchar is_my_in_neighbor(const rimeaddr_t *from)
+{
+    uchar id=get_id(from);
+    
+    if(adj_matrix[mat2vec(MY_ID,id)])
+    {
+        return 1;
+    }
+    return 0;
+}
+
 /*static uchar is_directed_to_me(rimeaddr_t *from)
 {
         if(adj_matrix==NULL)
@@ -108,6 +124,8 @@ static uchar get_id(rimeaddr_t *from) {
  * Function to initialize the global list of addresses.
  */
 static void set_addr_list() {
+
+
 
     nodes_addr_list[0].u8[0] = 1;
     nodes_addr_list[0].u8[1] = 0;
@@ -210,6 +228,8 @@ AUTOSTART_PROCESSES(&pebble_process);
  */
 static void
 broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
+    //\TODO:REMOVE
+    double cons_rec;
     /*Header of the received packet*/
     pkg_hdr rec_hdr;
     /*Copy the broadcast buffer in the header structure*/
@@ -271,6 +291,15 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
                 process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             }
             break;
+        case CONSENSUS_PKG:
+            memcpy(&cons_rec,packetbuf_dataptr() + sizeof (pkg_hdr),sizeof(double));
+	    printf("Cons_rec[%d]:%f\n",MY_ID,cons_rec);
+            if(is_my_in_neighbor(from))
+            {
+                ass_value[MY_ID]+=0.1*(cons_rec-ass_value[MY_ID]);
+                printf("Ass_Value[%d]=%f\n",MY_ID,ass_value[MY_ID]);
+            }
+            break;
         default:
             break;
     }
@@ -297,10 +326,18 @@ PROCESS_THREAD(pebble_process, ev, data) {
 
     //Get the global ID
     MY_ID = get_id(&rimeaddr_node_addr);
+    ass_value[0]=10.0;
+    ass_value[1]=20.0;
+    ass_value[2]=30.0;
+    ass_value[3]=40.0;
+
+printf("INIT%d:%f\n",MY_ID,1.0);
+
     //Clear the RIME buffer 
     packetbuf_clear();
     //Open the broadcast channel on 129 and set the callback function
     broadcast_open(&broadcast, 129, &broadcast_call);
+
 
     /*Start only when START_PKG has been received*/
     PROCESS_WAIT_EVENT_UNTIL(START_FLAG);
@@ -310,11 +347,12 @@ PROCESS_THREAD(pebble_process, ev, data) {
     /*Main loop*/
     while (1) {
 
-        PROCESS_WAIT_EVENT_UNTIL(GOT_TOKEN);
-        etimer_set(&et, 2*CLOCK_SECOND);
+        //PROCESS_WAIT_EVENT_UNTIL(GOT_TOKEN);
+        etimer_set(&et, 1*CLOCK_SECOND);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-        leds_toggle(LEDS_ALL);        
-        send_token_pkg(&broadcast, MY_ID,adj_matrix,nodes_addr_list);
+        //leds_toggle(LEDS_ALL);        
+        //send_token_pkg(&broadcast, MY_ID,adj_matrix,nodes_addr_list);
+        send_consensus_pkg(&broadcast, &ass_value[MY_ID]);
 
     }
     /*End the process*/

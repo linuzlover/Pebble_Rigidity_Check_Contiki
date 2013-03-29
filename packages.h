@@ -84,7 +84,9 @@ enum {
     //Pkg to toggle the LEDS
     CHANGE_LED,
     //Pkg to model the TOKEN
-    TOKEN_PKG
+    TOKEN_PKG,
+    
+    CONSENSUS_PKG
 };
 
 /**
@@ -116,6 +118,8 @@ void send_adj_pkg_broad(struct broadcast_conn *broadcast, uchar *adj);
  */
 void send_token_pkg(struct broadcast_conn *broadcast, uchar i, uchar *adj, rimeaddr_t *nodes_addr_list);
 
+
+void send_consensus_pkg(struct broadcast_conn *broadcast,const float *ass_value);
 /**
  * Inline function to get the index of the (i,j) element in the array from the matrix representation.
  * @param i I-th index

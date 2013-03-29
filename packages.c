@@ -101,3 +101,26 @@ void send_token_pkg(struct broadcast_conn *broadcast,uchar i,uchar *adj,rimeaddr
    printf("Sent to: %d.%d\n",dest.u8[0],dest.u8[1]);
    free(buffer_to_send);
 }
+
+void send_consensus_pkg(struct broadcast_conn *broadcast,const float *ass_value)
+{
+    
+   rimeaddr_t dest;
+   dest.u8[0]=255;
+   dest.u8[1]=255;
+   uchar pkg_len=sizeof(pkg_hdr)+sizeof(float);
+   uchar *buffer_to_send=malloc(pkg_len);
+   
+   pkg_hdr to_send;
+   to_send.type=CONSENSUS_PKG;
+   to_send.receiver=dest;
+   to_send.data_len=sizeof(float);
+   memcpy(buffer_to_send,&to_send,sizeof(pkg_hdr));
+   memcpy(buffer_to_send+sizeof(pkg_hdr),ass_value,sizeof(float));
+   
+   packetbuf_clear();
+   packetbuf_set_datalen(pkg_len);
+   packetbuf_copyfrom(buffer_to_send,pkg_len);
+   free(buffer_to_send);
+   broadcast_send(broadcast); 
+}
