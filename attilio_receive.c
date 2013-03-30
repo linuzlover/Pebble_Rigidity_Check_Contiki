@@ -51,6 +51,28 @@
 #include <stdlib.h>
 #include <math.h>
 
+//Initialization of the NODE_ID global identifier
+uchar NODE_ID=255;
+
+//Initialization i-th agent variables
+uchar is_leader=0;
+
+uchar been_leader=0;
+
+uchar requester=0;
+
+uchar paths_searched=0;
+
+uchar request_id=0;
+
+uchar pebbles=2;
+
+edge peb_assign[2];
+
+edge *ind_set;
+
+//-----------------------------------
+
 /**
  * \var START_FLAG Variable to store the start Flag
  */
@@ -64,10 +86,7 @@ static uchar ADJ_FLAG = 0;
  * \var adj_matrix Array representing the adjacency matrix
  */
 static uchar adj_matrix[TOT_NUM_NODES*TOT_NUM_NODES];
-/**
- * \var MY_ID Id or index of the node in global ordering
- */
-static uchar MY_ID = 255;
+
 /**
  * \var GOT_TOKEN Variable to store the token
  */
@@ -296,7 +315,8 @@ PROCESS_THREAD(pebble_process, ev, data) {
     set_addr_list();
 
     //Get the global ID
-    MY_ID = get_id(&rimeaddr_node_addr);
+    NODE_ID = get_id(&rimeaddr_node_addr);
+    printf("NODE_ID:%d\n",NODE_ID);
     //Clear the RIME buffer 
     packetbuf_clear();
     //Open the broadcast channel on 129 and set the callback function
@@ -314,7 +334,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
         etimer_set(&et, 2*CLOCK_SECOND);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         leds_toggle(LEDS_ALL);        
-        send_token_pkg(&broadcast, MY_ID,adj_matrix,nodes_addr_list);
+        send_token_pkg(&broadcast, NODE_ID,adj_matrix,nodes_addr_list);
 
     }
     /*End the process*/
