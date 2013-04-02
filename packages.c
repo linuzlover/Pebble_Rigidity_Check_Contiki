@@ -101,3 +101,56 @@ void send_token_pkg(struct broadcast_conn *broadcast,uchar i,uchar *adj,rimeaddr
    printf("Sent to: %d.%d\n",dest.u8[0],dest.u8[1]);
    free(buffer_to_send);
 }
+
+void send_leader_bid_pkg(struct broadcast_conn *broadcast, uchar id, uchar bid)
+{
+   pkg_hdr to_send;
+   rimeaddr_t dest;
+   uint16 len=sizeof(uchar)*2;
+
+   uint16 pkg_length=sizeof(pkg_hdr)+len;
+   unsigned char buffer_to_send[pkg_length];   
+
+   dest.u8[0]=255;
+   dest.u8[1]=255;
+
+   to_send.type=LEADER_BID_PKG;
+   to_send.receiver=dest;
+   to_send.data_len=len;
+   //Copying the header into the buffer
+   memcpy(buffer_to_send,&to_send,sizeof(pkg_hdr));
+   
+   memcpy(buffer_to_send+sizeof(pkg_hdr),&id,sizeof(uchar));
+   memcpy(buffer_to_send+sizeof(pkg_hdr),&bid,sizeof(uchar));
+   packetbuf_clear();
+   packetbuf_set_datalen(pkg_length);
+   packetbuf_copyfrom(buffer_to_send,pkg_length);
+   broadcast_send(broadcast); 
+   free(buffer_to_send);
+}
+
+void send_rigidity_pkg(struct broadcast_conn *broadcast, uchar rigidity)
+{
+    pkg_hdr to_send;
+   rimeaddr_t dest;
+   uint16 len=sizeof(uchar);
+
+   uint16 pkg_length=sizeof(pkg_hdr)+len;
+   unsigned char buffer_to_send[pkg_length];   
+
+   dest.u8[0]=255;
+   dest.u8[1]=255;
+
+   to_send.type=NOTIFY_RIGIDITY_PKG;
+   to_send.receiver=dest;
+   to_send.data_len=len;
+   //Copying the header into the buffer
+   memcpy(buffer_to_send,&to_send,sizeof(pkg_hdr));
+   
+   memcpy(buffer_to_send+sizeof(pkg_hdr),&rigidity,len);
+   packetbuf_clear();
+   packetbuf_set_datalen(pkg_length);
+   packetbuf_copyfrom(buffer_to_send,pkg_length);
+   broadcast_send(broadcast); 
+   free(buffer_to_send);
+}

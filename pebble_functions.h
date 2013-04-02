@@ -8,6 +8,7 @@
 #ifndef PEBBLE_FUNCTIONS_H
 #define	PEBBLE_FUNCTIONS_H
 #include "pebble_globals.h"
+#include "packages.h"
 
 #ifdef	__cplusplus
 extern "C" {

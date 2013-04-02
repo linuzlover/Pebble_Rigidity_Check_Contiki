@@ -69,7 +69,11 @@ enum {
     //Pkg to toggle the LEDS
     CHANGE_LED,
     //Pkg to model the TOKEN
-    TOKEN_PKG
+    TOKEN_PKG,
+    //Pkg to model the bid in the leader election process
+    LEADER_BID_PKG,
+    //Pkg to notify the rigidity condition to all the agents
+    NOTIFY_RIGIDITY_PKG
 };
 
 /**
@@ -101,4 +105,7 @@ void send_adj_pkg_broad(struct broadcast_conn *broadcast, uchar *adj);
  */
 void send_token_pkg(struct broadcast_conn *broadcast, uchar i, uchar *adj, rimeaddr_t *nodes_addr_list);
 
+void send_leader_bid_pkg(struct broadcast_conn *broadcast, uchar id, uchar bid);
+
+void send_rigidity_pkg(struct broadcast_conn *broadcast, uchar rigidity);
 #endif
