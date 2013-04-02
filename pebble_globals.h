@@ -69,6 +69,10 @@ extern edge considered_edge;
 extern uchar max_id;
 
 extern uchar max_bid;
+
+extern uchar num_neighbors;
+
+extern uchar neighbors_list[TOT_NUM_NODES];
 /**
  * Inline function to get the index of the (i,j) element in the array from the matrix representation.
  * @param i I-th index

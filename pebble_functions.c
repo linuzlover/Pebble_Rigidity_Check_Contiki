@@ -104,6 +104,19 @@ uchar check_all_leader_pkgs_rec()
     return considered==TOT_NUM_NODES;
 }
 
+uchar all_been_leader()
+{
+    uchar i=0;
+    uchar considered=0;
+    
+    for(i=0;i<TOT_NUM_NODES;i++)
+    {
+        if(been_leader_tab[i])
+            considered++;
+    }
+    
+    return considered==TOT_NUM_NODES;
+}
 void leader_init(){
     //INdex
     uint16 i=0;

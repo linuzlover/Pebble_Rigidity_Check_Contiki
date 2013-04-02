@@ -246,6 +246,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             /*Set flag and send an event*/
             START_FLAG = 1;
             /*Send the event to unlock the main process*/
+            printf("Received Start\n");
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             //leds_toggle(LEDS_ALL);
             break;
@@ -314,7 +315,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
 
     //Get the global ID
     NODE_ID = get_id(&rimeaddr_node_addr);
-    printf("NODE_ID:%d\n", NODE_ID);
+   
     //Clear the RIME buffer 
     packetbuf_clear();
     //Open the broadcast channel on 129 and set the callback function
@@ -322,9 +323,11 @@ PROCESS_THREAD(pebble_process, ev, data) {
 
     /*Start only when START_PKG has been received*/
     PROCESS_WAIT_EVENT_UNTIL(START_FLAG);
+    printf("%d: Started\n",NODE_ID);
     /*Start only when ADJ_PKG has been received*/
     PROCESS_WAIT_EVENT_UNTIL(ADJ_FLAG == 1);
-
+    printf("%d: Adj received\n",NODE_ID);
+    agent_init();
 
 
 
@@ -332,15 +335,30 @@ PROCESS_THREAD(pebble_process, ev, data) {
     /*Main loop*/
     while (1) {
 
+        //Wait a sec for all the start pkgs to arrive
         PROCESS_WAIT_EVENT_UNTIL(LEADER_INIT_EL == 1);
+        printf("Id:%d GO!\n",NODE_ID);
+        etimer_set(&et, CLOCK_SECOND);
+        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+        //Finally send the bid
+        if(been_leader)
+        {
+                send_leader_bid_pkg(&broadcast, 0, 0);
+        }
+        else
+                send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID);
 
-        send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID);
-
-
-        while (check_all_leader_pkgs_rec()) {
+        //If all the bids have arrived
+        while (!check_all_leader_pkgs_rec()) {
             PROCESS_WAIT_EVENT();
         }
 
+        printf("Max id:%d\n",max_id);
+        
+        if(max_id==0 && all_been_leader())
+        {
+            //Send no rigidity
+        } 
         if (max_id == NODE_ID) {
             leader_init();
             //leader_run();

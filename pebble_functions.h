@@ -22,6 +22,9 @@ void leader_init();
 
 void agent_init();
 
+uchar all_been_leader();
+
+uchar check_all_leader_pkgs_rec();
 #ifdef	__cplusplus
 }
 #endif

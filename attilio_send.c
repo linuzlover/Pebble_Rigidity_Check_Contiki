@@ -68,7 +68,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
 
 //Callbacks and broadcast connection structure
 static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
-static struct broadcast_conn broadcast;
+struct broadcast_conn broadcast;
 
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(example_broadcast_process, ev, data) {
@@ -77,8 +77,8 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
 
     pkg_hdr to_send;
     //This address will be used to send the token to the first node
-    dest.u8[0] = 1;
-    dest.u8[1] = 0;
+    dest.u8[0] = 255;
+    dest.u8[1] = 255;
 
 
     //Adjacency matrix to be sent
@@ -91,6 +91,12 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
     adj[mat2vec(1, 2)] = 1;
 
     adj[mat2vec(2, 0)] = 1;
+    
+    adj[mat2vec(0, 2)] = 1;
+
+    adj[mat2vec(2, 1)] = 1;
+
+    adj[mat2vec(1, 0)] = 1;
     //---
 
     //Setting handlers and begin
@@ -100,7 +106,7 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
 
     //Send start pkg in broadcast to all the agents
     broadcast_open(&broadcast, 129, &broadcast_call);
-    etimer_set(&et, CLOCK_SECOND);
+    etimer_set(&et, 3*CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
     send_start_pkg_broad(&broadcast);
 
@@ -113,7 +119,7 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
     //Send the token to the first agent
-    to_send.type = TOKEN_PKG;
+    to_send.type = LEADER_START_ELECTION_PKG;
     to_send.data_len = 0;
     to_send.receiver = dest;
     packetbuf_clear();
