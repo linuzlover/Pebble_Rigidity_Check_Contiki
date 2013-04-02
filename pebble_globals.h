@@ -27,23 +27,44 @@ typedef struct{
  * \var NODE Id or index of the node in global ordering
  */
 extern uchar NODE_ID;
-
+/**
+ * \var is_leader Variable to represent the current leadership
+ */
 extern uchar is_leader;
-
+/**
+ * \var been_leader Variable to represent the past leadership
+ */
 extern uchar been_leader;
 
 extern uchar requester;
 
 extern uchar paths_searched;
-
+/**
+ * \var request_id unique identifier of the packet
+ */
 extern uchar request_id;
-
+/**
+ * \var pebbles for the pebble game
+ */
 extern uchar pebbles;
 
 extern edge peb_assign[2];
 
-extern edge *ind_set;
+extern edge ind_set[2*TOT_NUM_NODES-3];
 
+extern uchar request_wait;
+
+extern uchar quad;
+
+extern uchar been_leader_tab[TOT_NUM_NODES];
+
+extern uchar adj_matrix[TOT_NUM_NODES*TOT_NUM_NODES];
+
+extern edge incident_edges[TOT_NUM_NODES-1];
+
+extern uchar num_incident_edges;
+
+extern edge considered_edge;
 /**
  * Inline function to get the index of the (i,j) element in the array from the matrix representation.
  * @param i I-th index

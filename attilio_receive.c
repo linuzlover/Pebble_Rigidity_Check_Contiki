@@ -49,30 +49,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "pebble_functions.h"
 #include <math.h>
 
 //Initialization of the NODE_ID global identifier
-uchar NODE_ID=255;
-
-//Initialization i-th agent variables
-uchar is_leader=0;
-
-uchar been_leader=0;
-
-uchar requester=0;
-
-uchar paths_searched=0;
-
-uchar request_id=0;
-
-uchar pebbles=2;
-
-edge peb_assign[2];
-
-edge *ind_set;
 
 //-----------------------------------
-
+//Communication related variables
 /**
  * \var START_FLAG Variable to store the start Flag
  */
@@ -82,10 +65,7 @@ static uchar START_FLAG = 0;
  * matrix has been sent to the agent
  */
 static uchar ADJ_FLAG = 0;
-/*
- * \var adj_matrix Array representing the adjacency matrix
- */
-static uchar adj_matrix[TOT_NUM_NODES*TOT_NUM_NODES];
+
 
 /**
  * \var GOT_TOKEN Variable to store the token
