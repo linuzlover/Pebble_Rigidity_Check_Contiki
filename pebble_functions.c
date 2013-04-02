@@ -101,7 +101,7 @@ uchar check_all_leader_pkgs_rec()
             considered++;
     }
     
-    return considered==TOT_NUM_NODES;
+    return considered==TOT_NUM_NODES-1;
 }
 
 uchar all_been_leader()
@@ -115,7 +115,7 @@ uchar all_been_leader()
             considered++;
     }
     
-    return considered==TOT_NUM_NODES;
+    return considered==TOT_NUM_NODES-1;
 }
 void leader_init(){
     //INdex

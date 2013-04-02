@@ -246,7 +246,6 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             /*Set flag and send an event*/
             START_FLAG = 1;
             /*Send the event to unlock the main process*/
-            printf("Received Start\n");
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             //leds_toggle(LEDS_ALL);
             break;
@@ -274,21 +273,30 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
                 process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             }
             break;
-        case LEADER_START_ELECTION_PKG:
-            leader_election_init();
-            LEADER_INIT_EL = 1;
-            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
-            break;
         case LEADER_BID_PKG:
+
             memcpy(&id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             memcpy(&bid, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
             received_leader_bid[id] = 1;
+            printf("Received_Leader_Bid by %d of %d\n", id, bid);
             if (max_bid < bid) {
                 max_bid = bid;
                 max_id = id;
             }
+            if (NODE_ID > max_bid && !been_leader) {
+                max_bid = NODE_ID;
+                max_id = NODE_ID;
+            }
+
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
+        case LEADER_START_ELECTION_PKG:
+            received_leader_bid[NODE_ID] = 1;
+            leader_election_init();
+            LEADER_INIT_EL = 1;
+            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
+            break;
+
         default:
             break;
     }
@@ -311,59 +319,76 @@ PROCESS_THREAD(pebble_process, ev, data) {
     PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
     //Begin the process
     PROCESS_BEGIN();
+
+
+    //Open the broadcast channel on 129 and set the callback function
+    broadcast_open(&broadcast, 129, &broadcast_call);
+
     set_addr_list();
 
     //Get the global ID
     NODE_ID = get_id(&rimeaddr_node_addr);
-   
-    //Clear the RIME buffer 
-    packetbuf_clear();
-    //Open the broadcast channel on 129 and set the callback function
-    broadcast_open(&broadcast, 129, &broadcast_call);
+
 
     /*Start only when START_PKG has been received*/
     PROCESS_WAIT_EVENT_UNTIL(START_FLAG);
-    printf("%d: Started\n",NODE_ID);
+
     /*Start only when ADJ_PKG has been received*/
     PROCESS_WAIT_EVENT_UNTIL(ADJ_FLAG == 1);
-    printf("%d: Adj received\n",NODE_ID);
+
     agent_init();
-
-
-
 
     /*Main loop*/
     while (1) {
-
+        leader_election_init();
         //Wait a sec for all the start pkgs to arrive
         PROCESS_WAIT_EVENT_UNTIL(LEADER_INIT_EL == 1);
-        printf("Id:%d GO!\n",NODE_ID);
+        LEADER_INIT_EL = 0;
         etimer_set(&et, CLOCK_SECOND);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         //Finally send the bid
-        if(been_leader)
-        {
-                send_leader_bid_pkg(&broadcast, 0, 0);
-        }
-        else
-                send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID);
+        //if(been_leader)
+        // {
+        // send_leader_bid_pkg(&broadcast, 0, 0);
+        //}
+        //else
 
+        //etimer_set(&et, NODE_ID * CLOCK_SECOND);
+        etimer_set(&et, NODE_ID * 50);
+        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+        if (been_leader)
+            send_leader_bid_pkg(&broadcast, NODE_ID, 0);
+        else
+            send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID);
         //If all the bids have arrived
         while (!check_all_leader_pkgs_rec()) {
             PROCESS_WAIT_EVENT();
         }
 
-        printf("Max id:%d\n",max_id);
-        
-        if(max_id==0 && all_been_leader())
-        {
-            //Send no rigidity
-        } 
+
+
+        if (max_id == 0 && all_been_leader()) {
+            printf("STOPPE\n");
+        }
         if (max_id == NODE_ID) {
+            //Absolutely to change. The comparison should be done with the bid, not with the ID
+
             leader_init();
             //leader_run();
             //leader_close();
         }
+        printf("Max id:%d\n", max_id);
+
+
+        //TO REMOVE
+        if (is_leader) {
+            is_leader = 0;
+            LEADER_INIT_EL = 1;
+            etimer_set(&et, NODE_ID * 50);
+            PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+            send_leader_election_pkg(&broadcast);
+        }
+
         //PROCESS_WAIT_EVENT_UNTIL(GOT_TOKEN);
         //etimer_set(&et, 2*CLOCK_SECOND);
         //PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));

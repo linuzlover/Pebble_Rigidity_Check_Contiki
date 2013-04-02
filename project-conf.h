@@ -1,0 +1,2 @@
+#define NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE 32
+#define NETSTACK_CONF_RDC nullrdc_driver

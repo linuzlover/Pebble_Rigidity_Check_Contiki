@@ -110,4 +110,7 @@ void send_token_pkg(struct broadcast_conn *broadcast, uchar i, uchar *adj, rimea
 void send_leader_bid_pkg(struct broadcast_conn *broadcast, uchar id, uchar bid);
 
 void send_rigidity_pkg(struct broadcast_conn *broadcast, uchar rigidity);
+
+void send_leader_election_pkg(struct broadcast_conn *broadcast);
+
 #endif
