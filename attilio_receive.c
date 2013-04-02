@@ -50,6 +50,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "pebble_functions.h"
+#include "pebble_globals.h"
 #include <math.h>
 
 //Initialization of the NODE_ID global identifier
@@ -66,7 +67,7 @@ static uchar START_FLAG = 0;
  */
 static uchar ADJ_FLAG = 0;
 
-
+static uchar LEADER_INIT_EL = 0;
 /**
  * \var GOT_TOKEN Variable to store the token
  */
@@ -213,6 +214,8 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
     pkg_hdr rec_hdr;
     /*Copy the broadcast buffer in the header structure*/
     memcpy(&rec_hdr, packetbuf_dataptr(), sizeof (pkg_hdr));
+
+    uchar bid, id;
     /*Switch on the type of pkg*/
     switch (rec_hdr.type) {
             /*Color Of the led to set*/
@@ -265,10 +268,25 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
                 //I have the token!
                 GOT_TOKEN = 1;
 
-		leds_toggle(LEDS_ALL);
+                leds_toggle(LEDS_ALL);
                 /*Send the event to unlock the main process*/
                 process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             }
+            break;
+        case LEADER_START_ELECTION_PKG:
+            leader_election_init();
+            LEADER_INIT_EL = 1;
+            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
+            break;
+        case LEADER_BID_PKG:
+            memcpy(&id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+            memcpy(&bid, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
+            received_leader_bid[id] = 1;
+            if (max_bid < bid) {
+                max_bid = bid;
+                max_id = id;
+            }
+            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         default:
             break;
@@ -285,9 +303,9 @@ static struct broadcast_conn broadcast;
 PROCESS_THREAD(pebble_process, ev, data) {
     static struct etimer et;
 
-    
+
     //Variables to iterate on.... temporary
- //   int i, j;
+    //   int i, j;
     //Set the exit handler
     PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
     //Begin the process
@@ -296,7 +314,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
 
     //Get the global ID
     NODE_ID = get_id(&rimeaddr_node_addr);
-    printf("NODE_ID:%d\n",NODE_ID);
+    printf("NODE_ID:%d\n", NODE_ID);
     //Clear the RIME buffer 
     packetbuf_clear();
     //Open the broadcast channel on 129 and set the callback function
@@ -307,14 +325,32 @@ PROCESS_THREAD(pebble_process, ev, data) {
     /*Start only when ADJ_PKG has been received*/
     PROCESS_WAIT_EVENT_UNTIL(ADJ_FLAG == 1);
 
+
+
+
+
     /*Main loop*/
     while (1) {
 
-        PROCESS_WAIT_EVENT_UNTIL(GOT_TOKEN);
-        etimer_set(&et, 2*CLOCK_SECOND);
-        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-        leds_toggle(LEDS_ALL);        
-        send_token_pkg(&broadcast, NODE_ID,adj_matrix,nodes_addr_list);
+        PROCESS_WAIT_EVENT_UNTIL(LEADER_INIT_EL == 1);
+
+        send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID);
+
+
+        while (check_all_leader_pkgs_rec()) {
+            PROCESS_WAIT_EVENT();
+        }
+
+        if (max_id == NODE_ID) {
+            leader_init();
+            //leader_run();
+            //leader_close();
+        }
+        //PROCESS_WAIT_EVENT_UNTIL(GOT_TOKEN);
+        //etimer_set(&et, 2*CLOCK_SECOND);
+        //PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+        //leds_toggle(LEDS_ALL);        
+        //send_token_pkg(&broadcast, NODE_ID,adj_matrix,nodes_addr_list);
 
     }
     /*End the process*/

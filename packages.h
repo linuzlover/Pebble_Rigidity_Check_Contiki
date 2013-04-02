@@ -72,6 +72,8 @@ enum {
     TOKEN_PKG,
     //Pkg to model the bid in the leader election process
     LEADER_BID_PKG,
+    //Pkg to start the leader election
+    LEADER_START_ELECTION_PKG,
     //Pkg to notify the rigidity condition to all the agents
     NOTIFY_RIGIDITY_PKG
 };

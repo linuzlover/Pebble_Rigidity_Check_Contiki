@@ -14,6 +14,10 @@
 extern "C" {
 #endif
 
+extern uchar received_leader_bid[TOT_NUM_NODES];
+
+void leader_election_init();
+    
 void leader_init(); 
 
 void agent_init();

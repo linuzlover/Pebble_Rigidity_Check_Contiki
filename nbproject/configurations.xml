@@ -52,6 +52,8 @@
         </cTool>
       </folder>
       <item path="packages.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+        </cTool>
       </item>
       <item path="packages.h" ex="false" tool="3" flavor2="0">
       </item>

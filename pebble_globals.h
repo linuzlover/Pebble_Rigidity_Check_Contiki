@@ -65,6 +65,10 @@ extern edge incident_edges[TOT_NUM_NODES-1];
 extern uchar num_incident_edges;
 
 extern edge considered_edge;
+
+extern uchar max_id;
+
+extern uchar max_bid;
 /**
  * Inline function to get the index of the (i,j) element in the array from the matrix representation.
  * @param i I-th index

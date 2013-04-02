@@ -76,6 +76,33 @@ uchar num_incident_edges=0;
  */
 edge considered_edge;
 
+uchar received_leader_bid[TOT_NUM_NODES];
+
+uchar max_id=0;
+
+uchar max_bid=0;
+
+void leader_election_init()
+{
+    memset(received_leader_bid,0,TOT_NUM_NODES*sizeof(uchar));
+    received_leader_bid[NODE_ID]=1;
+    max_bid=0;
+    max_id=0;
+}
+
+uchar check_all_leader_pkgs_rec()
+{
+    uchar i=0;
+    uchar considered=0;
+    
+    for(i=0;i<TOT_NUM_NODES;i++)
+    {
+        if(received_leader_bid[i])
+            considered++;
+    }
+    
+    return considered==TOT_NUM_NODES;
+}
 
 void leader_init(){
     //INdex
@@ -133,3 +160,5 @@ void agent_init(){
     //2 initially free pebbles assigned
     pebbles=2;
 }
+
+
