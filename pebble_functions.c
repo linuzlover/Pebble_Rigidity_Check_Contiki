@@ -27,19 +27,33 @@ uchar request_id=0;
  * \var pebbles Number of pebbles
  */
 uchar pebbles=2;
-
+/*
+ * Pebbles assignment
+ */
 edge peb_assign[2];
-
+/**
+ * Independent edges set
+ */
 edge ind_set[2*TOT_NUM_NODES-3];
-
+/**
+ * Number of independent edges
+ */
 uchar num_ind_set=0;
-
+/*
+ *Wait the request to be fulfilled
+ */
 uchar request_wait=0;
-
+/*
+ *Step of edge quadruplication
+ */
 uchar quad=1;
-
+/**
+ * Array containing who has been a leader
+ */
 uchar been_leader_tab[TOT_NUM_NODES];
-
+/**
+ *Unique id of the node
+ */
 uchar NODE_ID=255;
 
 /*
@@ -47,20 +61,34 @@ uchar NODE_ID=255;
  */
 uchar adj_matrix[TOT_NUM_NODES*TOT_NUM_NODES];
 
+/**
+ *List of incident edges
+ */
 edge incident_edges[TOT_NUM_NODES-1];
 
+/*
+ * number of incident edges
+ */
 uchar num_incident_edges=0;
 
+/**
+ * Currently considered edge by the leader
+ */
 edge considered_edge;
 
 
 void leader_init(){
+    //INdex
     uint16 i=0;
+    //Counter
     uchar count=0;
+    //Setting the variables
     is_leader=1;
     been_leader=1;
     request_wait=0;
     quad=1;
+    been_leader_tab[NODE_ID]=1;
+    
     
     //Init the incident edges set
     for(i=0;i<TOT_NUM_NODES;i++)
@@ -79,6 +107,7 @@ void leader_init(){
     //Keep track of the number of incident edges
     num_incident_edges=count;
     
+    //Set the considered edge for the quadruplication
     if(num_incident_edges>0)
     {
         considered_edge.node_i=incident_edges[0].node_i;
