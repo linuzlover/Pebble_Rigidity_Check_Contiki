@@ -1,10 +1,14 @@
+DEFINES=PROJECT_CONF_H=\"project-conf.h\"
+
 CONTIKI = ../..
 LD_LIBRARY_PATH+=./
 PORT=/dev/ttyUSB0
 DEPS=$(OBJECTDIR)/packages.o $(OBJECTDIR)/pebble_functions.o
-all: attilio_send attilio_receive
 
 include $(CONTIKI)/Makefile.include
+
+
+all: attilio_send attilio_receive
 
 attilio_receive.$(TARGET): $(DEPS)
 
