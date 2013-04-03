@@ -46,7 +46,7 @@ void send_adj_pkg_broad(struct broadcast_conn *broadcast, uchar *adj) {
     uint16 len = TOT_NUM_NODES*TOT_NUM_NODES;
 
     uint16 pkg_length = sizeof (pkg_hdr) + len;
-    unsigned char buffer_to_send[pkg_length];
+    uchar buffer_to_send[pkg_length];
 
     dest.u8[0] = 255;
     dest.u8[1] = 255;
@@ -102,7 +102,7 @@ void send_leader_bid_pkg(struct broadcast_conn *broadcast, uchar id, uchar bid) 
     uint16 len = sizeof (uchar)*2;
 
     uint16 pkg_length = sizeof (pkg_hdr) + len;
-    unsigned char buffer_to_send[pkg_length];
+    uchar buffer_to_send[pkg_length];
 
     dest.u8[0] = 255;
     dest.u8[1] = 255;
@@ -148,7 +148,7 @@ void send_rigidity_pkg(struct broadcast_conn *broadcast, uchar rigidity) {
     uint16 len = sizeof (uchar);
 
     uint16 pkg_length = sizeof (pkg_hdr) + len;
-    unsigned char buffer_to_send[pkg_length];
+    uchar buffer_to_send[pkg_length];
 
     dest.u8[0] = 255;
     dest.u8[1] = 255;
@@ -174,7 +174,7 @@ void send_pebble_request_pkg(struct broadcast_conn *broadcast,uchar dId,uchar uI
     uint16 len = sizeof (uchar)*2;
 
     uint16 pkg_length = sizeof (pkg_hdr) + len;
-    unsigned char buffer_to_send[pkg_length];
+    uchar buffer_to_send[pkg_length];
 
     //TO BE FIXED
     dest.u8[0] = 255;
@@ -204,7 +204,7 @@ void send_back_pebble_pkg(struct broadcast_conn *broadcast,uchar dId)
     uint16 len = sizeof (uchar);
 
     uint16 pkg_length = sizeof (pkg_hdr) + len;
-    unsigned char buffer_to_send[pkg_length];
+    uchar buffer_to_send[pkg_length];
 
     //TO BE FIXED
     dest.u8[0] = 255;
@@ -219,6 +219,36 @@ void send_back_pebble_pkg(struct broadcast_conn *broadcast,uchar dId)
 
     memcpy(buffer_to_send + sizeof (pkg_hdr), &dId, sizeof(uchar));
     
+    packetbuf_clear();
+    //packetbuf_set_datalen(pkg_length);
+    packetbuf_copyfrom(buffer_to_send, pkg_length);
+    broadcast_send(broadcast);
+    free(buffer_to_send);
+}
+
+void send_current_ind_set(struct broadcast_conn *broadcast,uchar count_incident_edges,edge ind_set[2*TOT_NUM_NODES-3])
+{
+    pkg_hdr to_send;
+    rimeaddr_t dest;
+    uint16 len = sizeof (uchar)+sizeof(edge)*(2*TOT_NUM_NODES-3);
+
+    uint16 pkg_length = sizeof (pkg_hdr) + len;
+    
+    uchar buffer_to_send[pkg_length];
+
+    //TO BE FIXED
+    dest.u8[0] = 255;
+    dest.u8[1] = 255;
+    //-----------
+    
+    to_send.type = IND_SET_PKG;
+    to_send.receiver = dest;
+    to_send.data_len = len;
+    //Copying the header into the buffer
+    memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
+
+    memcpy(buffer_to_send + sizeof (pkg_hdr), &count_incident_edges, sizeof(uchar));
+    memcpy(buffer_to_send + sizeof (pkg_hdr)+sizeof(uchar), &ind_set,len-sizeof(uchar));
     packetbuf_clear();
     //packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);

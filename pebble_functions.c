@@ -214,7 +214,7 @@ uchar leader_run(struct broadcast_conn *broadcast)
         
     }
     //All local edges checked: initiate the leadership auction
-    //send_current_ind_set(broadcast,count_incident_edges,ind_set);
+    send_current_ind_set(broadcast,count_incident_edges,ind_set);
     return 1;
 }
 

@@ -79,7 +79,9 @@ enum {
     //Pkg to request a pebble to a neighboring agent
     REQUEST_PEBBLE_PKG,
     //Pkg to send back a pebble to an agent
-    SEND_BACK_PEBBLE_PKG
+    SEND_BACK_PEBBLE_PKG,
+    //Pkg to send the independent set in broadcast
+    IND_SET_PKG
 };
 
 /**
