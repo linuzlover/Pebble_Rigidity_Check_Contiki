@@ -67,11 +67,9 @@ static uchar START_FLAG = 0;
  */
 static uchar ADJ_FLAG = 0;
 
-static uchar LEADER_INIT_EL = 0;
 /**
  * \var GOT_TOKEN Variable to store the token
  */
-
 static uchar GOT_TOKEN = 0;
 
 /**
@@ -340,61 +338,52 @@ PROCESS_THREAD(pebble_process, ev, data) {
 
     /*Main loop*/
     while (1) {
+        //Init the structures for the leader election
         leader_election_init();
         //Wait a sec for all the start pkgs to arrive
         PROCESS_WAIT_EVENT_UNTIL(LEADER_INIT_EL == 1);
+        //Once the start has been received, set the flag to zero for future auctions
         LEADER_INIT_EL = 0;
+
+        //Wait for the start to be notified to all the nodes
         etimer_set(&et, CLOCK_SECOND);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-        //Finally send the bid
-        //if(been_leader)
-        // {
-        // send_leader_bid_pkg(&broadcast, 0, 0);
-        //}
-        //else
-
-        //etimer_set(&et, NODE_ID * CLOCK_SECOND);
+        //Desync the agents
         etimer_set(&et, NODE_ID * 50);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+        //If the i-th agent has been a leader, set the bid to the lowest value
         if (been_leader)
             send_leader_bid_pkg(&broadcast, NODE_ID, 0);
         else
             send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID);
+
         //If all the bids have arrived
         while (!check_all_leader_pkgs_rec()) {
             PROCESS_WAIT_EVENT();
         }
 
-        //Fill the been leader tab
-        been_leader_tab[max_id]=1;
-        
+        //Fill the been leader tab with the new leader ID
+        been_leader_tab[max_id] = 1;
+
         if (max_id == 0 && all_been_leader()) {
-            printf("STOPPE\n");
+            printf("STOP the execution of the algorithm\n");
+            return;
         }
+        printf("Max id:%d\n", max_id);
+        //If the i-th agent is the leader..
         if (max_id == NODE_ID) {
             //Absolutely to change. The comparison should be done with the bid, not with the ID
 
             leader_init();
             //leader_run();
-            //leader_close();
-        }
-        printf("Max id:%d\n", max_id);
-
-
-        //TO REMOVE
-        if (is_leader) {
-            is_leader = 0;
-            LEADER_INIT_EL = 1;
+            //Terminate the leadership phase
+            leader_close(&broadcast);
+            //Wait to send the leader election packet
             etimer_set(&et, NODE_ID * 50);
             PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+            //Start new election process
             send_leader_election_pkg(&broadcast);
         }
-
-        //PROCESS_WAIT_EVENT_UNTIL(GOT_TOKEN);
-        //etimer_set(&et, 2*CLOCK_SECOND);
-        //PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-        //leds_toggle(LEDS_ALL);        
-        //send_token_pkg(&broadcast, NODE_ID,adj_matrix,nodes_addr_list);
 
     }
     /*End the process*/
