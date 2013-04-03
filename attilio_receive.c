@@ -365,8 +365,9 @@ PROCESS_THREAD(pebble_process, ev, data) {
             PROCESS_WAIT_EVENT();
         }
 
-
-
+        //Fill the been leader tab
+        been_leader_tab[max_id]=1;
+        
         if (max_id == 0 && all_been_leader()) {
             printf("STOPPE\n");
         }
