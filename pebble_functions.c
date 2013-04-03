@@ -2,6 +2,7 @@
 
 #include "pebble_functions.h"
 
+static uchar uId=0;
 //Initialization i-th agent variables
 /**
  * \var is_leader Is the current agent the leader
@@ -71,10 +72,7 @@ edge incident_edges[TOT_NUM_NODES - 1];
  */
 uchar num_incident_edges = 0;
 
-/**
- * Currently considered edge by the leader
- */
-edge considered_edge;
+uchar count_incident_edges=0;
 
 uchar received_leader_bid[TOT_NUM_NODES];
 
@@ -143,11 +141,6 @@ void leader_init() {
     //Keep track of the number of incident edges
     num_incident_edges = count;
 
-    //Set the considered edge for the quadruplication
-    if (num_incident_edges > 0) {
-        considered_edge.node_i = incident_edges[0].node_i;
-        considered_edge.node_j = incident_edges[0].node_j;
-    }
 }
 
 void agent_init() {
@@ -169,9 +162,63 @@ void agent_init() {
     pebbles = 2;
 }
 
+//Returns 1 when completed
+uchar leader_run(struct broadcast_conn *broadcast)
+{
+    if(request_wait)
+        return 0;
+    while(count_incident_edges<num_incident_edges)
+    {
+        while(quad<=4)
+        {
+            if(pebbles>0)
+            {
+                //Add edge to P_i
+                peb_assign[2-pebbles]=incident_edges[count_incident_edges];
+                //Decrement the free pebbles
+                pebbles--;
+                //Next step of quadruplication
+                quad++;
+            }
+            else
+            {
+                //Request pebble message to P_i(1,2) with UID
+                send_pebble_request_pkg(broadcast,peb_assign[0].node_j,uId);
+                request_wait=1;
+                paths_searched=1;
+                //Not properly return
+                return 0;
+            }
+        }
+        
+        peb_assign[0].node_i=255;
+        peb_assign[0].node_j=255;
+        peb_assign[1].node_i=255;
+        peb_assign[1].node_j=255;
+        pebbles=2;
+        //Send back a pebble to e_i(2)
+        send_back_pebble_pkg(broadcast,incident_edges[count_incident_edges].node_j);
+        //Add edge to ind set
+        ind_set[num_ind_set]=incident_edges[count_incident_edges];
+        //increment the ind_set_size
+        count_incident_edges++;
+        
+        if(num_ind_set==2*TOT_NUM_NODES-3)
+        {
+            //NOtify rigidity
+            //return 1;
+        }
+        //take the next edge
+        count_incident_edges++;
+        quad=1;
+        
+    }
+    //All local edges checked: initiate the leadership auction
+    //send_current_ind_set()
+    return 1;
+}
+
 void leader_close(struct broadcast_conn *broadcast) {
-    static struct etimer et;
     is_leader = 0;
     LEADER_INIT_EL = 1;
-
 }

@@ -75,7 +75,11 @@ enum {
     //Pkg to start the leader election
     LEADER_START_ELECTION_PKG,
     //Pkg to notify the rigidity condition to all the agents
-    NOTIFY_RIGIDITY_PKG
+    NOTIFY_RIGIDITY_PKG,
+    //Pkg to request a pebble to a neighboring agent
+    REQUEST_PEBBLE_PKG,
+    //Pkg to send back a pebble to an agent
+    SEND_BACK_PEBBLE_PKG
 };
 
 /**
@@ -113,4 +117,7 @@ void send_rigidity_pkg(struct broadcast_conn *broadcast, uchar rigidity);
 
 void send_leader_election_pkg(struct broadcast_conn *broadcast);
 
+void send_pebble_request_pkg(struct broadcast_conn *broadcast,uchar dId,uchar uId);
+
+void send_back_pebble_pkg(struct broadcast_conn *broadcast,uchar dId);
 #endif
