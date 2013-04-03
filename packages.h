@@ -122,4 +122,6 @@ void send_leader_election_pkg(struct broadcast_conn *broadcast);
 void send_pebble_request_pkg(struct broadcast_conn *broadcast,uchar dId,uchar uId);
 
 void send_back_pebble_pkg(struct broadcast_conn *broadcast,uchar dId);
+
+void send_current_ind_set(struct broadcast_conn *broadcast,uchar count_incident_edges,edge ind_set[2*TOT_NUM_NODES-3]);
 #endif
