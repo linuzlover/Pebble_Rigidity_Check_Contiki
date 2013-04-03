@@ -205,8 +205,8 @@ uchar leader_run(struct broadcast_conn *broadcast)
         
         if(num_ind_set==2*TOT_NUM_NODES-3)
         {
-            //NOtify rigidity
-            //return 1;
+            send_rigidity_pkg(broadcast, 1);
+            return 1;
         }
         //take the next edge
         count_incident_edges++;
@@ -214,7 +214,7 @@ uchar leader_run(struct broadcast_conn *broadcast)
         
     }
     //All local edges checked: initiate the leadership auction
-    //send_current_ind_set()
+    //send_current_ind_set(broadcast,count_incident_edges,ind_set);
     return 1;
 }
 

@@ -59,7 +59,7 @@ void send_adj_pkg_broad(struct broadcast_conn *broadcast, uchar *adj) {
     //Copying the adjacency matrix in the buffer with an offset of sizeof(pkg_hdr)
     memcpy(buffer_to_send + sizeof (pkg_hdr), adj, len);
     packetbuf_clear();
-    packetbuf_set_datalen(pkg_length);
+    //packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);
     broadcast_send(broadcast);
     free(buffer_to_send);
@@ -88,7 +88,7 @@ void send_token_pkg(struct broadcast_conn *broadcast, uchar i, uchar *adj, rimea
     to_send.receiver = dest;
     memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
     packetbuf_clear();
-    packetbuf_set_datalen(pkg_length);
+    //packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);
     broadcast_send(broadcast);
     //Debugging
@@ -116,7 +116,7 @@ void send_leader_bid_pkg(struct broadcast_conn *broadcast, uchar id, uchar bid) 
     memcpy(buffer_to_send + sizeof (pkg_hdr), &id, sizeof (uchar));
     memcpy(buffer_to_send + sizeof (pkg_hdr) + sizeof (uchar), &bid, sizeof (uchar));
     packetbuf_clear();
-    packetbuf_set_datalen(pkg_length);
+    //packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);
     broadcast_send(broadcast);
     free(buffer_to_send);
@@ -137,7 +137,7 @@ void send_leader_election_pkg(struct broadcast_conn *broadcast) {
     //Copying the header into the buffer
 
     packetbuf_clear();
-    packetbuf_set_datalen(pkg_length);
+    //packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(&to_send, pkg_length);
     broadcast_send(broadcast);
 }
@@ -161,7 +161,7 @@ void send_rigidity_pkg(struct broadcast_conn *broadcast, uchar rigidity) {
 
     memcpy(buffer_to_send + sizeof (pkg_hdr), &rigidity, len);
     packetbuf_clear();
-    packetbuf_set_datalen(pkg_length);
+    //packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);
     broadcast_send(broadcast);
     free(buffer_to_send);
@@ -191,7 +191,7 @@ void send_pebble_request_pkg(struct broadcast_conn *broadcast,uchar dId,uchar uI
     memcpy(buffer_to_send + sizeof (pkg_hdr)+sizeof(uchar), &uId, sizeof(uchar));
     
     packetbuf_clear();
-    packetbuf_set_datalen(pkg_length);
+    //packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);
     broadcast_send(broadcast);
     free(buffer_to_send);
@@ -220,7 +220,7 @@ void send_back_pebble_pkg(struct broadcast_conn *broadcast,uchar dId)
     memcpy(buffer_to_send + sizeof (pkg_hdr), &dId, sizeof(uchar));
     
     packetbuf_clear();
-    packetbuf_set_datalen(pkg_length);
+    //packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);
     broadcast_send(broadcast);
     free(buffer_to_send);
