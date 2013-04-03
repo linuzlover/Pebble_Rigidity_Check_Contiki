@@ -8,7 +8,7 @@
 #ifndef PEBBLE_FUNCTIONS_H
 #define	PEBBLE_FUNCTIONS_H
 #include "pebble_globals.h"
-#include "packages.h"
+#include "packages_comm.h"
 #include "contiki.h"
 #include "net/rime.h"
 #include "random.h"

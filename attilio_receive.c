@@ -45,37 +45,13 @@
 #include "random.h"
 #include "dev/button-sensor.h"
 #include "dev/leds.h"
-#include "packages.h"
+#include "packages_comm.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include "pebble_functions.h"
 #include "pebble_globals.h"
 #include <math.h>
-
-//Initialization of the NODE_ID global identifier
-
-//-----------------------------------
-//Communication related variables
-/**
- * \var START_FLAG Variable to store the start Flag
- */
-static uchar START_FLAG = 0;
-/**
- * \var ADJ_FLAG Variable to store the adj Flag used to understand if an adjacency
- * matrix has been sent to the agent
- */
-static uchar ADJ_FLAG = 0;
-
-/**
- * \var GOT_TOKEN Variable to store the token
- */
-static uchar GOT_TOKEN = 0;
-
-/**
- * \var nodes_addr_list List of the nodes addresses in global order.
- */
-static rimeaddr_t nodes_addr_list[TOT_NUM_NODES];
 
 /**
  * Function to retrieve the global ID

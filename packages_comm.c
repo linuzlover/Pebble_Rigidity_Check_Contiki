@@ -1,4 +1,11 @@
-#include "packages.h"
+#include "packages_comm.h"
+
+rimeaddr_t nodes_addr_list[TOT_NUM_NODES];
+
+uchar START_FLAG = 0;
+uchar ADJ_FLAG = 0;
+uchar GOT_TOKEN = 0;
+
 
 void send_start_pkg_broad(struct broadcast_conn *broadcast) {
     //Destination address
@@ -226,11 +233,11 @@ void send_back_pebble_pkg(struct broadcast_conn *broadcast,uchar dId)
     free(buffer_to_send);
 }
 
-void send_current_ind_set(struct broadcast_conn *broadcast,uchar count_incident_edges,edge ind_set[2*TOT_NUM_NODES-3])
+void send_current_ind_set(struct broadcast_conn *broadcast,uchar count_incident_edges)
 {
     pkg_hdr to_send;
     rimeaddr_t dest;
-    uint16 len = sizeof (uchar)+sizeof(edge)*(2*TOT_NUM_NODES-3);
+    uint16 len = sizeof (uchar);
 
     uint16 pkg_length = sizeof (pkg_hdr) + len;
     
@@ -246,9 +253,7 @@ void send_current_ind_set(struct broadcast_conn *broadcast,uchar count_incident_
     to_send.data_len = len;
     //Copying the header into the buffer
     memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
-
     memcpy(buffer_to_send + sizeof (pkg_hdr), &count_incident_edges, sizeof(uchar));
-    memcpy(buffer_to_send + sizeof (pkg_hdr)+sizeof(uchar), &ind_set,len-sizeof(uchar));
     packetbuf_clear();
     //packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);

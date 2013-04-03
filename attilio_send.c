@@ -45,7 +45,7 @@
 #include "random.h"
 #include "dev/button-sensor.h"
 #include "dev/leds.h"
-#include "packages.h"
+#include "packages_comm.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

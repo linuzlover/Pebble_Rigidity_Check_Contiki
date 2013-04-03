@@ -32,6 +32,28 @@
 #include <stdlib.h>
 #include <string.h>
 
+/**
+ * \var nodes_addr_list List of the nodes addresses in global order.
+ */
+
+extern rimeaddr_t nodes_addr_list[TOT_NUM_NODES];
+
+//-----------------------------------
+//Communication related variables
+/**
+ * \var START_FLAG Variable to store the start Flag
+ */
+extern uchar START_FLAG;
+/**
+ * \var ADJ_FLAG Variable to store the adj Flag used to understand if an adjacency
+ * matrix has been sent to the agent
+ */
+extern uchar ADJ_FLAG;
+
+/**
+ * \var GOT_TOKEN Variable to store the token
+ */
+extern uchar GOT_TOKEN;
 
 /*! 
  * \struct pkg_hdr
@@ -123,5 +145,5 @@ void send_pebble_request_pkg(struct broadcast_conn *broadcast,uchar dId,uchar uI
 
 void send_back_pebble_pkg(struct broadcast_conn *broadcast,uchar dId);
 
-void send_current_ind_set(struct broadcast_conn *broadcast,uchar count_incident_edges,edge ind_set[2*TOT_NUM_NODES-3]);
+void send_current_ind_set(struct broadcast_conn *broadcast,uchar count_incident_edges);
 #endif
