@@ -225,28 +225,63 @@ uchar leader_run(struct broadcast_conn *broadcast) {
     return 1;
 }
 
-void manage_pebble_request(struct broadcast_conn *broadcast,uchar rUid,uchar rid)
+void manage_pebble_request(struct broadcast_conn *broadcast,uchar from,uchar rUid)
 {
-    
-    if(request_id==uId)
+     //Already requested
+    if(request_id==rUid)
     {
-        //Send pebble not found msg
-        //return;
+        //Pebble not found msg
+        send_pebble_msg(broadcast,NODE_ID,requester,0);
+        return;
     }
-    request_id=uId;
+    //Storing the requestid
+    request_id=rUid;
     
+    //If there are some pebbles
     if(pebbles>0)
     {
+        //Assign one of them
         peb_assign[2-pebbles].node_i=NODE_ID;
-        peb_assign[2-pebbles].node_j=rid;
+        peb_assign[2-pebbles].node_j=from;
         pebbles--;
-        //send found pebble msg
+        //Pebble found msg
+        send_pebble_msg(broadcast,NODE_ID,requester,1);
+        
+    }
+    //No pebbles left
+    else
+    {
+        //Request the pebble to your neighbor
+        send_pebble_request_pkg(broadcast,peb_assign[0].node_j,uId);
+        paths_searched=1;
+        requester=from;
+    }
+}
+
+void manage_pebble_found(struct broadcast_conn *broadcast,uchar from)
+{
+    uchar i;
+    
+    for(i=0;i<2;i++)
+    {
+        if(peb_assign[i].node_i==NODE_ID && peb_assign[i].node_j==from)
+        {
+            peb_assign[i].node_i=255;
+            peb_assign[i].node_j=255;
+        }
+    }
+    
+    if(is_leader)
+    {
+        //Add pebble assignment
+        quad++;
+        request_wait=0;
     }
     else
     {
-        send_pebble_request_pkg(broadcast,peb_assign[0].node_j,uId);
-        paths_searched=1;
-        requester=rid;
+        peb_assign[2-pebbles].node_i=NODE_ID;
+        peb_assign[2-pebbles].node_j=from;
+        send_pebble_msg(broadcast,NODE_ID,requester,1);
     }
 }
 
@@ -256,3 +291,4 @@ void leader_close() {
     //Init the auction
     LEADER_INIT_EL = 1;
 }
+

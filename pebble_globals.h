@@ -52,6 +52,8 @@ extern edge peb_assign[2];
 
 extern edge ind_set[2*TOT_NUM_NODES-3];
 
+extern uchar num_ind_set;
+
 extern uchar request_wait;
 
 extern uchar quad;

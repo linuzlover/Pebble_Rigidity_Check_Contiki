@@ -35,7 +35,7 @@ extern "C" {
 
     void leader_close();
     
-    void manage_pebble_request(struct broadcast_conn *broadcast,uchar ruId,uchar id);
+    void manage_pebble_request(struct broadcast_conn *broadcast,uchar from,uchar rUid);
     
     
     

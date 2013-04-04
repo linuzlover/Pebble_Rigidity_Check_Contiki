@@ -192,7 +192,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
     /*Copy the broadcast buffer in the header structure*/
     memcpy(&rec_hdr, packetbuf_dataptr(), sizeof (pkg_hdr));
 
-    uchar bid, rid,ruId;
+    uchar bid, destination_id,sender_id,temp,received_unique_id,received_ind_set_size;
     /*Switch on the type of pkg*/
     switch (rec_hdr.type) {
             /*Color Of the led to set*/
@@ -251,15 +251,16 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             }
             break;
         case LEADER_BID_PKG:
-
-            memcpy(&rid, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+            memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             memcpy(&bid, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
-            received_leader_bid[rid]=1;
-            printf("Received_Leader_Bid by %d of %d\n", rid, bid);
+            received_leader_bid[sender_id]=1;
+            printf("Received_Leader_Bid by %d of %d\n", sender_id, bid);
             if (max_bid < bid) {
                 max_bid = bid;
-                max_id = rid;
+                max_id = sender_id;
             }
+            //Check if i-th agent hasn't been a leader and has the highest bid
+            //(it doesn't receive its own packet)
             if (NODE_ID > max_bid && !been_leader) {
                 max_bid = NODE_ID;
                 max_id = NODE_ID;
@@ -274,10 +275,24 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
             
+        case IND_SET_PKG:
+            memcpy(&received_ind_set_size, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+            num_ind_set=received_ind_set_size;
+            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
+            break;
         case REQUEST_PEBBLE_PKG:
-            memcpy(&rid, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
-            memcpy(&ruId, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
-            manage_pebble_request(&broadcast,ruId,rid);
+            memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+            memcpy(&received_unique_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
+            manage_pebble_request(&broadcast,destination_id,received_unique_id);
+            break;
+        case PEBBLE_FOUND_PKG:
+            memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+            memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr)+sizeof (uchar), sizeof (uchar));
+            manage_pebble_found(&broadcast,sender_id);
+            break;
+        case PEBBLE_NOT_FOUND_PKG:
+            
+            
             break;
             
         default:

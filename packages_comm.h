@@ -105,7 +105,9 @@ enum {
     //Pkg to send the independent set in broadcast
     IND_SET_PKG,
     //Pkg to notify that a pebble has been found
-    PEBBLE_FOUND_PKG
+    PEBBLE_FOUND_PKG,
+    //Pkg to notify that a pebble hasn't been found
+    PEBBLE_NOT_FOUND_PKG
 };
 
 /**
@@ -147,8 +149,8 @@ void send_pebble_request_pkg(struct broadcast_conn *broadcast,uchar dId,uchar uI
 
 void send_back_pebble_pkg(struct broadcast_conn *broadcast,uchar dId);
 
-void send_current_ind_set(struct broadcast_conn *broadcast,uchar count_incident_edges);
+void send_current_ind_set(struct broadcast_conn *broadcast,uchar how_many_edges);
 
-void send_pebble_found_msg(struct broadcast_conn *broadcast,uchar id);
+void send_pebble_msg(struct broadcast_conn *broadcast,uchar from,uchar to,uchar found);
 
 #endif
