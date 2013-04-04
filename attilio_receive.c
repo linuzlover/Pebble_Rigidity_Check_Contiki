@@ -53,6 +53,9 @@
 #include "pebble_globals.h"
 #include <math.h>
 
+
+
+static struct broadcast_conn broadcast;
 /**
  * Function to retrieve the global ID
  * @param from Rime address of the node used to retrieve the global ID
@@ -189,7 +192,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
     /*Copy the broadcast buffer in the header structure*/
     memcpy(&rec_hdr, packetbuf_dataptr(), sizeof (pkg_hdr));
 
-    uchar bid, id;
+    uchar bid, rid,ruId;
     /*Switch on the type of pkg*/
     switch (rec_hdr.type) {
             /*Color Of the led to set*/
@@ -249,13 +252,13 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             break;
         case LEADER_BID_PKG:
 
-            memcpy(&id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+            memcpy(&rid, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             memcpy(&bid, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
-            received_leader_bid[id] = 1;
-            printf("Received_Leader_Bid by %d of %d\n", id, bid);
+            received_leader_bid[rid]=1;
+            printf("Received_Leader_Bid by %d of %d\n", rid, bid);
             if (max_bid < bid) {
                 max_bid = bid;
-                max_id = id;
+                max_id = rid;
             }
             if (NODE_ID > max_bid && !been_leader) {
                 max_bid = NODE_ID;
@@ -270,7 +273,13 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             LEADER_INIT_EL = 1;
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
-
+            
+        case REQUEST_PEBBLE_PKG:
+            memcpy(&rid, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+            memcpy(&ruId, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
+            manage_pebble_request(&broadcast,ruId,rid);
+            break;
+            
         default:
             break;
     }
@@ -278,7 +287,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
 }
 
 static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
-static struct broadcast_conn broadcast;
+
 
 /*---------------------------------------------------------------------------*/
 
@@ -325,7 +334,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
         etimer_set(&et, CLOCK_SECOND);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         //Desync the agents
-        etimer_set(&et, NODE_ID * 50);
+        etimer_set(&et, (NODE_ID+1) *50);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         //If the i-th agent has been a leader, set the bid to the lowest value
         if (been_leader)
@@ -333,29 +342,38 @@ PROCESS_THREAD(pebble_process, ev, data) {
         else
             send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID);
 
+        //Each agent knows its bid
+        received_leader_bid[NODE_ID]=1;
         //If all the bids have arrived
         while (!check_all_leader_pkgs_rec()) {
             PROCESS_WAIT_EVENT();
         }
-
-        //Fill the been leader tab with the new leader ID
-        been_leader_tab[max_id] = 1;
-
+        //Clear the receiverd_leader_bid
+        memset(received_leader_bid,0,TOT_NUM_NODES);
+        
+        //If the max_id is 0 and all the agents have been leader
         if (max_id == 0 && all_been_leader()) {
             printf("STOP the execution of the algorithm\n");
             return;
         }
+        
+        //Fill the been leader tab with the new leader ID
+        been_leader_tab[max_id] = 1;
+        //Set the leadership tab with the new leader ID
+        received_leader_bid[max_id] = 1;
+        //Debug TODO:remove
         printf("Max id:%d\n", max_id);
         //If the i-th agent is the leader..
         if (max_id == NODE_ID) {
-            //Absolutely to change. The comparison should be done with the bid, not with the ID
-
+            //Init the leadership structures
             leader_init();
+            
             //leader_run();
+            
             //Terminate the leadership phase
-            leader_close(&broadcast);
+            leader_close();
             //Wait to send the leader election packet
-            etimer_set(&et, NODE_ID * 50);
+            etimer_set(&et, 50);
             PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
             //Start new election process
             send_leader_election_pkg(&broadcast);

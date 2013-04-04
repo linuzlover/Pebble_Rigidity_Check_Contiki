@@ -7,6 +7,8 @@ uchar ADJ_FLAG = 0;
 uchar GOT_TOKEN = 0;
 
 
+//TODO... all the cut and paste code must be moved in a auxiliary function
+
 void send_start_pkg_broad(struct broadcast_conn *broadcast) {
     //Destination address
     rimeaddr_t dest;
@@ -254,6 +256,35 @@ void send_current_ind_set(struct broadcast_conn *broadcast,uchar count_incident_
     //Copying the header into the buffer
     memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
     memcpy(buffer_to_send + sizeof (pkg_hdr), &count_incident_edges, sizeof(uchar));
+    packetbuf_clear();
+    //packetbuf_set_datalen(pkg_length);
+    packetbuf_copyfrom(buffer_to_send, pkg_length);
+    broadcast_send(broadcast);
+    free(buffer_to_send);
+}
+
+void send_pebble_found_msg(struct broadcast_conn *broadcast,uchar id)
+{
+    pkg_hdr to_send;
+    rimeaddr_t dest;
+    uint16 len = sizeof (uchar);
+
+    uint16 pkg_length = sizeof (pkg_hdr) + len;
+    uchar buffer_to_send[pkg_length];
+
+    //TO BE FIXED
+    dest.u8[0] = 255;
+    dest.u8[1] = 255;
+    //-----------
+    
+    to_send.type = PEBBLE_FOUND_PKG;
+    to_send.receiver = dest;
+    to_send.data_len = len;
+    //Copying the header into the buffer
+    memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
+
+    memcpy(buffer_to_send + sizeof (pkg_hdr), id, sizeof(uchar));
+    
     packetbuf_clear();
     //packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);

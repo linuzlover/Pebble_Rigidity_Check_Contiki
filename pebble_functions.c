@@ -225,7 +225,32 @@ uchar leader_run(struct broadcast_conn *broadcast) {
     return 1;
 }
 
-void leader_close(struct broadcast_conn *broadcast) {
+void manage_pebble_request(struct broadcast_conn *broadcast,uchar rUid,uchar rid)
+{
+    
+    if(request_id==uId)
+    {
+        //Send pebble not found msg
+        //return;
+    }
+    request_id=uId;
+    
+    if(pebbles>0)
+    {
+        peb_assign[2-pebbles].node_i=NODE_ID;
+        peb_assign[2-pebbles].node_j=rid;
+        pebbles--;
+        //send found pebble msg
+    }
+    else
+    {
+        send_pebble_request_pkg(broadcast,peb_assign[0].node_j,uId);
+        paths_searched=1;
+        requester=rid;
+    }
+}
+
+void leader_close() {
     //Not leader anymore
     is_leader = 0;
     //Init the auction

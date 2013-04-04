@@ -12,7 +12,9 @@
       <in>pebble_functions.c</in>
       <in>pebble_functions.h</in>
       <in>pebble_globals.h</in>
-      <in>project-conf.h</in>
+      <in>pippo-conf.h</in>
+      <in>symbols.c</in>
+      <in>symbols.h</in>
     </df>
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>

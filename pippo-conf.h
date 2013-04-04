@@ -31,14 +31,14 @@
 #ifndef __PROJECT_CONF_H__
 #define __PROJECT_CONF_H__
 
-#undef NETSTACK_CONF_MAC
-#define NETSTACK_CONF_MAC nullmac_driver
+//#undef NETSTACK_CONF_MAC
+//#define NETSTACK_CONF_MAC nullmac_driver
 
 #undef NETSTACK_CONF_RDC
 #define NETSTACK_CONF_RDC sicslowmac_driver
 
-#undef NETSTACK_MAC
-#define NETSTACK_MAC nullmac_driver
+//#undef NETSTACK_MAC
+//#define NETSTACK_MAC nullmac_driver
 
 #undef NETSTACK_RDC
 #define NETSTACK_RDC nullrdc_driver

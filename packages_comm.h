@@ -103,7 +103,9 @@ enum {
     //Pkg to send back a pebble to an agent
     SEND_BACK_PEBBLE_PKG,
     //Pkg to send the independent set in broadcast
-    IND_SET_PKG
+    IND_SET_PKG,
+    //Pkg to notify that a pebble has been found
+    PEBBLE_FOUND_PKG
 };
 
 /**
@@ -146,4 +148,7 @@ void send_pebble_request_pkg(struct broadcast_conn *broadcast,uchar dId,uchar uI
 void send_back_pebble_pkg(struct broadcast_conn *broadcast,uchar dId);
 
 void send_current_ind_set(struct broadcast_conn *broadcast,uchar count_incident_edges);
+
+void send_pebble_found_msg(struct broadcast_conn *broadcast,uchar id);
+
 #endif

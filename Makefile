@@ -1,4 +1,4 @@
-DEFINES=PROJECT_CONF_H=\"project-conf.h\"
+%DEFINES=PROJECT_CONF_H=\"project-conf.h\"
 
 CONTIKI = ../..
 LD_LIBRARY_PATH+=./

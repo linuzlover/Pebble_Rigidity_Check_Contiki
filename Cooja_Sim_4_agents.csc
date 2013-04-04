@@ -55,8 +55,8 @@
     <mote>
       <interface_config>
         se.sics.cooja.interfaces.Position
-        <x>45.66198092345738</x>
-        <y>58.31717859169691</y>
+        <x>25.4091724066285</x>
+        <y>17.8659468004158</y>
         <z>0.0</z>
       </interface_config>
       <interface_config>
@@ -68,8 +68,8 @@
     <mote>
       <interface_config>
         se.sics.cooja.interfaces.Position
-        <x>43.72802890429688</x>
-        <y>89.73822844176995</y>
+        <x>32.28377519882766</x>
+        <y>31.32326978956456</y>
         <z>0.0</z>
       </interface_config>
       <interface_config>
@@ -81,8 +81,8 @@
     <mote>
       <interface_config>
         se.sics.cooja.interfaces.Position
-        <x>67.65219455656545</x>
-        <y>77.12440236033889</y>
+        <x>39.82743909002431</x>
+        <y>19.363802644984503</y>
         <z>0.0</z>
       </interface_config>
       <interface_config>
@@ -94,8 +94,8 @@
     <mote>
       <interface_config>
         se.sics.cooja.interfaces.Position
-        <x>55.8223825577331</x>
-        <y>74.94746696240618</y>
+        <x>39.939848808128694</x>
+        <y>39.345968206286784</y>
         <z>0.0</z>
       </interface_config>
       <interface_config>
@@ -120,7 +120,7 @@
       <skin>se.sics.cooja.plugins.skins.GridVisualizerSkin</skin>
       <skin>se.sics.cooja.plugins.skins.TrafficVisualizerSkin</skin>
       <skin>se.sics.cooja.plugins.skins.UDGMVisualizerSkin</skin>
-      <viewport>6.644196609473991 0.0 0.0 6.644196609473991 -178.89488492285034 -265.9657058802831</viewport>
+      <viewport>8.299466928091663 0.0 0.0 8.299466928091663 -92.4794542960453 -132.55056188182323</viewport>
     </plugin_config>
     <width>400</width>
     <z>1</z>
@@ -133,7 +133,7 @@
     <plugin_config>
       <filter />
     </plugin_config>
-    <width>840</width>
+    <width>766</width>
     <z>4</z>
     <height>240</height>
     <location_x>400</location_x>
@@ -152,11 +152,11 @@
       <split>-1</split>
       <zoomfactor>500.0</zoomfactor>
     </plugin_config>
-    <width>1240</width>
+    <width>1166</width>
     <z>3</z>
     <height>166</height>
     <location_x>0</location_x>
-    <location_y>658</location_y>
+    <location_y>526</location_y>
   </plugin>
   <plugin>
     se.sics.cooja.plugins.Notes
@@ -164,7 +164,7 @@
       <notes>Enter notes here</notes>
       <decorations>true</decorations>
     </plugin_config>
-    <width>560</width>
+    <width>486</width>
     <z>2</z>
     <height>160</height>
     <location_x>680</location_x>

@@ -33,7 +33,11 @@ extern "C" {
 
     uchar check_all_leader_pkgs_rec();
 
-    void leader_close(struct broadcast_conn *broadcast);
+    void leader_close();
+    
+    void manage_pebble_request(struct broadcast_conn *broadcast,uchar ruId,uchar id);
+    
+    
     
 #ifdef	__cplusplus
 }
