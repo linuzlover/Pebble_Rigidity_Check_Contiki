@@ -107,7 +107,9 @@ enum {
     //Pkg to notify that a pebble has been found
     PEBBLE_FOUND_PKG,
     //Pkg to notify that a pebble hasn't been found
-    PEBBLE_NOT_FOUND_PKG
+    PEBBLE_NOT_FOUND_PKG,
+    //Pkg to inform an agent to get back its pebbles :-)
+    TAKE_BACK_PEBBLES_PKG
 };
 
 /**
@@ -145,7 +147,7 @@ void send_rigidity_pkg(struct broadcast_conn *broadcast, uchar rigidity);
 
 void send_leader_election_pkg(struct broadcast_conn *broadcast);
 
-void send_pebble_request_pkg(struct broadcast_conn *broadcast, uchar to,uchar from ,uchar uId);
+void send_pebble_request_pkg(struct broadcast_conn *broadcast, uchar to,uchar from ,uint16 uId);
 
 void send_back_pebble_pkg(struct broadcast_conn *broadcast, uchar to);
 
@@ -153,4 +155,5 @@ void send_current_ind_set(struct broadcast_conn *broadcast,uchar how_many_edges)
 
 void send_pebble_msg(struct broadcast_conn *broadcast,uchar to,uchar from,uchar found);
 
+void send_take_back_pebbles(struct broadcast_conn *broadcast,uchar to,uchar from);
 #endif

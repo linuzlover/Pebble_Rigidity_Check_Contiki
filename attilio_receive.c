@@ -56,6 +56,7 @@
 
 
 static struct broadcast_conn broadcast;
+
 /**
  * Function to retrieve the global ID
  * @param from Rime address of the node used to retrieve the global ID
@@ -192,7 +193,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
     /*Copy the broadcast buffer in the header structure*/
     memcpy(&rec_hdr, packetbuf_dataptr(), sizeof (pkg_hdr));
 
-    uchar bid, destination_id,sender_id,temp,received_unique_id,received_ind_set_size;
+    uchar bid, destination_id, sender_id, received_unique_id, received_ind_set_size;
     /*Switch on the type of pkg*/
     switch (rec_hdr.type) {
             /*Color Of the led to set*/
@@ -253,7 +254,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
         case LEADER_BID_PKG:
             memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             memcpy(&bid, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
-            received_leader_bid[sender_id]=1;
+            received_leader_bid[sender_id] = 1;
             printf("Received_Leader_Bid by %d of %d\n", sender_id, bid);
             if (max_bid < bid) {
                 max_bid = bid;
@@ -274,37 +275,55 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             LEADER_INIT_EL = 1;
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
-            
+
         case IND_SET_PKG:
             memcpy(&received_ind_set_size, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
-            num_ind_set=received_ind_set_size;
+            num_ind_set = received_ind_set_size;
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case REQUEST_PEBBLE_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
-            if(destination_id==NODE_ID)
-            {
+            if (destination_id == NODE_ID) {
                 memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
-                memcpy(&received_unique_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
-                manage_pebble_request(&broadcast,sender_id,received_unique_id);
+                memcpy(&received_unique_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uint16));
+                manage_pebble_request(&broadcast, sender_id, received_unique_id);
             }
             break;
         case PEBBLE_FOUND_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
-            memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr)+sizeof (uchar), sizeof (uchar));
-            manage_pebble_found(&broadcast,sender_id);
+            if (destination_id == NODE_ID) {
+                memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
+                manage_pebble_found(&broadcast, sender_id);
+            }
             break;
         case PEBBLE_NOT_FOUND_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
-            memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr)+sizeof (uchar), sizeof (uchar));
-            //manage_pebble_not_found(&broadcast,sender_id);
+            if(destination_id==NODE_ID)
+            {
+            memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
+            manage_pebble_not_found(&broadcast,sender_id);
+            }
             break;
-            
+
         case SEND_BACK_PEBBLE_PKG:
+            memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+            if (destination_id == NODE_ID) {
+                pebbles++;
+            }
+            break;
+        case NOTIFY_RIGIDITY_PKG:
+            memcpy(&is_rigid, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+            if (is_rigid)
+                leds_on(LEDS_YELLOW);
+            else
+                leds_on(LEDS_RED);
+            break;
+        case TAKE_BACK_PEBBLES_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if(destination_id==NODE_ID)
             {
-                pebbles++;
+            memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
+            manage_take_back_pebbles(sender_id);
             }
             break;
         default:
@@ -350,62 +369,65 @@ PROCESS_THREAD(pebble_process, ev, data) {
 
     /*Main loop*/
     while (1) {
-        //Init the structures for the leader election
-        leader_election_init();
-        //Wait a sec for all the start pkgs to arrive
-        PROCESS_WAIT_EVENT_UNTIL(LEADER_INIT_EL == 1);
-        //Once the start has been received, set the flag to zero for future auctions
-        LEADER_INIT_EL = 0;
+        if (!is_rigid) {
+            //Init the structures for the leader election
+            leader_election_init();
+            //Wait a sec for all the start pkgs to arrive
+            PROCESS_WAIT_EVENT_UNTIL(LEADER_INIT_EL == 1);
+            //Once the start has been received, set the flag to zero for future auctions
+            LEADER_INIT_EL = 0;
 
-        //Wait for the start to be notified to all the nodes
-        etimer_set(&et, CLOCK_SECOND);
-        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-        //Desync the agents
-        etimer_set(&et, (NODE_ID+1) *50);
-        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-        //If the i-th agent has been a leader, set the bid to the lowest value
-        if (been_leader)
-            send_leader_bid_pkg(&broadcast, NODE_ID, 0);
-        else
-            send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID);
-
-        //Each agent knows its bid
-        received_leader_bid[NODE_ID]=1;
-        //If all the bids have arrived
-        while (!check_all_leader_pkgs_rec()) {
-            PROCESS_WAIT_EVENT();
-        }
-        //Clear the receiverd_leader_bid
-        memset(received_leader_bid,0,TOT_NUM_NODES);
-        
-        //If the max_id is 0 and all the agents have been leader
-        if (max_id == 0 && all_been_leader()) {
-            printf("STOP the execution of the algorithm\n");
-            return;
-        }
-        
-        //Fill the been leader tab with the new leader ID
-        been_leader_tab[max_id] = 1;
-        //Set the leadership tab with the new leader ID
-        received_leader_bid[max_id] = 1;
-        //Debug TODO:remove
-        printf("Max id:%d\n", max_id);
-        //If the i-th agent is the leader..
-        if (max_id == NODE_ID) {
-            //Init the leadership structures
-            leader_init();
-            
-            //leader_run();
-            
-            //Terminate the leadership phase
-            leader_close();
-            //Wait to send the leader election packet
-            etimer_set(&et, 50);
+            //Wait for the start to be notified to all the nodes
+            etimer_set(&et, CLOCK_SECOND);
             PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-            //Start new election process
-            send_leader_election_pkg(&broadcast);
-        }
+            //Desync the agents
+            etimer_set(&et, (NODE_ID + 1) *50);
+            PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+            //If the i-th agent has been a leader, set the bid to the lowest value
+            if (been_leader)
+                send_leader_bid_pkg(&broadcast, NODE_ID, 0);
+            else
+                send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID);
 
+            //Each agent knows its bid
+            received_leader_bid[NODE_ID] = 1;
+            //If all the bids have arrived
+            while (!check_all_leader_pkgs_rec()) {
+                PROCESS_WAIT_EVENT();
+            }
+            //Clear the receiverd_leader_bid
+            memset(received_leader_bid, 0, TOT_NUM_NODES);
+
+            //If the max_id is 0 and all the agents have been leader
+            if (max_id == 0 && all_been_leader()) {
+                printf("STOP the execution of the algorithm\n");
+                send_rigidity_pkg(&broadcast, 0);
+                is_rigid = 0;
+            }
+
+            //Fill the been leader tab with the new leader ID
+            been_leader_tab[max_id] = 1;
+            //Set the leadership tab with the new leader ID
+            received_leader_bid[max_id] = 1;
+            //Debug TODO:remove
+            printf("Max id:%d\n", max_id);
+            //If the i-th agent is the leader..
+            if (max_id == NODE_ID) {
+                //Init the leadership structures
+                leader_init();
+
+                while (leader_run(&broadcast));
+
+                //Terminate the leadership phase
+                leader_close();
+                //Wait to send the leader election packet
+                etimer_set(&et, 50);
+                PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+                //Start new election process
+                send_leader_election_pkg(&broadcast);
+            }
+        } else
+            PROCESS_YIELD();
     }
     /*End the process*/
     PROCESS_END();

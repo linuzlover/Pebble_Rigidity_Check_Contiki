@@ -2,7 +2,7 @@
 
 #include "pebble_functions.h"
 
-static uchar uId = 0;
+uchar is_rigid=0;
 //Initialization i-th agent variables
 /**
  * \var is_leader Is the current agent the leader
@@ -23,7 +23,7 @@ uchar paths_searched = 0;
 /**
  * \var request_id Unique id of the request
  */
-uchar request_id = 0;
+uint16 request_id = 0;
 /**
  * \var pebbles Number of pebbles
  */
@@ -57,6 +57,7 @@ uchar been_leader_tab[TOT_NUM_NODES];
  */
 uchar NODE_ID = 255;
 
+uchar uId;
 /*
  * \var adj_matrix Array representing the adjacency matrix
  */
@@ -144,6 +145,8 @@ void leader_init() {
 }
 
 void agent_init() {
+    
+    uId=NODE_ID*(TOT_NUM_NODES*TOT_NUM_NODES);
     //Not the leader
     is_leader = 0;
     //Never been a leader
@@ -162,15 +165,15 @@ void agent_init() {
     memset(received_leader_bid, 0, sizeof (been_leader_tab));
     //Clearing the adjacency matrix
     memset(adj_matrix, 0, sizeof (adj_matrix));
-    
+
     //Clearing the assignment set
-    peb_assign[0].node_i=255;
-    peb_assign[0].node_j=255;
-    peb_assign[1].node_i=255;
-    peb_assign[1].node_j=255;
-    
+    peb_assign[0].node_i = 255;
+    peb_assign[0].node_j = 255;
+    peb_assign[1].node_i = 255;
+    peb_assign[1].node_j = 255;
+
     //No ind edges
-    num_ind_set=0;
+    num_ind_set = 0;
 }
 
 //Returns 1 when completed
@@ -193,7 +196,7 @@ uchar leader_run(struct broadcast_conn *broadcast) {
                 quad++;
             } else {
                 //Request pebble message to P_i(1,2) with UID
-                send_pebble_request_pkg(broadcast, peb_assign[0].node_j,NODE_ID, uId);
+                send_pebble_request_pkg(broadcast, peb_assign[0].node_j, NODE_ID, uId);
                 //Keep uId unique
                 uId++;
                 //Waiting for the answer
@@ -211,6 +214,7 @@ uchar leader_run(struct broadcast_conn *broadcast) {
         peb_assign[1].node_i = 255;
         peb_assign[1].node_j = 255;
         pebbles = 2;
+        
         //------------------------------
 
         //Send back a pebble to e_i(2)
@@ -223,6 +227,7 @@ uchar leader_run(struct broadcast_conn *broadcast) {
         //If there are 2N-3 in the independent set..the graph is rigid
         if (num_ind_set == 2 * TOT_NUM_NODES - 3) {
             send_rigidity_pkg(broadcast, 1);
+            is_rigid=1;
             return 1;
         }
         //take the next edge
@@ -236,63 +241,109 @@ uchar leader_run(struct broadcast_conn *broadcast) {
     return 1;
 }
 
-void manage_pebble_request(struct broadcast_conn *broadcast,uchar from,uchar rUid)
-{
-     //Already requested
-    if(request_id==rUid)
-    {
+void manage_pebble_request(struct broadcast_conn *broadcast, uchar from, uint16 rUid) {
+    //Already requested
+    if (request_id == rUid) {
         //Pebble not found msg
-        send_pebble_msg(broadcast,requester,NODE_ID,0);
+        send_pebble_msg(broadcast, from, NODE_ID, 0);
         return;
     }
     //Storing the requestid
-    request_id=rUid;
-    
+    request_id = rUid;
+
     //If there are some pebbles
-    if(pebbles>0)
-    {
+    if (pebbles > 0) {
         //Assign one of them
-        peb_assign[2-pebbles].node_i=NODE_ID;
-        peb_assign[2-pebbles].node_j=from;
+        peb_assign[2 - pebbles].node_i = NODE_ID;
+        peb_assign[2 - pebbles].node_j = from;
         pebbles--;
         //Pebble found msg
-        send_pebble_msg(broadcast,requester,NODE_ID,1);
-        
-    }
-    //No pebbles left
-    else
-    {
+        send_pebble_msg(broadcast, from, NODE_ID, 1);
+
+    }        //No pebbles left
+    else {
         //Request the pebble to your neighbor
-        send_pebble_request_pkg(broadcast,peb_assign[0].node_j,NODE_ID,uId);
-        paths_searched=1;
-        requester=from;
+        send_pebble_request_pkg(broadcast, peb_assign[0].node_j, NODE_ID, uId);
+        paths_searched = 1;
+        requester = from;
     }
 }
 
-void manage_pebble_found(struct broadcast_conn *broadcast,uchar from)
+void manage_pebble_found(struct broadcast_conn *broadcast, uchar from) {
+    uchar i;
+
+    for (i = 0; i < 2; i++) {
+        if (peb_assign[i].node_i == NODE_ID && peb_assign[i].node_j == from) {
+            peb_assign[i].node_i = 255;
+            peb_assign[i].node_j = 255;
+        }
+    }
+
+    if (is_leader) {
+        //Add pebble assignment
+        quad++;
+        request_wait = 0;
+    } else {
+        peb_assign[2 - pebbles].node_i = NODE_ID;
+        peb_assign[2 - pebbles].node_j = from;
+        send_pebble_msg(broadcast, requester, NODE_ID, 1);
+    }
+}
+
+void manage_pebble_not_found(struct broadcast_conn *broadcast, uchar from)
+{
+    uchar i=0;
+    if(paths_searched<2)
+    {
+        //Pebble request message to the other path
+        send_pebble_request_pkg(broadcast,peb_assign[1].node_j,NODE_ID,uId);
+        //Maintain the uId
+        uId++;
+        //Searched on the second path
+        paths_searched=2;
+    }
+    else
+    {
+        if(is_leader)
+        {
+            //Return pebbles to e_i
+            for(i=0;i<2;i++)
+            {
+                if(peb_assign[i].node_j==incident_edges[count_incident_edges].node_j)
+                {
+                    peb_assign[i].node_i=255;
+                    peb_assign[i].node_j=255;
+                    pebbles++;
+                }
+                send_take_back_pebbles(broadcast,incident_edges[count_incident_edges].node_j,from);
+            }
+            //---------------------
+            //Remove the edge
+            incident_edges[count_incident_edges].node_i=255;
+            incident_edges[count_incident_edges].node_j=255;
+            count_incident_edges++;
+            //Starting over with the quadruplication process
+            quad=1;
+            //Not waiting for any request to be satisfied
+            request_wait=0;
+        }
+        else
+            send_pebble_msg(broadcast,from,NODE_ID,0);
+    }
+}
+
+void manage_take_back_pebbles(uchar from)
 {
     uchar i;
     
     for(i=0;i<2;i++)
     {
-        if(peb_assign[i].node_i==NODE_ID && peb_assign[i].node_j==from)
-        {
-            peb_assign[i].node_i=255;
-            peb_assign[i].node_j=255;
-        }
-    }
-    
-    if(is_leader)
-    {
-        //Add pebble assignment
-        quad++;
-        request_wait=0;
-    }
-    else
-    {
-        peb_assign[2-pebbles].node_i=NODE_ID;
-        peb_assign[2-pebbles].node_j=from;
-        send_pebble_msg(broadcast,requester,NODE_ID,1);
+        if(peb_assign[i].node_j==from)
+                {
+                    peb_assign[i].node_i=255;
+                    peb_assign[i].node_j=255;
+                    pebbles++;
+                }
     }
 }
 

@@ -42,7 +42,7 @@ extern uchar paths_searched;
 /**
  * \var request_id unique identifier of the packet
  */
-extern uchar request_id;
+extern uint16 request_id;
 /**
  * \var pebbles for the pebble game
  */
@@ -75,6 +75,8 @@ extern uchar max_bid;
 extern uchar num_neighbors;
 
 extern uchar neighbors_list[TOT_NUM_NODES];
+
+extern uchar is_rigid;
 /**
  * Inline function to get the index of the (i,j) element in the array from the matrix representation.
  * @param i I-th index

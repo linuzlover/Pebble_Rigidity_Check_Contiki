@@ -22,10 +22,14 @@ extern "C" {
     extern uchar LEADER_INIT_EL;
 
     extern uchar received_leader_bid[TOT_NUM_NODES];
+    
+    extern uchar uId;
 
     void leader_election_init();
 
     void leader_init();
+    
+    uchar leader_run(struct broadcast_conn *broadcast);
 
     void agent_init();
 
@@ -35,11 +39,13 @@ extern "C" {
 
     void leader_close();
     
-    void manage_pebble_request(struct broadcast_conn *broadcast,uchar from,uchar rUid);
+    void manage_pebble_request(struct broadcast_conn *broadcast,uchar from,uint16 rUid);
     
     void manage_pebble_found(struct broadcast_conn *broadcast,uchar from);
     
+    void manage_pebble_not_found(struct broadcast_conn *broadcast, uchar from);
     
+    void manage_take_back_pebbles(uchar from);
     
 #ifdef	__cplusplus
 }
