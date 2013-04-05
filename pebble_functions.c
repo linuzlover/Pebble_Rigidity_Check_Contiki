@@ -148,10 +148,6 @@ void agent_init() {
     is_leader = 0;
     //Never been a leader
     been_leader = 0;
-    //No leaders
-    memset(been_leader_tab, 0, sizeof (been_leader_tab));
-    //Clearing the adjacency matrix
-    memset(adj_matrix, 0, sizeof (adj_matrix));
     //No requesters
     requester = 0;
     //No paths searched
@@ -160,6 +156,21 @@ void agent_init() {
     request_id = 0;
     //2 initially free pebbles assigned
     pebbles = 2;
+    //No leaders
+    memset(been_leader_tab, 0, sizeof (been_leader_tab));
+    //No auction pkgs received
+    memset(received_leader_bid, 0, sizeof (been_leader_tab));
+    //Clearing the adjacency matrix
+    memset(adj_matrix, 0, sizeof (adj_matrix));
+    
+    //Clearing the assignment set
+    peb_assign[0].node_i=255;
+    peb_assign[0].node_j=255;
+    peb_assign[1].node_i=255;
+    peb_assign[1].node_j=255;
+    
+    //No ind edges
+    num_ind_set=0;
 }
 
 //Returns 1 when completed
@@ -182,7 +193,7 @@ uchar leader_run(struct broadcast_conn *broadcast) {
                 quad++;
             } else {
                 //Request pebble message to P_i(1,2) with UID
-                send_pebble_request_pkg(broadcast, peb_assign[0].node_j, uId);
+                send_pebble_request_pkg(broadcast, peb_assign[0].node_j,NODE_ID, uId);
                 //Keep uId unique
                 uId++;
                 //Waiting for the answer
@@ -231,7 +242,7 @@ void manage_pebble_request(struct broadcast_conn *broadcast,uchar from,uchar rUi
     if(request_id==rUid)
     {
         //Pebble not found msg
-        send_pebble_msg(broadcast,NODE_ID,requester,0);
+        send_pebble_msg(broadcast,requester,NODE_ID,0);
         return;
     }
     //Storing the requestid
@@ -245,14 +256,14 @@ void manage_pebble_request(struct broadcast_conn *broadcast,uchar from,uchar rUi
         peb_assign[2-pebbles].node_j=from;
         pebbles--;
         //Pebble found msg
-        send_pebble_msg(broadcast,NODE_ID,requester,1);
+        send_pebble_msg(broadcast,requester,NODE_ID,1);
         
     }
     //No pebbles left
     else
     {
         //Request the pebble to your neighbor
-        send_pebble_request_pkg(broadcast,peb_assign[0].node_j,uId);
+        send_pebble_request_pkg(broadcast,peb_assign[0].node_j,NODE_ID,uId);
         paths_searched=1;
         requester=from;
     }
@@ -281,7 +292,7 @@ void manage_pebble_found(struct broadcast_conn *broadcast,uchar from)
     {
         peb_assign[2-pebbles].node_i=NODE_ID;
         peb_assign[2-pebbles].node_j=from;
-        send_pebble_msg(broadcast,NODE_ID,requester,1);
+        send_pebble_msg(broadcast,requester,NODE_ID,1);
     }
 }
 

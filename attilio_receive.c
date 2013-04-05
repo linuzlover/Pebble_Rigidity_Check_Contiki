@@ -282,19 +282,31 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             break;
         case REQUEST_PEBBLE_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
-            memcpy(&received_unique_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
-            manage_pebble_request(&broadcast,destination_id,received_unique_id);
+            if(destination_id==NODE_ID)
+            {
+                memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
+                memcpy(&received_unique_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
+                manage_pebble_request(&broadcast,sender_id,received_unique_id);
+            }
             break;
         case PEBBLE_FOUND_PKG:
-            memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
-            memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr)+sizeof (uchar), sizeof (uchar));
+            memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+            memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr)+sizeof (uchar), sizeof (uchar));
             manage_pebble_found(&broadcast,sender_id);
             break;
         case PEBBLE_NOT_FOUND_PKG:
-            
-            
+            memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+            memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr)+sizeof (uchar), sizeof (uchar));
+            //manage_pebble_not_found(&broadcast,sender_id);
             break;
             
+        case SEND_BACK_PEBBLE_PKG:
+            memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+            if(destination_id==NODE_ID)
+            {
+                pebbles++;
+            }
+            break;
         default:
             break;
     }

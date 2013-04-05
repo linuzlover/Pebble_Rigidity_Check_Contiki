@@ -37,6 +37,8 @@ extern "C" {
     
     void manage_pebble_request(struct broadcast_conn *broadcast,uchar from,uchar rUid);
     
+    void manage_pebble_found(struct broadcast_conn *broadcast,uchar from);
+    
     
     
 #ifdef	__cplusplus

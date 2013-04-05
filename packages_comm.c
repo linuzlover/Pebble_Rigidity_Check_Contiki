@@ -176,10 +176,10 @@ void send_rigidity_pkg(struct broadcast_conn *broadcast, uchar rigidity) {
     free(buffer_to_send);
 }
 
-void send_pebble_request_pkg(struct broadcast_conn *broadcast, uchar dId, uchar uId) {
+void send_pebble_request_pkg(struct broadcast_conn *broadcast, uchar to,uchar from ,uchar uId) {
     pkg_hdr to_send;
     rimeaddr_t dest;
-    uint16 len = sizeof (uchar)*2;
+    uint16 len = sizeof (uchar)*3;
 
     uint16 pkg_length = sizeof (pkg_hdr) + len;
     uchar buffer_to_send[pkg_length];
@@ -194,9 +194,9 @@ void send_pebble_request_pkg(struct broadcast_conn *broadcast, uchar dId, uchar 
     to_send.data_len = len;
     //Copying the header into the buffer
     memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
-
-    memcpy(buffer_to_send + sizeof (pkg_hdr), &dId, sizeof (uchar));
-    memcpy(buffer_to_send + sizeof (pkg_hdr) + sizeof (uchar), &uId, sizeof (uchar));
+    memcpy(buffer_to_send + sizeof (pkg_hdr), &to, sizeof (uchar));
+    memcpy(buffer_to_send + sizeof (pkg_hdr)+ sizeof (uchar), &from, sizeof (uchar));
+    memcpy(buffer_to_send + sizeof (pkg_hdr) + 2*sizeof (uchar), &uId, sizeof (uchar));
 
     packetbuf_clear();
     //packetbuf_set_datalen(pkg_length);
@@ -205,7 +205,7 @@ void send_pebble_request_pkg(struct broadcast_conn *broadcast, uchar dId, uchar 
     free(buffer_to_send);
 }
 
-void send_back_pebble_pkg(struct broadcast_conn *broadcast, uchar dId) {
+void send_back_pebble_pkg(struct broadcast_conn *broadcast, uchar to) {
     pkg_hdr to_send;
     rimeaddr_t dest;
     uint16 len = sizeof (uchar);
@@ -224,7 +224,7 @@ void send_back_pebble_pkg(struct broadcast_conn *broadcast, uchar dId) {
     //Copying the header into the buffer
     memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
 
-    memcpy(buffer_to_send + sizeof (pkg_hdr), &dId, sizeof (uchar));
+    memcpy(buffer_to_send + sizeof (pkg_hdr), &to, sizeof (uchar));
 
     packetbuf_clear();
     //packetbuf_set_datalen(pkg_length);
@@ -260,7 +260,7 @@ void send_current_ind_set(struct broadcast_conn *broadcast, uchar how_many_edges
     free(buffer_to_send);
 }
 
-void send_pebble_msg(struct broadcast_conn *broadcast,uchar from,uchar to,uchar found) {
+void send_pebble_msg(struct broadcast_conn *broadcast,uchar to,uchar from,uchar found) {
     pkg_hdr to_send;
     rimeaddr_t dest;
     uint16 len = 2*sizeof (uchar);
@@ -287,8 +287,8 @@ void send_pebble_msg(struct broadcast_conn *broadcast,uchar from,uchar to,uchar 
     //Copying the header into the buffer
     memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
 
-    memcpy(buffer_to_send + sizeof (pkg_hdr), &from, sizeof (uchar));
-    memcpy(buffer_to_send + sizeof (pkg_hdr)+sizeof (uchar), &to, sizeof (uchar));
+    memcpy(buffer_to_send + sizeof (pkg_hdr), &to, sizeof (uchar));
+    memcpy(buffer_to_send + sizeof (pkg_hdr)+sizeof (uchar), &from, sizeof (uchar));
 
     packetbuf_clear();
     //packetbuf_set_datalen(pkg_length);

@@ -145,12 +145,12 @@ void send_rigidity_pkg(struct broadcast_conn *broadcast, uchar rigidity);
 
 void send_leader_election_pkg(struct broadcast_conn *broadcast);
 
-void send_pebble_request_pkg(struct broadcast_conn *broadcast,uchar dId,uchar uId);
+void send_pebble_request_pkg(struct broadcast_conn *broadcast, uchar to,uchar from ,uchar uId);
 
-void send_back_pebble_pkg(struct broadcast_conn *broadcast,uchar dId);
+void send_back_pebble_pkg(struct broadcast_conn *broadcast, uchar to);
 
 void send_current_ind_set(struct broadcast_conn *broadcast,uchar how_many_edges);
 
-void send_pebble_msg(struct broadcast_conn *broadcast,uchar from,uchar to,uchar found);
+void send_pebble_msg(struct broadcast_conn *broadcast,uchar to,uchar from,uchar found);
 
 #endif
