@@ -193,12 +193,10 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
     pkg_hdr rec_hdr;
     /*Copy the broadcast buffer in the header structure*/
     memcpy(&rec_hdr, packetbuf_dataptr(), sizeof (pkg_hdr));
-    
+
     uchar bid, destination_id, sender_id, received_unique_id, received_ind_set_size;
     /*Switch on the type of pkg*/
     switch (rec_hdr.type) {
-            /*Color Of the led to set*/
-            uchar color;
 
             /*PKG to start the algorithms*/
         case START_PKG:
@@ -260,10 +258,11 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
 
             break;
         case PEBBLE_FOUND_PKG:
-            printf("Received pebble found by %d\n", NODE_ID);
+            
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+            memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
+            printf("Agent %d received \"pebble found\" by %d addressed to %d\n", NODE_ID,sender_id,destination_id);
             if (destination_id == NODE_ID) {
-                memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
                 manage_pebble_found(&broadcast, sender_id);
             }
             break;
@@ -284,10 +283,6 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
         case NOTIFY_RIGIDITY_PKG:
             memcpy(&is_rigid, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             is_over = 1;
-            if (is_rigid)
-                leds_on(LEDS_YELLOW);
-            else
-                leds_on(LEDS_RED);
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case TAKE_BACK_PEBBLES_PKG:
@@ -311,39 +306,34 @@ static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
 
 /*Main thread of the process*/
 PROCESS_THREAD(pebble_process, ev, data) {
+
+    //Timer structure
     static struct etimer et;
-
-
-    //Variables to iterate on.... temporary
-    //   int i, j;
     //Set the exit handler
     PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
     //Begin the process
     PROCESS_BEGIN();
 
-
     //Open the broadcast channel on 129 and set the callback function
     broadcast_open(&broadcast, 129, &broadcast_call);
-
+    //Init the address list statically
     set_addr_list();
-
     //Get the global ID
     NODE_ID = get_id(&rimeaddr_node_addr);
-
-
     /*Start only when START_PKG has been received*/
     PROCESS_WAIT_EVENT_UNTIL(START_FLAG);
-
-    /*Start only when ADJ_PKG has been received*/
+    /*Wait for the adjacency matrix to be received*/
     PROCESS_WAIT_EVENT_UNTIL(ADJ_FLAG);
-
+    //Init each agent
     agent_init();
-
     /*Main loop*/
+    //iterate until or all the agents have been leader or the algorithm is over due
+    //to the graph rigidity.
     while (!all_been_leader() && !is_over) {
+      
         //Init the structures for the leader election
         leader_election_init();
-        //Wait a sec for all the start pkgs to arrive
+        //Wait for all the start pkgs to arrive
         PROCESS_WAIT_EVENT_UNTIL(LEADER_INIT_EL || is_over);
         if(is_over)
             continue;
@@ -353,7 +343,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
         etimer_set(&et, CLOCK_SECOND);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         //Desync the agents
-        etimer_set(&et, (NODE_ID + 1) *50);
+        etimer_set(&et, (NODE_ID + 1) *500);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         //If the i-th agent has been a leader, set the bid to the lowest value
         if (been_leader)
@@ -361,16 +351,12 @@ PROCESS_THREAD(pebble_process, ev, data) {
         else
             send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID);
 
-
         //If all the bids have arrived
         while (!check_all_leader_pkgs_rec()) {
             PROCESS_WAIT_EVENT();
         }
         //Clear the receiverd_leader_bid
         memset(received_leader_bid, 0, TOT_NUM_NODES);
-        
-        //If the max_id is 0 and all the agents have been leader
-
         //Fill the been leader tab with the new leader ID
         been_leader_tab[max_id] = 1;
         //Debug TODO:remove
@@ -381,20 +367,23 @@ PROCESS_THREAD(pebble_process, ev, data) {
             //Init the leadership structures
             leader_init();
 
-            while (!leader_run(&broadcast));
+              while (!leader_run(&broadcast));
 
             //Terminate the leadership phase
             leader_close(&broadcast);
             //Wait to send the leader election packet
-            etimer_set(&et, 50);
+            etimer_set(&et, CLOCK_SECOND);
             PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
             //Start new election process
             send_leader_election_pkg(&broadcast);
         }
+        if (is_over)
+            continue;
 
     }
-    if(!is_rigid)
-        leds_on(LEDS_ALL);
+
+    if (!is_rigid)
+        leds_on(LEDS_BLUE);
     else
         leds_on(LEDS_YELLOW);
 

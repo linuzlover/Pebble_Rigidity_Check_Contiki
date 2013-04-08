@@ -2,9 +2,9 @@
 
 #include "pebble_functions.h"
 
-uchar is_over=0;
+uchar is_over = 0;
 
-uchar is_rigid=0;
+uchar is_rigid = 0;
 //Initialization i-th agent variables
 /**
  * \var is_leader Is the current agent the leader
@@ -119,7 +119,7 @@ uchar all_been_leader() {
 void leader_init() {
     //INdex
     uint16 i = 0;
-    uint16 j=0;
+    uint16 j = 0;
     //Counter
     uchar count = 0;
     //Setting the variables
@@ -128,10 +128,10 @@ void leader_init() {
     request_wait = 0;
     quad = 1;
     been_leader_tab[NODE_ID] = 1;
-    
+
     //Init the incident edges set
     for (i = 0; i < TOT_NUM_NODES; i++) {
-        
+
         //If the agents are neighbors
         if (adj_matrix[mat2vec(NODE_ID, i)]) {
             //Set the first endpoint
@@ -140,18 +140,18 @@ void leader_init() {
             incident_edges[count].node_j = i;
             //Increment the counter of incident edges
             count++;
-            
+
         }
     }
     //Keep track of the number of incident edges
-    
+
     num_incident_edges = count;
 
 }
 
 void agent_init() {
-    
-    uId=NODE_ID*(TOT_NUM_NODES*TOT_NUM_NODES);
+
+    uId = NODE_ID * (TOT_NUM_NODES * TOT_NUM_NODES);
     //Not the leader
     is_leader = 0;
     //Never been a leader
@@ -168,7 +168,7 @@ void agent_init() {
     memset(been_leader_tab, 0, sizeof (been_leader_tab));
     //No auction pkgs received
     memset(received_leader_bid, 0, sizeof (been_leader_tab));
-    
+
 
     //Clearing the assignment set
     peb_assign[0].node_i = 255;
@@ -184,15 +184,14 @@ void agent_init() {
 
 uchar leader_run(struct broadcast_conn *broadcast) {
     //If there is a pending request
-    
-    if (request_wait)
-    {
+
+    if (request_wait) {
         return 0;
     }
-      
+
     //Inspecting all the incident edges
     while (count_incident_edges < num_incident_edges) {
-        
+
         //Quadrupling
         while (quad <= 4) {
             //If the i-th agent has a free pebble
@@ -203,11 +202,11 @@ uchar leader_run(struct broadcast_conn *broadcast) {
                 pebbles--;
                 //Next step of quadruplication
                 quad++;
-                
+
             } else {
-                
+
                 //Request pebble message to P_i(1,2) with UID
-                printf("Asked from %d to %d\n",NODE_ID,peb_assign[0].node_j);
+                printf("Asked from %d to %d\n", NODE_ID, peb_assign[0].node_j);
                 send_pebble_request_pkg(broadcast, peb_assign[0].node_j, NODE_ID, uId);
                 //Keep uId unique
                 uId++;
@@ -218,7 +217,7 @@ uchar leader_run(struct broadcast_conn *broadcast) {
                 //Not finished yet
                 return 0;
             }
-            
+
         }
         //Clearing the pebble assignment
         peb_assign[0].node_i = 255;
@@ -226,7 +225,7 @@ uchar leader_run(struct broadcast_conn *broadcast) {
         peb_assign[1].node_i = 255;
         peb_assign[1].node_j = 255;
         pebbles = 2;
-        
+
         //------------------------------
 
         //Send back a pebble to e_i(2)
@@ -239,25 +238,25 @@ uchar leader_run(struct broadcast_conn *broadcast) {
         //If there are 2N-3 in the independent set..the graph is rigid
         if (num_ind_set == 2 * TOT_NUM_NODES - 3) {
             send_rigidity_pkg(broadcast, 1);
-            is_rigid=1;
+            is_rigid = 1;
             return 1;
         }
         //take the next edge
         count_incident_edges++;
         //Back
         quad = 1;
-        
+
     }
     //All local edges checked: initiate the leadership auction sending the current size of the independent set
     send_current_ind_set(broadcast, num_ind_set);
-    
+
     return 1;
 }
 
 void manage_pebble_request(struct broadcast_conn *broadcast, uchar from, uint16 rUid) {
     static struct etimer et;
-    
-    printf("In from by: %d agent: %d\n",from,NODE_ID);
+
+    printf("In from by: %d agent: %d\n", from, NODE_ID);
     //Already requested
     if (request_id == rUid) {
         //Pebble not found msg
@@ -277,11 +276,11 @@ void manage_pebble_request(struct broadcast_conn *broadcast, uchar from, uint16 
         //Pebble found msg
         /*etimer_set(&et, CLOCK_SECOND*2);
     while(!etimer_expired(&et));
-    */
+         */
         send_pebble_msg(broadcast, from, NODE_ID, 1);
-       
-        
-    }        //No pebbles left
+
+
+    }//No pebbles left
     else {
         //Request the pebble to your neighbor
         send_pebble_request_pkg(broadcast, peb_assign[0].node_j, NODE_ID, uId);
@@ -311,71 +310,60 @@ void manage_pebble_found(struct broadcast_conn *broadcast, uchar from) {
     }
 }
 
-void manage_pebble_not_found(struct broadcast_conn *broadcast, uchar from)
-{
-    uchar i=0;
-    if(paths_searched<2)
-    {
+void manage_pebble_not_found(struct broadcast_conn *broadcast, uchar from) {
+    uchar i = 0;
+    if (paths_searched < 2) {
         //Pebble request message to the other path
-        send_pebble_request_pkg(broadcast,peb_assign[1].node_j,NODE_ID,uId);
+        send_pebble_request_pkg(broadcast, peb_assign[1].node_j, NODE_ID, uId);
         //Maintain the uId
         uId++;
         //Searched on the second path
-        paths_searched=2;
-    }
-    else
-    {
-        if(is_leader)
-        {
+        paths_searched = 2;
+    } else {
+        if (is_leader) {
             //Return pebbles to e_i
-            for(i=0;i<2;i++)
-            {
-                if(peb_assign[i].node_j==incident_edges[count_incident_edges].node_j)
-                {
-                    peb_assign[i].node_i=255;
-                    peb_assign[i].node_j=255;
+            for (i = 0; i < 2; i++) {
+                if (peb_assign[i].node_j == incident_edges[count_incident_edges].node_j) {
+                    peb_assign[i].node_i = 255;
+                    peb_assign[i].node_j = 255;
                     pebbles++;
                 }
-                send_take_back_pebbles(broadcast,incident_edges[count_incident_edges].node_j,from);
+                send_take_back_pebbles(broadcast, incident_edges[count_incident_edges].node_j, from);
             }
             //---------------------
             //Remove the edge
-            incident_edges[count_incident_edges].node_i=255;
-            incident_edges[count_incident_edges].node_j=255;
+            incident_edges[count_incident_edges].node_i = 255;
+            incident_edges[count_incident_edges].node_j = 255;
             count_incident_edges++;
             //Starting over with the quadruplication process
-            quad=1;
+            quad = 1;
             //Not waiting for any request to be satisfied
-            request_wait=0;
-        }
-        else
-            send_pebble_msg(broadcast,from,NODE_ID,0);
+            request_wait = 0;
+        } else
+            send_pebble_msg(broadcast, from, NODE_ID, 0);
     }
 }
 
-void manage_take_back_pebbles(uchar from)
-{
+void manage_take_back_pebbles(uchar from) {
     uchar i;
-    
-    for(i=0;i<2;i++)
-    {
-        if(peb_assign[i].node_j==from)
-                {
-                    peb_assign[i].node_i=255;
-                    peb_assign[i].node_j=255;
-                    pebbles++;
-                }
+
+    for (i = 0; i < 2; i++) {
+        if (peb_assign[i].node_j == from) {
+            peb_assign[i].node_i = 255;
+            peb_assign[i].node_j = 255;
+            pebbles++;
+        }
     }
 }
 
 void leader_close(struct broadcast_conn *broadcast) {
     //Not leader anymore
     is_leader = 0;
-    if(all_been_leader())
-        send_rigidity_pkg(broadcast,is_rigid);
-    //Init the auction
-    LEADER_INIT_EL = 1;
-    
-               
+    if (all_been_leader()) {
+        send_rigidity_pkg(broadcast, is_rigid);
+        //Init the auction
+        is_over = 1;
+    } else
+        LEADER_INIT_EL = 1;
 }
 
