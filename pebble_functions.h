@@ -15,6 +15,7 @@
 #include "dev/button-sensor.h"
 #include "dev/leds.h"
 
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
@@ -37,7 +38,7 @@ extern "C" {
 
     uchar check_all_leader_pkgs_rec();
 
-    void leader_close();
+    void leader_close(struct broadcast_conn *broadcast);
     
     void manage_pebble_request(struct broadcast_conn *broadcast,uchar from,uint16 rUid);
     

@@ -23,6 +23,8 @@ typedef struct{
  */
 #define TOT_NUM_NODES 4
 
+
+extern uchar is_over;
 /**
  * \var NODE Id or index of the node in global ordering
  */

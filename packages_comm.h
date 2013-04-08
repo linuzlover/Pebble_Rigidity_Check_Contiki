@@ -68,7 +68,7 @@ typedef struct {
     /**
      * \var receiver The rime address of the destination
      */
-    rimeaddr_t receiver;
+//    rimeaddr_t receiver;
     /**
      *\var data_len Length of the data in the payload
      */

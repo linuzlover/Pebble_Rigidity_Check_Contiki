@@ -44,6 +44,7 @@
 #include "net/rime.h"
 #include "random.h"
 #include "dev/button-sensor.h"
+#include "net/netstack.h"
 #include "dev/leds.h"
 #include "packages_comm.h"
 #include <stdio.h>
@@ -121,11 +122,11 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
     //Send the token to the first agent
     to_send.type = LEADER_START_ELECTION_PKG;
     to_send.data_len = 0;
-    to_send.receiver = dest;
+    //to_send.receiver = dest;
     packetbuf_clear();
     packetbuf_copyfrom(&to_send, sizeof (pkg_hdr));
     broadcast_send(&broadcast);
-
+    NETSTACK_MAC.off(0);
     //  while(1) {
     //    etimer_set(&et, CLOCK_SECOND);
     //    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));

@@ -49,6 +49,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "net/netstack.h"
 #include "pebble_functions.h"
 #include "pebble_globals.h"
 #include <math.h>
@@ -192,33 +193,13 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
     pkg_hdr rec_hdr;
     /*Copy the broadcast buffer in the header structure*/
     memcpy(&rec_hdr, packetbuf_dataptr(), sizeof (pkg_hdr));
-
+    
     uchar bid, destination_id, sender_id, received_unique_id, received_ind_set_size;
     /*Switch on the type of pkg*/
     switch (rec_hdr.type) {
             /*Color Of the led to set*/
             uchar color;
 
-        case CHANGE_LED:
-            /*Change the active LED*/
-            memcpy(&color, packetbuf_dataptr() + sizeof (pkg_hdr), 1);
-            switch (color) {
-                case 0:
-                    leds_off(LEDS_ALL);
-                    leds_toggle(LEDS_RED);
-                    break;
-                case 1:
-                    leds_off(LEDS_ALL);
-                    leds_toggle(LEDS_YELLOW);
-                    break;
-                case 2:
-                    leds_off(LEDS_ALL);
-                    leds_toggle(LEDS_GREEN);
-                    break;
-                default:
-                    break;
-            }
-            break;
             /*PKG to start the algorithms*/
         case START_PKG:
             /*Set flag and send an event*/
@@ -240,17 +221,6 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             /*Send the event to unlock the main process*/
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
-        case TOKEN_PKG:
-            //If I am the recipient...
-            if (rimeaddr_cmp(&rec_hdr.receiver, &rimeaddr_node_addr)) {
-                //I have the token!
-                GOT_TOKEN = 1;
-
-                leds_toggle(LEDS_ALL);
-                /*Send the event to unlock the main process*/
-                process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
-            }
-            break;
         case LEADER_BID_PKG:
             memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             memcpy(&bid, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
@@ -270,12 +240,10 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case LEADER_START_ELECTION_PKG:
-            received_leader_bid[NODE_ID] = 1;
             leader_election_init();
             LEADER_INIT_EL = 1;
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
-
         case IND_SET_PKG:
             memcpy(&received_ind_set_size, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             num_ind_set = received_ind_set_size;
@@ -285,13 +253,14 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if (destination_id == NODE_ID) {
                 memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
-                printf("Sender id %d\n",sender_id);
-                memcpy(&received_unique_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uint16));
+                printf("Sender id %d\n", sender_id);
+                memcpy(&received_unique_id, packetbuf_dataptr() + sizeof (pkg_hdr) + 2 * sizeof (uchar), sizeof (uint16));
                 manage_pebble_request(&broadcast, sender_id, received_unique_id);
             }
+
             break;
         case PEBBLE_FOUND_PKG:
-            printf("Received pebble found by %d\n",NODE_ID);
+            printf("Received pebble found by %d\n", NODE_ID);
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if (destination_id == NODE_ID) {
                 memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
@@ -300,10 +269,9 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             break;
         case PEBBLE_NOT_FOUND_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
-            if(destination_id==NODE_ID)
-            {
-            memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
-            manage_pebble_not_found(&broadcast,sender_id);
+            if (destination_id == NODE_ID) {
+                memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
+                manage_pebble_not_found(&broadcast, sender_id);
             }
             break;
 
@@ -315,20 +283,22 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             break;
         case NOTIFY_RIGIDITY_PKG:
             memcpy(&is_rigid, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+            is_over = 1;
             if (is_rigid)
                 leds_on(LEDS_YELLOW);
             else
                 leds_on(LEDS_RED);
+            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case TAKE_BACK_PEBBLES_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
-            if(destination_id==NODE_ID)
-            {
-            memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
-            manage_take_back_pebbles(sender_id);
+            if (destination_id == NODE_ID) {
+                memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
+                manage_take_back_pebbles(sender_id);
             }
             break;
         default:
+            printf("Error in switch\n");
             break;
     }
 
@@ -365,84 +335,69 @@ PROCESS_THREAD(pebble_process, ev, data) {
     PROCESS_WAIT_EVENT_UNTIL(START_FLAG);
 
     /*Start only when ADJ_PKG has been received*/
-    PROCESS_WAIT_EVENT_UNTIL(ADJ_FLAG == 1);
-            /*uchar i,j;
-                for (i = 0; i < TOT_NUM_NODES; i++) {
-for (j = 0; j < TOT_NUM_NODES; j++) {
-    printf("adj[%d,%d]= %d\n",i,j,adj_matrix[mat2vec(i, j)]);
-}
-}*/
-    
+    PROCESS_WAIT_EVENT_UNTIL(ADJ_FLAG);
+
     agent_init();
 
     /*Main loop*/
-    while (1) {
-        if (!is_rigid) {
-            //Init the structures for the leader election
-            leader_election_init();
-            //Wait a sec for all the start pkgs to arrive
-            PROCESS_WAIT_EVENT_UNTIL(LEADER_INIT_EL == 1);
-            //Once the start has been received, set the flag to zero for future auctions
-            LEADER_INIT_EL = 0;
+    while (!all_been_leader() && !is_over) {
+        //Init the structures for the leader election
+        leader_election_init();
+        //Wait a sec for all the start pkgs to arrive
+        PROCESS_WAIT_EVENT_UNTIL(LEADER_INIT_EL || is_over);
+        if(is_over)
+            continue;
+        //Once the start has been received, set the flag to zero for future auctions
+        LEADER_INIT_EL = 0;
+        //Wait for the start to be notified to all the nodes
+        etimer_set(&et, CLOCK_SECOND);
+        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+        //Desync the agents
+        etimer_set(&et, (NODE_ID + 1) *50);
+        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+        //If the i-th agent has been a leader, set the bid to the lowest value
+        if (been_leader)
+            send_leader_bid_pkg(&broadcast, NODE_ID, 0);
+        else
+            send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID);
 
-            //Wait for the start to be notified to all the nodes
-            etimer_set(&et, CLOCK_SECOND);
+
+        //If all the bids have arrived
+        while (!check_all_leader_pkgs_rec()) {
+            PROCESS_WAIT_EVENT();
+        }
+        //Clear the receiverd_leader_bid
+        memset(received_leader_bid, 0, TOT_NUM_NODES);
+        
+        //If the max_id is 0 and all the agents have been leader
+
+        //Fill the been leader tab with the new leader ID
+        been_leader_tab[max_id] = 1;
+        //Debug TODO:remove
+        printf("Max id:%d\n", max_id);
+        //If the i-th agent is the leader..
+        if (max_id == NODE_ID) {
+
+            //Init the leadership structures
+            leader_init();
+
+            while (!leader_run(&broadcast));
+
+            //Terminate the leadership phase
+            leader_close(&broadcast);
+            //Wait to send the leader election packet
+            etimer_set(&et, 50);
             PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-            //Desync the agents
-            etimer_set(&et, (NODE_ID + 1) *50);
-            PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-            //If the i-th agent has been a leader, set the bid to the lowest value
-            if (been_leader)
-                send_leader_bid_pkg(&broadcast, NODE_ID, 0);
-            else
-                send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID);
+            //Start new election process
+            send_leader_election_pkg(&broadcast);
+        }
 
-            //Each agent knows its bid
-            received_leader_bid[NODE_ID] = 1;
-            //If all the bids have arrived
-            while (!check_all_leader_pkgs_rec()) {
-                PROCESS_WAIT_EVENT();
-            }
-            //Clear the receiverd_leader_bid
-            memset(received_leader_bid, 0, TOT_NUM_NODES);
-
-            //If the max_id is 0 and all the agents have been leader
-            if (max_id == 0 && all_been_leader()) {
-                printf("STOP the execution of the algorithm\n");
-                send_rigidity_pkg(&broadcast, 0);
-                is_rigid = 0;
-            }
-
-            //Fill the been leader tab with the new leader ID
-            been_leader_tab[max_id] = 1;
-            //Set the leadership tab with the new leader ID
-            received_leader_bid[max_id] = 1;
-            //Debug TODO:remove
-            printf("Max id:%d\n", max_id);
-            //If the i-th agent is the leader..
-            if (max_id == NODE_ID) {
-                /*uchar i,j;
-                for (i = 0; i < TOT_NUM_NODES; i++) {
-for (j = 0; j < TOT_NUM_NODES; j++) {
-    printf("adj[%d,%d]= %d\n",i,j,adj_matrix[mat2vec(i, j)]);
-}
-}*/
-                //Init the leadership structures
-                leader_init();
-
-                while (!leader_run(&broadcast));
-                
-                //Terminate the leadership phase
-                leader_close();
-                //Wait to send the leader election packet
-                etimer_set(&et, 50);
-                PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-                //Start new election process
-                send_leader_election_pkg(&broadcast);
-            }
-        } else
-            PROCESS_YIELD();
     }
+    if(!is_rigid)
+        leds_on(LEDS_ALL);
+    else
+        leds_on(LEDS_YELLOW);
+
     /*End the process*/
     PROCESS_END();
 }

@@ -20,7 +20,7 @@ void send_start_pkg_broad(struct broadcast_conn *broadcast) {
     pkg_hdr to_send;
     //Setting the header, the receiver and the length of the payload
     to_send.type = START_PKG;
-    to_send.receiver = dest;
+    //to_send.receiver = dest;
     to_send.data_len = 0;
     //Clearing the buffer for sending the package
     packetbuf_clear();
@@ -40,7 +40,7 @@ void send_stop_pkg_broad(struct broadcast_conn *broadcast) {
     dest.u8[1] = 255;
     pkg_hdr to_send;
     to_send.type = STOP_PKG;
-    to_send.receiver = dest;
+    //to_send.receiver = dest;
     to_send.data_len = 0;
     packetbuf_clear();
     packetbuf_set_datalen(sizeof (pkg_hdr));
@@ -61,7 +61,7 @@ void send_adj_pkg_broad(struct broadcast_conn *broadcast, uchar *adj) {
     dest.u8[1] = 255;
 
     to_send.type = ADJ_MATR_PKG;
-    to_send.receiver = dest;
+  //  to_send.receiver = dest;
     to_send.data_len = len;
     //Copying the header into the buffer
     memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
@@ -94,7 +94,7 @@ void send_token_pkg(struct broadcast_conn *broadcast, uchar i, uchar *adj, rimea
 
         }
     }
-    to_send.receiver = dest;
+    //to_send.receiver = dest;
     memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
     packetbuf_clear();
     //packetbuf_set_datalen(pkg_length);
@@ -117,7 +117,7 @@ void send_leader_bid_pkg(struct broadcast_conn *broadcast, uchar id, uchar bid) 
     dest.u8[1] = 255;
 
     to_send.type = LEADER_BID_PKG;
-    to_send.receiver = dest;
+    //to_send.receiver = dest;
     to_send.data_len = len;
     //Copying the header into the buffer
     memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
@@ -141,7 +141,7 @@ void send_leader_election_pkg(struct broadcast_conn *broadcast) {
     dest.u8[1] = 255;
 
     to_send.type = LEADER_START_ELECTION_PKG;
-    to_send.receiver = dest;
+    //to_send.receiver = dest;
     to_send.data_len = 0;
     //Copying the header into the buffer
 
@@ -163,7 +163,7 @@ void send_rigidity_pkg(struct broadcast_conn *broadcast, uchar rigidity) {
     dest.u8[1] = 255;
 
     to_send.type = NOTIFY_RIGIDITY_PKG;
-    to_send.receiver = dest;
+    //to_send.receiver = dest;
     to_send.data_len = len;
     //Copying the header into the buffer
     memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
@@ -190,7 +190,7 @@ void send_pebble_request_pkg(struct broadcast_conn *broadcast, uchar to, uchar f
     //-----------
 
     to_send.type = REQUEST_PEBBLE_PKG;
-    to_send.receiver = dest;
+    //to_send.receiver = dest;
     to_send.data_len = len;
     //Copying the header into the buffer
     
@@ -220,7 +220,7 @@ void send_back_pebble_pkg(struct broadcast_conn *broadcast, uchar to) {
     //-----------
 
     to_send.type = SEND_BACK_PEBBLE_PKG;
-    to_send.receiver = dest;
+    //to_send.receiver = dest;
     to_send.data_len = len;
     //Copying the header into the buffer
     memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
@@ -249,7 +249,7 @@ void send_current_ind_set(struct broadcast_conn *broadcast, uchar how_many_edges
     //-----------
 
     to_send.type = IND_SET_PKG;
-    to_send.receiver = dest;
+    //to_send.receiver = dest;
     to_send.data_len = len;
     //Copying the header into the buffer
     memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
@@ -276,7 +276,7 @@ void send_take_back_pebbles(struct broadcast_conn *broadcast, uchar to, uchar fr
 
 
     to_send.type = TAKE_BACK_PEBBLES_PKG;
-    to_send.receiver = dest;
+    //to_send.receiver = dest;
     to_send.data_len = len;
     //Copying the header into the buffer
     memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
@@ -298,7 +298,6 @@ void send_pebble_msg(struct broadcast_conn *broadcast, uchar to, uchar from, uch
 
     uint16 pkg_length = sizeof (pkg_hdr) + len;
     uchar buffer_to_send[pkg_length];
-
     //TO BE FIXED
     dest.u8[0] = 255;
     dest.u8[1] = 255;
@@ -313,14 +312,12 @@ void send_pebble_msg(struct broadcast_conn *broadcast, uchar to, uchar from, uch
             break;
     }
 
-    to_send.receiver = dest;
+    //to_send.receiver = dest;
     to_send.data_len = len;
     //Copying the header into the buffer
     memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
-
     memcpy(buffer_to_send + sizeof (pkg_hdr), &to, sizeof (uchar));
     memcpy(buffer_to_send + sizeof (pkg_hdr) + sizeof (uchar), &from, sizeof (uchar));
-
     packetbuf_clear();
     packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);

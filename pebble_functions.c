@@ -2,6 +2,8 @@
 
 #include "pebble_functions.h"
 
+uchar is_over=0;
+
 uchar is_rigid=0;
 //Initialization i-th agent variables
 /**
@@ -205,6 +207,7 @@ uchar leader_run(struct broadcast_conn *broadcast) {
             } else {
                 
                 //Request pebble message to P_i(1,2) with UID
+                printf("Asked from %d to %d\n",NODE_ID,peb_assign[0].node_j);
                 send_pebble_request_pkg(broadcast, peb_assign[0].node_j, NODE_ID, uId);
                 //Keep uId unique
                 uId++;
@@ -252,6 +255,7 @@ uchar leader_run(struct broadcast_conn *broadcast) {
 }
 
 void manage_pebble_request(struct broadcast_conn *broadcast, uchar from, uint16 rUid) {
+    static struct etimer et;
     
     printf("In from by: %d agent: %d\n",from,NODE_ID);
     //Already requested
@@ -271,10 +275,11 @@ void manage_pebble_request(struct broadcast_conn *broadcast, uchar from, uint16 
         peb_assign[2 - pebbles].node_j = from;
         pebbles--;
         //Pebble found msg
-        printf("Sending to %d\n",from);
+        /*etimer_set(&et, CLOCK_SECOND*2);
+    while(!etimer_expired(&et));
+    */
         send_pebble_msg(broadcast, from, NODE_ID, 1);
-        printf("Sent to %d\n",from);
-    
+       
         
     }        //No pebbles left
     else {
@@ -363,10 +368,14 @@ void manage_take_back_pebbles(uchar from)
     }
 }
 
-void leader_close() {
+void leader_close(struct broadcast_conn *broadcast) {
     //Not leader anymore
     is_leader = 0;
+    if(all_been_leader())
+        send_rigidity_pkg(broadcast,is_rigid);
     //Init the auction
     LEADER_INIT_EL = 1;
+    
+               
 }
 
