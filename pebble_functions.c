@@ -117,6 +117,7 @@ uchar all_been_leader() {
 void leader_init() {
     //INdex
     uint16 i = 0;
+    uint16 j=0;
     //Counter
     uchar count = 0;
     //Setting the variables
@@ -125,10 +126,10 @@ void leader_init() {
     request_wait = 0;
     quad = 1;
     been_leader_tab[NODE_ID] = 1;
-
-
+    
     //Init the incident edges set
     for (i = 0; i < TOT_NUM_NODES; i++) {
+        
         //If the agents are neighbors
         if (adj_matrix[mat2vec(NODE_ID, i)]) {
             //Set the first endpoint
@@ -137,9 +138,11 @@ void leader_init() {
             incident_edges[count].node_j = i;
             //Increment the counter of incident edges
             count++;
+            
         }
     }
     //Keep track of the number of incident edges
+    
     num_incident_edges = count;
 
 }
@@ -163,8 +166,7 @@ void agent_init() {
     memset(been_leader_tab, 0, sizeof (been_leader_tab));
     //No auction pkgs received
     memset(received_leader_bid, 0, sizeof (been_leader_tab));
-    //Clearing the adjacency matrix
-    memset(adj_matrix, 0, sizeof (adj_matrix));
+    
 
     //Clearing the assignment set
     peb_assign[0].node_i = 255;
@@ -180,10 +182,15 @@ void agent_init() {
 
 uchar leader_run(struct broadcast_conn *broadcast) {
     //If there is a pending request
+    
     if (request_wait)
+    {
         return 0;
+    }
+      
     //Inspecting all the incident edges
     while (count_incident_edges < num_incident_edges) {
+        
         //Quadrupling
         while (quad <= 4) {
             //If the i-th agent has a free pebble
@@ -194,7 +201,9 @@ uchar leader_run(struct broadcast_conn *broadcast) {
                 pebbles--;
                 //Next step of quadruplication
                 quad++;
+                
             } else {
+                
                 //Request pebble message to P_i(1,2) with UID
                 send_pebble_request_pkg(broadcast, peb_assign[0].node_j, NODE_ID, uId);
                 //Keep uId unique
@@ -206,8 +215,8 @@ uchar leader_run(struct broadcast_conn *broadcast) {
                 //Not finished yet
                 return 0;
             }
+            
         }
-
         //Clearing the pebble assignment
         peb_assign[0].node_i = 255;
         peb_assign[0].node_j = 255;
@@ -234,18 +243,22 @@ uchar leader_run(struct broadcast_conn *broadcast) {
         count_incident_edges++;
         //Back
         quad = 1;
-
+        
     }
     //All local edges checked: initiate the leadership auction sending the current size of the independent set
     send_current_ind_set(broadcast, num_ind_set);
+    
     return 1;
 }
 
 void manage_pebble_request(struct broadcast_conn *broadcast, uchar from, uint16 rUid) {
+    
+    printf("In from by: %d agent: %d\n",from,NODE_ID);
     //Already requested
     if (request_id == rUid) {
         //Pebble not found msg
         send_pebble_msg(broadcast, from, NODE_ID, 0);
+        printf("No pebbles in manage pebble request\n");
         return;
     }
     //Storing the requestid
@@ -258,8 +271,11 @@ void manage_pebble_request(struct broadcast_conn *broadcast, uchar from, uint16 
         peb_assign[2 - pebbles].node_j = from;
         pebbles--;
         //Pebble found msg
+        printf("Sending to %d\n",from);
         send_pebble_msg(broadcast, from, NODE_ID, 1);
-
+        printf("Sent to %d\n",from);
+    
+        
     }        //No pebbles left
     else {
         //Request the pebble to your neighbor

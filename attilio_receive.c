@@ -285,11 +285,13 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if (destination_id == NODE_ID) {
                 memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
+                printf("Sender id %d\n",sender_id);
                 memcpy(&received_unique_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uint16));
                 manage_pebble_request(&broadcast, sender_id, received_unique_id);
             }
             break;
         case PEBBLE_FOUND_PKG:
+            printf("Received pebble found by %d\n",NODE_ID);
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if (destination_id == NODE_ID) {
                 memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
@@ -364,7 +366,13 @@ PROCESS_THREAD(pebble_process, ev, data) {
 
     /*Start only when ADJ_PKG has been received*/
     PROCESS_WAIT_EVENT_UNTIL(ADJ_FLAG == 1);
-
+            /*uchar i,j;
+                for (i = 0; i < TOT_NUM_NODES; i++) {
+for (j = 0; j < TOT_NUM_NODES; j++) {
+    printf("adj[%d,%d]= %d\n",i,j,adj_matrix[mat2vec(i, j)]);
+}
+}*/
+    
     agent_init();
 
     /*Main loop*/
@@ -413,11 +421,17 @@ PROCESS_THREAD(pebble_process, ev, data) {
             printf("Max id:%d\n", max_id);
             //If the i-th agent is the leader..
             if (max_id == NODE_ID) {
+                /*uchar i,j;
+                for (i = 0; i < TOT_NUM_NODES; i++) {
+for (j = 0; j < TOT_NUM_NODES; j++) {
+    printf("adj[%d,%d]= %d\n",i,j,adj_matrix[mat2vec(i, j)]);
+}
+}*/
                 //Init the leadership structures
                 leader_init();
 
-                while (leader_run(&broadcast));
-
+                while (!leader_run(&broadcast));
+                
                 //Terminate the leadership phase
                 leader_close();
                 //Wait to send the leader election packet
