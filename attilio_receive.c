@@ -278,6 +278,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
 	        PRINTD ("Received a pebble not found by agent %d from agent %d\n",NODE_ID,sender_id);
                 manage_pebble_not_found(&broadcast, sender_id);
             }
+            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
 
         case SEND_BACK_PEBBLE_PKG:
@@ -297,7 +298,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if (destination_id == NODE_ID) {
                 memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
-	    PRINTD ("Take back pebbles to agent %d\n",NODE_ID);
+	        PRINTD ("Take back pebbles to agent %d from %d\n",NODE_ID,sender_id);
                 manage_take_back_pebbles(sender_id);
             }
             break;
@@ -378,8 +379,9 @@ PROCESS_THREAD(pebble_process, ev, data) {
             leader_init();
 
             while (!leader_run(&broadcast)){
-		PROCESS_WAIT_EVENT();
-		}
+		 etimer_set(&et, 50);
+        	 PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+	    }
 
             //Terminate the leadership phase
             leader_close(&broadcast);
