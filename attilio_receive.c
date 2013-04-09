@@ -258,13 +258,13 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
 
             break;
         case PEBBLE_FOUND_PKG:
-            
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
             printf("Agent %d received \"pebble found\" by %d addressed to %d\n", NODE_ID,sender_id,destination_id);
             if (destination_id == NODE_ID) {
                 manage_pebble_found(&broadcast, sender_id);
             }
+            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case PEBBLE_NOT_FOUND_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
@@ -313,7 +313,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
     PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
     //Begin the process
     PROCESS_BEGIN();
-
+    
     //Open the broadcast channel on 129 and set the callback function
     broadcast_open(&broadcast, 129, &broadcast_call);
     //Init the address list statically
@@ -326,6 +326,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
     PROCESS_WAIT_EVENT_UNTIL(ADJ_FLAG);
     //Init each agent
     agent_init();
+    
     /*Main loop*/
     //iterate until or all the agents have been leader or the algorithm is over due
     //to the graph rigidity.
@@ -367,7 +368,9 @@ PROCESS_THREAD(pebble_process, ev, data) {
             //Init the leadership structures
             leader_init();
 
-              while (!leader_run(&broadcast));
+            while (!leader_run(&broadcast)){
+		PROCESS_WAIT_EVENT();
+		}
 
             //Terminate the leadership phase
             leader_close(&broadcast);

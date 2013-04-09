@@ -187,6 +187,7 @@ uchar leader_run(struct broadcast_conn *broadcast) {
 
     if (request_wait) {
         return 0;
+	printf("request_wait %d\n",request_wait);
     }
 
     //Inspecting all the incident edges
@@ -275,11 +276,9 @@ void manage_pebble_request(struct broadcast_conn *broadcast, uchar from, uint16 
         pebbles--;
         //Pebble found msg
         /*etimer_set(&et, CLOCK_SECOND*2);
-    while(!etimer_expired(&et));
+    	while(!etimer_expired(&et));
          */
         send_pebble_msg(broadcast, from, NODE_ID, 1);
-
-
     }//No pebbles left
     else {
         //Request the pebble to your neighbor
@@ -291,9 +290,11 @@ void manage_pebble_request(struct broadcast_conn *broadcast, uchar from, uint16 
 
 void manage_pebble_found(struct broadcast_conn *broadcast, uchar from) {
     uchar i;
-
-    for (i = 0; i < 2; i++) {
-        if (peb_assign[i].node_i == NODE_ID && peb_assign[i].node_j == from) {
+    uchar to_continue=1;
+    for (i = 1; i >=0 && to_continue; i++) {
+        if ((peb_assign[i].node_i == NODE_ID) && (peb_assign[i].node_j == from)) {
+	    to_continue=0;
+	    printf("Peb assigned\n");
             peb_assign[i].node_i = 255;
             peb_assign[i].node_j = 255;
         }
@@ -303,6 +304,7 @@ void manage_pebble_found(struct broadcast_conn *broadcast, uchar from) {
         //Add pebble assignment
         quad++;
         request_wait = 0;
+	printf("Quad %d by agent %d\n",quad,NODE_ID);
     } else {
         peb_assign[2 - pebbles].node_i = NODE_ID;
         peb_assign[2 - pebbles].node_j = from;

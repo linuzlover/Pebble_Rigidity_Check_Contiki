@@ -107,7 +107,7 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
 
     //Send start pkg in broadcast to all the agents
     broadcast_open(&broadcast, 129, &broadcast_call);
-    etimer_set(&et, 1*CLOCK_SECOND);
+    etimer_set(&et, 5*CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
     send_start_pkg_broad(&broadcast);
 
