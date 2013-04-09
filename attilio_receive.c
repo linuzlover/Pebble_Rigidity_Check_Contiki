@@ -200,6 +200,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
 
             /*PKG to start the algorithms*/
         case START_PKG:
+	PRINTD ("Start flag received by agent %d\n",NODE_ID);
             /*Set flag and send an event*/
             START_FLAG = 1;
             /*Send the event to unlock the main process*/
@@ -214,16 +215,18 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case ADJ_MATR_PKG:
+	PRINTD ("Adj Matrix received by agent %d\n",NODE_ID);
             ADJ_FLAG = 1;
             memcpy(adj_matrix, packetbuf_dataptr() + sizeof (pkg_hdr), TOT_NUM_NODES * TOT_NUM_NODES);
             /*Send the event to unlock the main process*/
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case LEADER_BID_PKG:
+
             memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             memcpy(&bid, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
+	    PRINTD ("Leader bid received by agent %d from %d amount %d\n",NODE_ID,sender_id,bid);
             received_leader_bid[sender_id] = 1;
-            printf("Received_Leader_Bid by %d of %d\n", sender_id, bid);
             if (max_bid < bid) {
                 max_bid = bid;
                 max_id = sender_id;
@@ -238,21 +241,23 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case LEADER_START_ELECTION_PKG:
+	    PRINTD ("Leader start election received by agent %d\n",NODE_ID);
             leader_election_init();
             LEADER_INIT_EL = 1;
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case IND_SET_PKG:
-            memcpy(&received_ind_set_size, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
-            num_ind_set = received_ind_set_size;
+	    memcpy(&received_ind_set_size, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+	    num_ind_set = received_ind_set_size;
+            PRINTD ("Ind Set received by agent %d amount %d\n",NODE_ID,num_ind_set);
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case REQUEST_PEBBLE_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if (destination_id == NODE_ID) {
                 memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
-                printf("Sender id %d\n", sender_id);
                 memcpy(&received_unique_id, packetbuf_dataptr() + sizeof (pkg_hdr) + 2 * sizeof (uchar), sizeof (uint16));
+                PRINTD ("Requested pebble to agent %d from agent %d with ID %d\n",NODE_ID,sender_id,received_unique_id);
                 manage_pebble_request(&broadcast, sender_id, received_unique_id);
             }
 
@@ -260,8 +265,8 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
         case PEBBLE_FOUND_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
-            printf("Agent %d received \"pebble found\" by %d addressed to %d\n", NODE_ID,sender_id,destination_id);
             if (destination_id == NODE_ID) {
+	        PRINTD ("Received a pebble found by agent %d from agent %d\n",NODE_ID,sender_id);
                 manage_pebble_found(&broadcast, sender_id);
             }
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
@@ -270,6 +275,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if (destination_id == NODE_ID) {
                 memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
+	        PRINTD ("Received a pebble not found by agent %d from agent %d\n",NODE_ID,sender_id);
                 manage_pebble_not_found(&broadcast, sender_id);
             }
             break;
@@ -277,11 +283,13 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
         case SEND_BACK_PEBBLE_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if (destination_id == NODE_ID) {
+	    PRINTD ("Sent back a pebble to agent %d\n",NODE_ID);
                 pebbles++;
             }
             break;
         case NOTIFY_RIGIDITY_PKG:
             memcpy(&is_rigid, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+	    PRINTD ("Rigidity notification %d\n",is_rigid);
             is_over = 1;
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
@@ -289,6 +297,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if (destination_id == NODE_ID) {
                 memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
+	    PRINTD ("Take back pebbles to agent %d\n",NODE_ID);
                 manage_take_back_pebbles(sender_id);
             }
             break;

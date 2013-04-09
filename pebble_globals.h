@@ -1,6 +1,14 @@
 #ifndef _PEBBLE_GLOBALS_H_
 #define _PEBBLE_GLOBALS_H_
 
+#define DEBUG
+
+#ifdef DEBUG
+#define PRINTD printf
+#else
+#define PRINTD(format, args...) ((void)0)
+#endif
+
 /*Typedefs for 2 byte and single byte information*/
 /*!\typedef  
  * Typedef for 16bit unsigned short.

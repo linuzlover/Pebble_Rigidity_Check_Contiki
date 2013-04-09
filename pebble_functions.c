@@ -187,7 +187,6 @@ uchar leader_run(struct broadcast_conn *broadcast) {
 
     if (request_wait) {
         return 0;
-	printf("request_wait %d\n",request_wait);
     }
 
     //Inspecting all the incident edges
@@ -207,7 +206,6 @@ uchar leader_run(struct broadcast_conn *broadcast) {
             } else {
 
                 //Request pebble message to P_i(1,2) with UID
-                printf("Asked from %d to %d\n", NODE_ID, peb_assign[0].node_j);
                 send_pebble_request_pkg(broadcast, peb_assign[0].node_j, NODE_ID, uId);
                 //Keep uId unique
                 uId++;
@@ -249,7 +247,6 @@ uchar leader_run(struct broadcast_conn *broadcast) {
 
     }
     //All local edges checked: initiate the leadership auction sending the current size of the independent set
-    send_current_ind_set(broadcast, num_ind_set);
 
     return 1;
 }
@@ -257,12 +254,10 @@ uchar leader_run(struct broadcast_conn *broadcast) {
 void manage_pebble_request(struct broadcast_conn *broadcast, uchar from, uint16 rUid) {
     static struct etimer et;
 
-    printf("In from by: %d agent: %d\n", from, NODE_ID);
     //Already requested
     if (request_id == rUid) {
         //Pebble not found msg
         send_pebble_msg(broadcast, from, NODE_ID, 0);
-        printf("No pebbles in manage pebble request\n");
         return;
     }
     //Storing the requestid
@@ -294,7 +289,6 @@ void manage_pebble_found(struct broadcast_conn *broadcast, uchar from) {
     for (i = 1; i >=0 && to_continue; i++) {
         if ((peb_assign[i].node_i == NODE_ID) && (peb_assign[i].node_j == from)) {
 	    to_continue=0;
-	    printf("Peb assigned\n");
             peb_assign[i].node_i = 255;
             peb_assign[i].node_j = 255;
         }
@@ -304,7 +298,6 @@ void manage_pebble_found(struct broadcast_conn *broadcast, uchar from) {
         //Add pebble assignment
         quad++;
         request_wait = 0;
-	printf("Quad %d by agent %d\n",quad,NODE_ID);
     } else {
         peb_assign[2 - pebbles].node_i = NODE_ID;
         peb_assign[2 - pebbles].node_j = from;
@@ -361,6 +354,7 @@ void manage_take_back_pebbles(uchar from) {
 void leader_close(struct broadcast_conn *broadcast) {
     //Not leader anymore
     is_leader = 0;
+    send_current_ind_set(broadcast,num_ind_set);
     if (all_been_leader()) {
         send_rigidity_pkg(broadcast, is_rigid);
         //Init the auction
