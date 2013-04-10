@@ -14,7 +14,7 @@
 #include "random.h"
 #include "dev/button-sensor.h"
 #include "dev/leds.h"
-
+#include "pebble_assign_set.h"
 
 #ifdef	__cplusplus
 extern "C" {

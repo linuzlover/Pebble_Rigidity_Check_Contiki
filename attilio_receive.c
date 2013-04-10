@@ -284,9 +284,11 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
         case SEND_BACK_PEBBLE_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if (destination_id == NODE_ID) {
-	    PRINTD ("Sent back a pebble to agent %d\n",NODE_ID);
-                pebbles++;
+                memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr)+sizeof (uchar), sizeof (uchar));
+            PRINTD ("Sent back a pebble to agent %d from \n",NODE_ID,sender_id);
+                manage_send_back_pebble(sender_id);
             }
+            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case NOTIFY_RIGIDITY_PKG:
             memcpy(&is_rigid, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
@@ -371,7 +373,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
         //Fill the been leader tab with the new leader ID
         been_leader_tab[max_id] = 1;
         //Debug TODO:remove
-        printf("Max id:%d\n", max_id);
+        printf("New Leader:%d\n", max_id);
         //If the i-th agent is the leader..
         if (max_id == NODE_ID) {
 

@@ -209,7 +209,7 @@ void send_pebble_request_pkg(struct broadcast_conn *broadcast, uchar to, uchar f
 void send_back_pebble_pkg(struct broadcast_conn *broadcast, uchar to) {
     pkg_hdr to_send;
     rimeaddr_t dest;
-    uint16 len = sizeof (uchar);
+    uint16 len = sizeof (uchar)*2;
 
     uint16 pkg_length = sizeof (pkg_hdr) + len;
     uchar buffer_to_send[pkg_length];
@@ -226,7 +226,7 @@ void send_back_pebble_pkg(struct broadcast_conn *broadcast, uchar to) {
     memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
 
     memcpy(buffer_to_send + sizeof (pkg_hdr), &to, sizeof (uchar));
-
+    memcpy(buffer_to_send + sizeof (pkg_hdr)+sizeof (uchar), &NODE_ID, sizeof (uchar));
     packetbuf_clear();
     packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);
