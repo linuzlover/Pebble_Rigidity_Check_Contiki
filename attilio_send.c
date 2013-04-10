@@ -89,13 +89,24 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
 
     //adj[mat2vec(0, 1)] = 1;
 
+    adj[mat2vec(0, 1)] = 1;
+
+    adj[mat2vec(1, 0)] = 1;
+    
     adj[mat2vec(1, 2)] = 1;
 
-    adj[mat2vec(2, 0)] = 1;
-    
-    adj[mat2vec(0, 2)] = 1;
-
     adj[mat2vec(2, 1)] = 1;
+    
+    adj[mat2vec(2, 3)] = 1;
+
+    adj[mat2vec(3, 2)] = 1;
+    
+    adj[mat2vec(3, 0)] = 1;
+    
+    adj[mat2vec(0, 3)] = 1;
+
+
+
 
     //adj[mat2vec(1, 0)] = 1;
     //---
