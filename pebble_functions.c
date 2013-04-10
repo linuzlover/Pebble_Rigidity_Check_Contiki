@@ -36,7 +36,7 @@ uchar pebbles = 2;
 /**
  * Independent edges set
  */
-edge ind_set[2 * TOT_NUM_NODES - 3];
+edge ind_set[2 * (TOT_NUM_NODES) - 3];
 /**
  * Number of independent edges
  */
@@ -67,7 +67,7 @@ uchar adj_matrix[TOT_NUM_NODES*TOT_NUM_NODES];
 /**
  *List of incident edges
  */
-edge incident_edges[TOT_NUM_NODES - 1];
+edge incident_edges[TOT_NUM_NODES-1];
 
 /*
  * number of incident edges
@@ -132,7 +132,7 @@ void leader_init() {
     for (i = 0; i < TOT_NUM_NODES; i++) {
 
         //If the agents are neighbors
-        if (adj_matrix[mat2vec(NODE_ID, i)]) {
+        if (adj_matrix[mat2vec(NODE_ID, i)] && !been_leader_tab[i]) {
             //Set the first endpoint
             incident_edges[count].node_i = NODE_ID;
             //Sent the second endpoint
@@ -233,9 +233,10 @@ uchar leader_run(struct broadcast_conn *broadcast) {
         num_ind_set++;
 
         //If there are 2N-3 in the independent set..the graph is rigid
-        if (num_ind_set == 2 * TOT_NUM_NODES - 3) {
+        if (num_ind_set == 2 * (TOT_NUM_NODES-1) - 3) {
             send_rigidity_pkg(broadcast, 1);
             is_rigid = 1;
+            leds_on(LEDS_ALL);
             return 1;
         }
         //take the next edge

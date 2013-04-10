@@ -401,7 +401,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
     if (!is_rigid)
         leds_on(LEDS_BLUE);
     else
-        leds_on(LEDS_YELLOW);
+        leds_on(LEDS_ALL);
 
     /*End the process*/
     PROCESS_END();
