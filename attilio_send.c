@@ -87,7 +87,7 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
     //Filling it
     memset(adj, 0, TOT_NUM_NODES * TOT_NUM_NODES);
 
-    adj[mat2vec(0, 1)] = 1;
+    //adj[mat2vec(0, 1)] = 1;
 
     adj[mat2vec(1, 2)] = 1;
 
@@ -97,7 +97,7 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
 
     adj[mat2vec(2, 1)] = 1;
 
-    adj[mat2vec(1, 0)] = 1;
+    //adj[mat2vec(1, 0)] = 1;
     //---
 
     //Setting handlers and begin

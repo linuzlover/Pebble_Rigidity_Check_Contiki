@@ -129,8 +129,8 @@ void leader_init() {
     been_leader_tab[NODE_ID] = 1;
 
     //Init the incident edges set
-    for (i = 0; i < TOT_NUM_NODES; i++) {
-
+    for (i = 0; i < TOT_NUM_NODES-1; i++) {
+        
         //If the agents are neighbors
         if (adj_matrix[mat2vec(NODE_ID, i)] && !been_leader_tab[i]) {
             //Set the first endpoint
@@ -139,7 +139,7 @@ void leader_init() {
             incident_edges[count].node_j = i;
             //Increment the counter of incident edges
             count++;
-
+            PRINTD("Agent %d, neighbor:%d\n",NODE_ID,i);
         }
     }
     //Keep track of the number of incident edges
