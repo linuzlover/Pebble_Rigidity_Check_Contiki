@@ -67,6 +67,25 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
 
 }
 
+static uchar temp_adj_matrix[TOT_NUM_NODES-1][TOT_NUM_NODES-1]={{0,1,0,1,1,1},{1,0,1,1,1,0},{0,1,0,1,0,1},{1,1,1,0,1,1},{1,1,0,1,0,1},{1,0,1,1,1,0}};
+//static uchar temp_adj_matrix[TOT_NUM_NODES-1][TOT_NUM_NODES-1]={{0,1,1,1,0,0},{1,0,1,0,0,0},{1,0,0,1,0,1},{1,1,1,0,0,1},{0,0,0,0,0,1},{0,0,1,1,1,0}};
+
+static void set_adj_matrix(uchar *adj)
+{
+	uchar i,j;
+
+	for(i=0;i<TOT_NUM_NODES-1;i++)
+	{
+		for(j=0;j<TOT_NUM_NODES-1;j++)
+		{
+			if(temp_adj_matrix[i][j])
+			{
+				    adj[mat2vec(i, j)] = 1;
+			}		
+		}
+	}
+}
+
 //Callbacks and broadcast connection structure
 static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
 struct broadcast_conn broadcast;
@@ -87,9 +106,10 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
     //Filling it
     memset(adj, 0, TOT_NUM_NODES * TOT_NUM_NODES);
 
+    set_adj_matrix(adj);
     //adj[mat2vec(0, 1)] = 1;
 
-    adj[mat2vec(0, 1)] = 1;
+/*    adj[mat2vec(0, 1)] = 1;
 
     adj[mat2vec(1, 0)] = 1;
     
@@ -115,7 +135,7 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
  
    // adj[mat2vec(1, 5)] = 1;
     
-   // adj[mat2vec(5, 1)] = 1;
+    adj[mat2vec(5, 1)] = 1;
 
     adj[mat2vec(2, 4)] = 1;
     
@@ -124,7 +144,8 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
     adj[mat2vec(5, 4)] = 1;
     
     adj[mat2vec(4, 5)] = 1;
-    //adj[mat2vec(1, 0)] = 1;
+*/  
+  //adj[mat2vec(1, 0)] = 1;
     //---
 
     //Setting handlers and begin

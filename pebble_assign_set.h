@@ -25,8 +25,11 @@ extern "C" {
 
     uchar remove_edge(edgeset *ed, edge ed_to_add);
 
+    uchar remove_single_edge(edgeset *ed, edge ed_to_add);
+
     extern edgeset assign_pebble;
 
+    void print_pebble_assign(edgeset *ed);
 #ifdef	__cplusplus
 }
 #endif

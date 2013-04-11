@@ -198,22 +198,21 @@ uchar leader_run(struct broadcast_conn *broadcast) {
             if (pebbles > 0) {
                 //Add edge to P_i
                 add_edge(&assign_pebble,incident_edges[count_incident_edges]);
-                //Decrement the free pebbles
+		//Decrement the free pebbles
                 pebbles--;
                 //Next step of quadruplication
                 quad++;
 
             } else {
-
-                //Request pebble message to P_i(1,2) with UID
-                send_pebble_request_pkg(broadcast, assign_pebble.assign_edges[0].node_j, NODE_ID, uId);
-                
-                //Keep uId unique
-                uId++;
-                //Waiting for the answer
+		//Waiting for the answer
                 request_wait = 1;
                 //The searched path
                 paths_searched = 1;
+                //Request pebble message to P_i(1,2) with UID
+                send_pebble_request_pkg(broadcast, assign_pebble.assign_edges[0].node_j, NODE_ID, uId);
+                //Keep uId unique
+                uId++;
+                
                 //Not finished yet
                 return 0;
             }
@@ -256,7 +255,7 @@ void manage_pebble_request(struct broadcast_conn *broadcast, uchar from, uint16 
     //Already requested
     if (request_id == rUid) {
         //Pebble not found msg
-        PRINTD("FOUND A MATCH IN REQUEST ID BY %d. SENDING A PEBBLE NOT FOUND\n",NODE_ID);
+        PRINTD("FOUND A MATCH IN REQUEST ID BY %d. SENDING A PEBBLE NOT FOUND to %d\n",NODE_ID,from);
         send_pebble_msg(broadcast, from, NODE_ID, 0);
         return;
     }
@@ -276,9 +275,9 @@ void manage_pebble_request(struct broadcast_conn *broadcast, uchar from, uint16 
     }//No pebbles left
     else {
         //Request the pebble to your neighbor
-        send_pebble_request_pkg(broadcast, assign_pebble.assign_edges[0].node_j, NODE_ID, rUid);
         paths_searched = 1;
-        requester = from;
+	requester = from;
+        send_pebble_request_pkg(broadcast, assign_pebble.assign_edges[0].node_j, NODE_ID, rUid);
     }
 }
 
@@ -289,10 +288,13 @@ void manage_pebble_found(struct broadcast_conn *broadcast, uchar from) {
     temp.node_i=NODE_ID;
     temp.node_j=from;
     
-    remove_edge(&assign_pebble,temp);
-    
+    remove_single_edge(&assign_pebble,temp);
+    PRINTD("In %d\n",NODE_ID);
+    print_pebble_assign(&assign_pebble);
+        
     if (is_leader) {
         add_edge(&assign_pebble,incident_edges[count_incident_edges]);
+	PRINTD("In pebble Found leader Num assigned %d\n",assign_pebble.num_assigned);
         quad++;
         request_wait = 0;
     } else {
@@ -308,14 +310,18 @@ void manage_pebble_not_found(struct broadcast_conn *broadcast, uchar from) {
     
     if (paths_searched < 2) {
         //Pebble request message to the other path
-        send_pebble_request_pkg(broadcast, assign_pebble.assign_edges[1].node_j, NODE_ID, uId);
-        //Maintain the uId
-        uId++;
-        //Searched on the second path
-        paths_searched = 2;
-    } else {
+	paths_searched = 2;
+	send_pebble_request_pkg(broadcast, assign_pebble.assign_edges[1].node_j, NODE_ID, uId);	
+	PRINTD("Looking on the second path: pebble request sent to %d by %d paths_searched %d\n",assign_pebble.assign_edges[1].node_j,NODE_ID,paths_searched);
+ 	//Searched on the second path
+        
+        
 
+        
+    } else {
         if (is_leader) {
+	    //Maintain the uId
+            uId++;
             //Return pebbles to e_i
             uchar temp_res=remove_edge(&assign_pebble,incident_edges[count_incident_edges]);
             pebbles+=temp_res;
@@ -361,24 +367,8 @@ void manage_send_back_pebble(uchar from)
     edge temp;
     temp.node_i=NODE_ID;
     temp.node_j=from;
-     if(assign_pebble.assign_edges[1].node_i==NODE_ID && assign_pebble.assign_edges[1].node_j==from)
-    {
-        assign_pebble.assign_edges[1].node_i=255;
-        assign_pebble.assign_edges[1].node_j=255;
-        assign_pebble.num_assigned--;
-        pebbles++;
-        return;
-    }
-    if(assign_pebble.assign_edges[0].node_i==NODE_ID && assign_pebble.assign_edges[0].node_j==from)
-    {
-        assign_pebble.assign_edges[0].node_i=assign_pebble.assign_edges[1].node_i;
-        assign_pebble.assign_edges[0].node_j=assign_pebble.assign_edges[1].node_j;
-        assign_pebble.assign_edges[0].node_i=255;
-        assign_pebble.assign_edges[0].node_j=255;
-        assign_pebble.num_assigned--;
-        pebbles++;
-        return;
-    }
-   
-    
+ 
+    uchar res;
+    res=remove_single_edge(&assign_pebble,temp);
+    pebbles+=res;      
 }

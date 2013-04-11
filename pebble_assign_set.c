@@ -11,6 +11,14 @@ void init_edge(edgeset *ed)
     ed->num_assigned=0;
 }
 
+void print_pebble_assign(edgeset *ed)
+{
+	PRINTD("Pebble assign 1: %d %d\n",ed->assign_edges[0].node_i,ed->assign_edges[0].node_j);
+	PRINTD("Pebble assign 2: %d %d\n",ed->assign_edges[1].node_i,ed->assign_edges[1].node_j);
+	PRINTD("Pebble assign num assigned %d\n",ed->num_assigned);
+	
+}
+
 void add_edge(edgeset *ed,edge ed_to_add)
 {
     if(ed->num_assigned==2)
@@ -23,6 +31,28 @@ void add_edge(edgeset *ed,edge ed_to_add)
         ed->assign_edges[ed->num_assigned].node_j=ed_to_add.node_j;
     }
     ed->num_assigned++;
+}
+
+uchar remove_single_edge(edgeset *ed,edge ed_to_add)
+{
+    uchar res=0;
+    if(ed->assign_edges[1].node_i==ed_to_add.node_i && ed->assign_edges[1].node_j==ed_to_add.node_j)
+    {
+        ed->assign_edges[1].node_i=255;
+        ed->assign_edges[1].node_j=255;
+        ed->num_assigned--;
+	res= 1;
+    }
+    else if(ed->assign_edges[0].node_i==ed_to_add.node_i && ed->assign_edges[0].node_j==ed_to_add.node_j)
+    {
+        ed->assign_edges[0].node_i=ed->assign_edges[1].node_i;
+        ed->assign_edges[0].node_j=ed->assign_edges[1].node_j;
+        ed->assign_edges[1].node_i=255;
+        ed->assign_edges[1].node_j=255;
+        ed->num_assigned--;
+        res=1;
+    }
+    return res;
 }
 
 uchar remove_edge(edgeset *ed,edge ed_to_add)

@@ -401,9 +401,18 @@ PROCESS_THREAD(pebble_process, ev, data) {
 
             //Init the leadership structures
             leader_init();
-
+	    uchar index1,index2;
+	    for(index1=0;index1<TOT_NUM_NODES;index1++)
+	    {
+		for(index2=0;index2<TOT_NUM_NODES;index2++)
+		{
+			printf("%d  ",adj_matrix[mat2vec(index1,index2)]);
+		}
+		printf("\n");
+	    }
+	
             while (!leader_run(&broadcast)){
-		 etimer_set(&et, 50);
+		 etimer_set(&et, 100);
         	 PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 	    }
 
