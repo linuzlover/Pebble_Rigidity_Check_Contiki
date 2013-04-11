@@ -183,8 +183,9 @@ void agent_init() {
 
 //Returns 1 when completed
 
-uchar leader_run(struct broadcast_conn *broadcast) {
+uchar leader_run(struct runicast_conn *c,struct trickle_conn *trick) {
     //If there is a pending request
+    PRINTD("Here\n");
     if (request_wait) {
         return 0;
     }
@@ -204,12 +205,16 @@ uchar leader_run(struct broadcast_conn *broadcast) {
                 quad++;
 
             } else {
+                PRINTD("In else\n");
 		//Waiting for the answer
                 request_wait = 1;
                 //The searched path
                 paths_searched = 1;
                 //Request pebble message to P_i(1,2) with UID
-                send_pebble_request_pkg(broadcast, assign_pebble.assign_edges[0].node_j, NODE_ID, uId);
+                PRINTD("Bef Send\n");
+                if(!send_pebble_request_pkg(c, assign_pebble.assign_edges[0].node_j, NODE_ID, uId))
+			return 0;
+                PRINTD("Sent pebble request to %d by %d with uId %d\n",assign_pebble.assign_edges[0].node_j,NODE_ID,uId);
                 //Keep uId unique
                 uId++;
                 
@@ -225,7 +230,7 @@ uchar leader_run(struct broadcast_conn *broadcast) {
         //------------------------------
 
         //Send back a pebble to e_i(2)
-        send_back_pebble_pkg(broadcast, incident_edges[count_incident_edges].node_j);
+        send_back_pebble_pkg(c, incident_edges[count_incident_edges].node_j);
         //Add edge to ind set
         ind_set[num_ind_set] = incident_edges[count_incident_edges];
         //increment the ind_set_size
@@ -233,7 +238,7 @@ uchar leader_run(struct broadcast_conn *broadcast) {
 
         //If there are 2N-3 in the independent set..the graph is rigid
         if (num_ind_set == 2 * (TOT_NUM_NODES-1) - 3) {
-            send_rigidity_pkg(broadcast, 1);
+            send_rigidity_pkg(trick, 1);
             is_rigid = 1;
             leds_on(LEDS_ALL);
             return 1;
@@ -249,14 +254,14 @@ uchar leader_run(struct broadcast_conn *broadcast) {
     return 1;
 }
 
-void manage_pebble_request(struct broadcast_conn *broadcast, uchar from, uint16 rUid) {
+void manage_pebble_request(struct runicast_conn *c, uchar from, uint16 rUid) {
     
 
     //Already requested
     if (request_id == rUid) {
         //Pebble not found msg
         PRINTD("FOUND A MATCH IN REQUEST ID BY %d. SENDING A PEBBLE NOT FOUND to %d\n",NODE_ID,from);
-        send_pebble_msg(broadcast, from, NODE_ID, 0);
+        send_pebble_msg(c, from, NODE_ID, 0);
         return;
     }
     //Storing the requestid
@@ -271,17 +276,17 @@ void manage_pebble_request(struct broadcast_conn *broadcast, uchar from, uint16 
         add_edge(&assign_pebble,temp);
         pebbles--;
         //Pebble found msg
-        send_pebble_msg(broadcast, from, NODE_ID, 1);
+        send_pebble_msg(c, from, NODE_ID, 1);
     }//No pebbles left
     else {
         //Request the pebble to your neighbor
         paths_searched = 1;
 	requester = from;
-        send_pebble_request_pkg(broadcast, assign_pebble.assign_edges[0].node_j, NODE_ID, rUid);
+        send_pebble_request_pkg(c, assign_pebble.assign_edges[0].node_j, NODE_ID, rUid);
     }
 }
 
-void manage_pebble_found(struct broadcast_conn *broadcast, uchar from) {
+void manage_pebble_found(struct runicast_conn *c, uchar from) {
     
     edge temp;
     
@@ -289,8 +294,6 @@ void manage_pebble_found(struct broadcast_conn *broadcast, uchar from) {
     temp.node_j=from;
     
     remove_single_edge(&assign_pebble,temp);
-    PRINTD("In %d\n",NODE_ID);
-    print_pebble_assign(&assign_pebble);
         
     if (is_leader) {
         add_edge(&assign_pebble,incident_edges[count_incident_edges]);
@@ -301,17 +304,17 @@ void manage_pebble_found(struct broadcast_conn *broadcast, uchar from) {
         temp.node_i=NODE_ID;
         temp.node_j=requester;
         add_edge(&assign_pebble,temp);
-        send_pebble_msg(broadcast, requester, NODE_ID, 1);
+        send_pebble_msg(c, requester, NODE_ID, 1);
     }
 
 }
 
-void manage_pebble_not_found(struct broadcast_conn *broadcast, uchar from) {
+void manage_pebble_not_found(struct runicast_conn *c, uchar from) {
     
     if (paths_searched < 2) {
         //Pebble request message to the other path
 	paths_searched = 2;
-	send_pebble_request_pkg(broadcast, assign_pebble.assign_edges[1].node_j, NODE_ID, uId);	
+	send_pebble_request_pkg(c, assign_pebble.assign_edges[1].node_j, NODE_ID, uId);	
 	PRINTD("Looking on the second path: pebble request sent to %d by %d paths_searched %d\n",assign_pebble.assign_edges[1].node_j,NODE_ID,paths_searched);
  	//Searched on the second path
 
@@ -322,7 +325,7 @@ void manage_pebble_not_found(struct broadcast_conn *broadcast, uchar from) {
             //Return pebbles to e_i
             uchar temp_res=remove_edge(&assign_pebble,incident_edges[count_incident_edges]);
             pebbles+=temp_res;
-            send_take_back_pebbles(broadcast, incident_edges[count_incident_edges].node_j, NODE_ID);
+            send_take_back_pebbles(c, incident_edges[count_incident_edges].node_j, NODE_ID);
             //---------------------
             //Remove the edge
             //incident_edges[count_incident_edges].node_i = 255;
@@ -333,7 +336,7 @@ void manage_pebble_not_found(struct broadcast_conn *broadcast, uchar from) {
             //Not waiting for any request to be satisfied
             request_wait = 0;
         } else
-            send_pebble_msg(broadcast, from, NODE_ID, 0);
+            send_pebble_msg(c, from, NODE_ID, 0);
     }
 }
 
@@ -347,12 +350,12 @@ void manage_take_back_pebbles(uchar from) {
     pebbles+=temp_res;
 }
 
-void leader_close(struct broadcast_conn *broadcast) {
+void leader_close(struct trickle_conn *trick) {
     //Not leader anymore
     is_leader = 0;
-    send_current_ind_set(broadcast, num_ind_set);
+    send_current_ind_set(trick, num_ind_set);
     if (all_been_leader()) {
-        send_rigidity_pkg(broadcast, is_rigid);
+        send_rigidity_pkg(trick, is_rigid);
         //Init the auction
         is_over = 1;
     } else

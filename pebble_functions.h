@@ -30,7 +30,7 @@ extern "C" {
 
     void leader_init();
     
-    uchar leader_run(struct broadcast_conn *broadcast);
+    uchar leader_run(struct runicast_conn *c,struct trickle_conn *trick);
 
     void agent_init();
 
@@ -38,16 +38,17 @@ extern "C" {
 
     uchar check_all_leader_pkgs_rec();
 
-    void leader_close(struct broadcast_conn *broadcast);
+    void leader_close(struct trickle_conn *trick);
     
-    void manage_pebble_request(struct broadcast_conn *broadcast,uchar from,uint16 rUid);
+    void manage_pebble_request(struct runicast_conn *c, uchar from, uint16 rUid);
     
-    void manage_pebble_found(struct broadcast_conn *broadcast,uchar from);
+    void manage_pebble_found(struct runicast_conn *c, uchar from);
     
-    void manage_pebble_not_found(struct broadcast_conn *broadcast, uchar from);
+    void manage_pebble_not_found(struct runicast_conn *c, uchar from);
     
     void manage_take_back_pebbles(uchar from);
     
+    void manage_send_back_pebble(uchar from);
 #ifdef	__cplusplus
 }
 #endif

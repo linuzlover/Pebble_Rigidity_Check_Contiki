@@ -117,18 +117,18 @@ enum {
  * This function sends the start package in broadcast
  * @param broadcast Broadcast channel
  */
-void send_start_pkg_broad(struct broadcast_conn *broadcast);
+void send_start_pkg_broad(struct trickle_conn *c);
 /**
  * This function sends the stop package in broadcast
  * @param broadcast Broadcast channel
  */
-void send_stop_pkg_broad(struct broadcast_conn *broadcast);
+void send_stop_pkg_broad(struct trickle_conn *c);
 /**
  * This function sends the adjacenty matrix in broadcast
  * @param broadcast Broadcast channel
  * @param adj Adjacency matrix represented as a single vector of TOT_NUM_NODES^2 elements
  */
-void send_adj_pkg_broad(struct broadcast_conn *broadcast, uchar *adj);
+void send_adj_pkg_broad(struct trickle_conn *c, uchar *adj);
 /**
  * This function sends the token package to the i-th agent neighbors according to the adjacency
  * matrix adj.
@@ -148,13 +148,13 @@ void send_rigidity_pkg(struct trickle_conn *c, uchar rigidity);
 
 void send_leader_election_pkg(struct trickle_conn *c);
 
-void send_pebble_request_pkg(struct broadcast_conn *broadcast, uchar to,uchar from ,uint16 uId);
+uchar send_pebble_request_pkg(struct runicast_conn *c, uchar to,uchar from ,uint16 uId);
 
-void send_back_pebble_pkg(struct broadcast_conn *broadcast, uchar to);
+void send_back_pebble_pkg(struct runicast_conn *c, uchar to);
 
 void send_current_ind_set(struct trickle_conn *c,uchar how_many_edges);
 
-void send_pebble_msg(struct broadcast_conn *broadcast,uchar to,uchar from,uchar found);
+void send_pebble_msg(struct runicast_conn *c,uchar to,uchar from,uchar found);
 
-void send_take_back_pebbles(struct broadcast_conn *broadcast,uchar to,uchar from);
+void send_take_back_pebbles(struct runicast_conn *c,uchar to,uchar from);
 #endif

@@ -43,6 +43,7 @@
 #include "contiki.h"
 #include "net/rime.h"
 #include "random.h"
+#include "dev/watchdog.h"
 #include "net/rime/trickle.h"
 #include "dev/button-sensor.h"
 #include "dev/leds.h"
@@ -113,13 +114,13 @@ static void set_addr_list() {
 
     nodes_addr_list[7].u8[0] = 8;
     nodes_addr_list[7].u8[1] = 0;
-
+/*
     nodes_addr_list[8].u8[0] = 9;
     nodes_addr_list[8].u8[1] = 0;
 
     nodes_addr_list[9].u8[0] = 10;
     nodes_addr_list[9].u8[1] = 0;
-
+   */
 
 
 
@@ -258,7 +259,7 @@ trickle_recv(struct trickle_conn *c)
             break;
         case LEADER_START_ELECTION_PKG:
 	    PRINTD ("Leader start election received by agent %d\n",NODE_ID);
-            leader_election_init();
+            //leader_election_init();
             LEADER_INIT_EL = 1;
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
@@ -294,13 +295,15 @@ const static struct trickle_callbacks trickle_call = {trickle_recv};
 static void
 timedout_runicast(struct runicast_conn *c, const rimeaddr_t *to, uchar retransmissions)
 {
-
+printf("runicast message timed out when sending to %d.%d, retransmissions %d\n",
+	 to->u8[0], to->u8[1], retransmissions);
 }
 
 static void
 sent_runicast(struct runicast_conn *c, const rimeaddr_t *to, uchar retransmissions)
 {
-
+printf("runicast message sent to %d.%d, retransmissions %d\n",
+	 to->u8[0], to->u8[1], retransmissions);
 }
 
 static void
@@ -310,7 +313,7 @@ recv_runicast(struct runicast_conn *c, const rimeaddr_t *from, uchar seqno) {
     /*Copy the broadcast buffer in the header structure*/
     memcpy(&rec_hdr, packetbuf_dataptr(), sizeof (pkg_hdr));
 
-    uchar bid, destination_id, sender_id, received_unique_id, received_ind_set_size;
+    uchar destination_id, sender_id, received_unique_id;
     /*Switch on the type of pkg*/
     switch (rec_hdr.type) {
 
@@ -320,16 +323,16 @@ recv_runicast(struct runicast_conn *c, const rimeaddr_t *from, uchar seqno) {
                 memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
                 memcpy(&received_unique_id, packetbuf_dataptr() + sizeof (pkg_hdr) + 2 * sizeof (uchar), sizeof (uint16));
                 PRINTD ("Requested pebble to agent %d from agent %d with ID %d\n",NODE_ID,sender_id,received_unique_id);
-                manage_pebble_request(&broadcast, sender_id, received_unique_id);
+                manage_pebble_request(&runicast, sender_id, received_unique_id);
             }
-
+            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case PEBBLE_FOUND_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
             if (destination_id == NODE_ID) {
 	        PRINTD ("Received a pebble found by agent %d from agent %d\n",NODE_ID,sender_id);
-                manage_pebble_found(&broadcast, sender_id);
+                manage_pebble_found(&runicast, sender_id);
             }
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
@@ -338,7 +341,7 @@ recv_runicast(struct runicast_conn *c, const rimeaddr_t *from, uchar seqno) {
             if (destination_id == NODE_ID) {
                 memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
 	        PRINTD ("Received a pebble not found by agent %d from agent %d\n",NODE_ID,sender_id);
-                manage_pebble_not_found(&broadcast, sender_id);
+                manage_pebble_not_found(&runicast, sender_id);
             }
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
@@ -347,7 +350,7 @@ recv_runicast(struct runicast_conn *c, const rimeaddr_t *from, uchar seqno) {
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if (destination_id == NODE_ID) {
                 memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr)+sizeof (uchar), sizeof (uchar));
-            PRINTD ("Sent back a pebble to agent %d from \n",NODE_ID,sender_id);
+            PRINTD ("Sent back a pebble to agent %d from %d\n",NODE_ID,sender_id);
                 manage_send_back_pebble(sender_id);
             }
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
@@ -359,9 +362,10 @@ recv_runicast(struct runicast_conn *c, const rimeaddr_t *from, uchar seqno) {
 	        PRINTD ("Take back pebbles to agent %d from %d\n",NODE_ID,sender_id);
                 manage_take_back_pebbles(sender_id);
             }
+            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         default:
-            printf("Error in switch\n");
+            PRINTD("Error in switch\n");
             break;
     }
 
@@ -376,14 +380,13 @@ static const struct runicast_callbacks runicast_callbacks = {recv_runicast,
 
 /*Main thread of the process*/
 PROCESS_THREAD(pebble_process, ev, data) {
-
+    
     //Timer structure
     static struct etimer et;
     //Set the exit handler
     PROCESS_EXITHANDLER(runicast_close(&runicast);)
     //Begin the process
     PROCESS_BEGIN();
-    
     //Open the broadcast channel on 129 and set the callback function
     runicast_open(&runicast, 144, &runicast_callbacks);
 
@@ -398,7 +401,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
     PROCESS_WAIT_EVENT_UNTIL(ADJ_FLAG);
     //Init each agent
     agent_init();
-    
+    clock_init();
     /*Main loop*/
     //iterate until or all the agents have been leader or the algorithm is over due
     //to the graph rigidity.
@@ -413,10 +416,15 @@ PROCESS_THREAD(pebble_process, ev, data) {
         //Once the start has been received, set the flag to zero for future auctions
         LEADER_INIT_EL = 0;
         //Wait for the start to be notified to all the nodes
-        etimer_set(&et, CLOCK_SECOND);
-        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+        
+        //DEC
+        //etimer_set(&et, CLOCK_SECOND);
+        //PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+        
+        
         //Desync the agents
-        etimer_set(&et, (NODE_ID + 1) *500);
+        //DEC
+        etimer_set(&et, (NODE_ID + 1) *250);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         //If the i-th agent has been a leader, set the bid to the lowest value
         if (been_leader)
@@ -433,30 +441,35 @@ PROCESS_THREAD(pebble_process, ev, data) {
         //Fill the been leader tab with the new leader ID
         been_leader_tab[max_id] = 1;
         //Debug TODO:remove
-        printf("New Leader:%d\n", max_id);
+        PRINTD("New Leader:%d\n", max_id);
         //If the i-th agent is the leader..
         if (max_id == NODE_ID) {
 
             //Init the leadership structures
             leader_init();
+#ifdef DEBUG
 	    uchar index1,index2;
 	    for(index1=0;index1<TOT_NUM_NODES;index1++)
 	    {
 		for(index2=0;index2<TOT_NUM_NODES;index2++)
 		{
-			printf("%d  ",adj_matrix[mat2vec(index1,index2)]);
+			PRINTD("%d  ",adj_matrix[mat2vec(index1,index2)]);
 		}
-		printf("\n");
+		PRINTD("\n");
 	    }
-	
-            while (!leader_run(&broadcast)){
+#endif
+            watchdog_stop();
+            while (!leader_run(&runicast,&trickle)){
 		 etimer_set(&et, 100);
         	 PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+                 PRINTD("Alive\n");
 	    }
+            watchdog_start();
 
             //Terminate the leadership phase
-            leader_close(&broadcast);
+            leader_close(&trickle);
             //Wait to send the leader election packet
+            //DEC
             etimer_set(&et, CLOCK_SECOND);
             PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
             //Start new election process

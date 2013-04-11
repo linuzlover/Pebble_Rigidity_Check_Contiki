@@ -66,9 +66,7 @@ AUTOSTART_PROCESSES(&example_broadcast_process);
 static void
 trickle_recv(struct trickle_conn *c)
 {
-  printf("%d.%d: trickle message received '%s'\n",
-	 rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1],
-	 (char *)packetbuf_dataptr());
+
 }
 const static struct trickle_callbacks trickle_call = {trickle_recv};
 static struct trickle_conn trickle;
@@ -162,7 +160,7 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
 
     //Send start pkg in broadcast to all the agents
     trickle_open(&trickle, CLOCK_SECOND, 145, &trickle_call);
-    etimer_set(&et, 5*CLOCK_SECOND);
+    etimer_set(&et, 7*CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
     send_start_pkg_broad(&trickle);
 
@@ -170,7 +168,7 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
     etimer_set(&et, CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
-    send_adj_pkg_broad(&&trickle, adj);
+    send_adj_pkg_broad(&trickle, adj);
     etimer_set(&et, CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
@@ -181,7 +179,7 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
     packetbuf_clear();
     packetbuf_copyfrom(&to_send, sizeof (pkg_hdr));
     trickle_send(&trickle);
-    NETSTACK_MAC.off(0);
+    //NETSTACK_MAC.off(0);
     //  while(1) {
     //    etimer_set(&et, CLOCK_SECOND);
     //    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));

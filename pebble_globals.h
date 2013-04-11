@@ -2,7 +2,7 @@
 #define _PEBBLE_GLOBALS_H_
 
 #define DEBUG
-
+#include <stdio.h>
 #ifdef DEBUG
 #define PRINTD printf
 #else
@@ -10,7 +10,7 @@
 #endif
 
 
-#define MAX_RETRANSMISSIONS 4
+#define MAX_RETRANSMISSIONS 8
 
 /*Typedefs for 2 byte and single byte information*/
 /*!\typedef  
