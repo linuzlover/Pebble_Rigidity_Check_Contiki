@@ -6,7 +6,6 @@ uchar START_FLAG = 0;
 uchar ADJ_FLAG = 0;
 uchar GOT_TOKEN = 0;
 
-
 //TODO... all the cut and paste code must be moved in a auxiliary function
 
 void send_start_pkg_broad(struct broadcast_conn *broadcast) {
