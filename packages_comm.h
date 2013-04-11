@@ -27,6 +27,7 @@
 
 #include "contiki.h"
 #include "net/rime.h"
+#include "net/rime/trickle.h"
 #include "pebble_globals.h"
 #include <stdio.h>
 #include <stdlib.h>

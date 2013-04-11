@@ -43,6 +43,7 @@
 #include "contiki.h"
 #include "net/rime.h"
 #include "random.h"
+#include "net/rime/trickle.h"
 #include "dev/button-sensor.h"
 #include "dev/leds.h"
 #include "packages_comm.h"
@@ -56,7 +57,8 @@
 
 
 
-static struct broadcast_conn broadcast;
+static struct runicast_conn runicast;
+static struct trickle_conn trickle;
 
 /**
  * Function to retrieve the global ID
@@ -201,6 +203,16 @@ AUTOSTART_PROCESSES(&pebble_process);
 
 /*---------------------------------------------------------------------------*/
 
+
+static void
+trickle_recv(struct trickle_conn *c)
+{
+  printf("%d.%d: trickle message received '%s'\n",
+	 rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1],
+	 (char *)packetbuf_dataptr());
+}
+const static struct trickle_callbacks trickle_call = {trickle_recv};
+
 /*\TODO: cut the switch using a case handler foreach case. Standard input
  and output structures should be written to feed/retrieve them to/from the functions*/
 
@@ -209,8 +221,21 @@ AUTOSTART_PROCESSES(&pebble_process);
  * @param c Connection
  * @param from Sender
  */
+
 static void
-broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
+timedout_runicast(struct runicast_conn *c, const rimeaddr_t *to, uint8_t retransmissions)
+{
+
+}
+
+static void
+sent_runicast(struct runicast_conn *c, const rimeaddr_t *to, uint8_t retransmissions)
+{
+
+}
+
+static void
+recv_runicast(struct broadcast_conn *c, const rimeaddr_t *from, uint8_t seqno) {
     /*Header of the received packet*/
     pkg_hdr rec_hdr;
     /*Copy the broadcast buffer in the header structure*/
@@ -333,8 +358,10 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
 
 }
 
-static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
-
+//static const struct broadcast_callbacks broadcast_call = {runicast_recv};
+static const struct runicast_callbacks runicast_callbacks = {recv_runicast,
+							     sent_runicast,
+							     timedout_runicast};
 
 /*---------------------------------------------------------------------------*/
 
@@ -344,12 +371,14 @@ PROCESS_THREAD(pebble_process, ev, data) {
     //Timer structure
     static struct etimer et;
     //Set the exit handler
-    PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
+    PROCESS_EXITHANDLER(runicast_close(&runicast);)
     //Begin the process
     PROCESS_BEGIN();
     
     //Open the broadcast channel on 129 and set the callback function
-    broadcast_open(&broadcast, 129, &broadcast_call);
+    runicast_open(&runicast, 144, &runicast_callbacks);
+
+    trickle_open(&trickle, CLOCK_SECOND, 145, &trickle_call);
     //Init the address list statically
     set_addr_list();
     //Get the global ID
@@ -382,9 +411,9 @@ PROCESS_THREAD(pebble_process, ev, data) {
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         //If the i-th agent has been a leader, set the bid to the lowest value
         if (been_leader)
-            send_leader_bid_pkg(&broadcast, NODE_ID, 0);
+            send_leader_bid_pkg(&trickle, NODE_ID, 0);
         else
-            send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID);
+            send_leader_bid_pkg(&trickle, NODE_ID, NODE_ID);
 
         //If all the bids have arrived
         while (!check_all_leader_pkgs_rec()) {
@@ -422,7 +451,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
             etimer_set(&et, CLOCK_SECOND);
             PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
             //Start new election process
-            send_leader_election_pkg(&broadcast);
+            send_leader_election_pkg(&trickle);
         }
         if (is_over)
             continue;

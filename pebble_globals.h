@@ -9,6 +9,9 @@
 #define PRINTD(format, args...) ((void)0)
 #endif
 
+
+#define MAX_RETRANSMISSIONS 4
+
 /*Typedefs for 2 byte and single byte information*/
 /*!\typedef  
  * Typedef for 16bit unsigned short.
