@@ -314,10 +314,7 @@ void manage_pebble_not_found(struct broadcast_conn *broadcast, uchar from) {
 	send_pebble_request_pkg(broadcast, assign_pebble.assign_edges[1].node_j, NODE_ID, uId);	
 	PRINTD("Looking on the second path: pebble request sent to %d by %d paths_searched %d\n",assign_pebble.assign_edges[1].node_j,NODE_ID,paths_searched);
  	//Searched on the second path
-        
-        
 
-        
     } else {
         if (is_leader) {
 	    //Maintain the uId
