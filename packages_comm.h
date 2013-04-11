@@ -140,19 +140,19 @@ void send_adj_pkg_broad(struct broadcast_conn *broadcast, uchar *adj);
  * a static array of rimeaddr_t TOT_NUM_NODES elements. The position in the array gives the short global index
  * of the agent (the "i").
  */
-void send_token_pkg(struct broadcast_conn *broadcast, uchar i, uchar *adj, rimeaddr_t *nodes_addr_list);
+void send_token_pkg(struct trickle_conn *c, uchar i, uchar *adj, rimeaddr_t *nodes_addr_list);
 
-void send_leader_bid_pkg(struct broadcast_conn *broadcast, uchar id, uchar bid);
+void send_leader_bid_pkg(struct trickle_conn *c, uchar id, uchar bid);
 
-void send_rigidity_pkg(struct broadcast_conn *broadcast, uchar rigidity);
+void send_rigidity_pkg(struct trickle_conn *c, uchar rigidity);
 
-void send_leader_election_pkg(struct broadcast_conn *broadcast);
+void send_leader_election_pkg(struct trickle_conn *c);
 
 void send_pebble_request_pkg(struct broadcast_conn *broadcast, uchar to,uchar from ,uint16 uId);
 
 void send_back_pebble_pkg(struct broadcast_conn *broadcast, uchar to);
 
-void send_current_ind_set(struct broadcast_conn *broadcast,uchar how_many_edges);
+void send_current_ind_set(struct trickle_conn *c,uchar how_many_edges);
 
 void send_pebble_msg(struct broadcast_conn *broadcast,uchar to,uchar from,uchar found);
 

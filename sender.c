@@ -43,6 +43,7 @@
 #include "contiki.h"
 #include "net/rime.h"
 #include "random.h"
+#include "net/rime/trickle.h"
 #include "dev/button-sensor.h"
 #include "net/netstack.h"
 #include "dev/leds.h"
@@ -63,9 +64,14 @@ AUTOSTART_PROCESSES(&example_broadcast_process);
 //\TODO: Empty... this code will act also as a packet sniffer so it will be implemented later
 
 static void
-broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
-
+trickle_recv(struct trickle_conn *c)
+{
+  printf("%d.%d: trickle message received '%s'\n",
+	 rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1],
+	 (char *)packetbuf_dataptr());
 }
+const static struct trickle_callbacks trickle_call = {trickle_recv};
+static struct trickle_conn trickle;
 //NEW
 static uchar temp_adj_matrix[TOT_NUM_NODES-1][TOT_NUM_NODES-1]={{0,1,0,1,1,1,1},{1,0,1,1,1,0,0},{0,1,0,1,0,1,0},{1,1,1,0,1,1,0},{1,1,0,1,0,1,0},{1,0,1,1,1,0,0},{1,0,0,0,0,0,0}};
 
@@ -90,8 +96,6 @@ static void set_adj_matrix(uchar *adj)
 }
 
 //Callbacks and broadcast connection structure
-static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
-struct broadcast_conn broadcast;
 
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(example_broadcast_process, ev, data) {
@@ -152,21 +156,21 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
     //---
 
     //Setting handlers and begin
-    PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
+    PROCESS_EXITHANDLER(trickle_close(&trickle);)
 
     PROCESS_BEGIN();
 
     //Send start pkg in broadcast to all the agents
-    broadcast_open(&broadcast, 129, &broadcast_call);
+    trickle_open(&trickle, CLOCK_SECOND, 145, &trickle_call);
     etimer_set(&et, 5*CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    send_start_pkg_broad(&broadcast);
+    send_start_pkg_broad(&trickle);
 
     //Send the adjacency matrix in broadcast to all the agents
     etimer_set(&et, CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
-    send_adj_pkg_broad(&broadcast, adj);
+    send_adj_pkg_broad(&&trickle, adj);
     etimer_set(&et, CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
@@ -176,7 +180,7 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
     //to_send.receiver = dest;
     packetbuf_clear();
     packetbuf_copyfrom(&to_send, sizeof (pkg_hdr));
-    broadcast_send(&broadcast);
+    trickle_send(&trickle);
     NETSTACK_MAC.off(0);
     //  while(1) {
     //    etimer_set(&et, CLOCK_SECOND);

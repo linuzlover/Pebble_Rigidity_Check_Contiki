@@ -8,7 +8,7 @@ uchar GOT_TOKEN = 0;
 
 //TODO... all the cut and paste code must be moved in a auxiliary function
 
-void send_start_pkg_broad(struct broadcast_conn *broadcast) {
+void send_start_pkg_broad(struct trickle_conn *c) {
     //Destination address
     rimeaddr_t dest;
     //Setting to not significant values
@@ -27,13 +27,13 @@ void send_start_pkg_broad(struct broadcast_conn *broadcast) {
     //Copying the data in the buffer
     packetbuf_copyfrom(&to_send, sizeof (pkg_hdr));
     //Broadcast send
-    broadcast_send(broadcast);
+    trickle_send(c);
 
 }
 
 //See previous function for comments
 
-void send_stop_pkg_broad(struct broadcast_conn *broadcast) {
+void send_stop_pkg_broad(struct trickle_conn *c) {
     rimeaddr_t dest;
     dest.u8[0] = 255;
     dest.u8[1] = 255;
@@ -44,11 +44,11 @@ void send_stop_pkg_broad(struct broadcast_conn *broadcast) {
     packetbuf_clear();
     packetbuf_set_datalen(sizeof (pkg_hdr));
     packetbuf_copyfrom(&to_send, sizeof (pkg_hdr));
-    broadcast_send(broadcast);
+    trickle_send(c);
 
 }
 
-void send_adj_pkg_broad(struct broadcast_conn *broadcast, uchar *adj) {
+void send_adj_pkg_broad(struct trickle_conn *c, uchar *adj) {
     pkg_hdr to_send;
     rimeaddr_t dest;
     uint16 len = TOT_NUM_NODES*TOT_NUM_NODES;
@@ -69,11 +69,11 @@ void send_adj_pkg_broad(struct broadcast_conn *broadcast, uchar *adj) {
     packetbuf_clear();
     packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);
-    broadcast_send(broadcast);
+    trickle_send(c);
     free(buffer_to_send);
 }
 
-void send_token_pkg(struct broadcast_conn *broadcast, uchar i, uchar *adj, rimeaddr_t nodes_addr_list[TOT_NUM_NODES]) {
+void send_token_pkg(struct trickle_conn *c, uchar i, uchar *adj, rimeaddr_t nodes_addr_list[TOT_NUM_NODES]) {
     pkg_hdr to_send;
     rimeaddr_t dest;
     uchar j;
@@ -98,13 +98,13 @@ void send_token_pkg(struct broadcast_conn *broadcast, uchar i, uchar *adj, rimea
     packetbuf_clear();
     //packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);
-    broadcast_send(broadcast);
+    trickle_send(c);
     //Debugging
 
     free(buffer_to_send);
 }
 
-void send_leader_bid_pkg(struct broadcast_conn *broadcast, uchar id, uchar bid) {
+void send_leader_bid_pkg(struct trickle_conn *c, uchar id, uchar bid) {
     pkg_hdr to_send;
     rimeaddr_t dest;
     uint16 len = sizeof (uchar)*2;
@@ -126,11 +126,11 @@ void send_leader_bid_pkg(struct broadcast_conn *broadcast, uchar id, uchar bid) 
     packetbuf_clear();
     packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);
-    broadcast_send(broadcast);
+    trickle_send(c);
     free(buffer_to_send);
 }
 
-void send_leader_election_pkg(struct broadcast_conn *broadcast) {
+void send_leader_election_pkg(struct trickle_conn *c) {
     pkg_hdr to_send;
     rimeaddr_t dest;
 
@@ -147,10 +147,10 @@ void send_leader_election_pkg(struct broadcast_conn *broadcast) {
     packetbuf_clear();
     packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(&to_send, pkg_length);
-    broadcast_send(broadcast);
+    trickle_send(c);
 }
 
-void send_rigidity_pkg(struct broadcast_conn *broadcast, uchar rigidity) {
+void send_rigidity_pkg(struct trickle_conn *c, uchar rigidity) {
     pkg_hdr to_send;
     rimeaddr_t dest;
     uint16 len = sizeof (uchar);
@@ -171,7 +171,7 @@ void send_rigidity_pkg(struct broadcast_conn *broadcast, uchar rigidity) {
     packetbuf_clear();
     packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);
-    broadcast_send(broadcast);
+    trickle_send(c);
     free(buffer_to_send);
 }
 
@@ -233,7 +233,7 @@ void send_back_pebble_pkg(struct broadcast_conn *broadcast, uchar to) {
     free(buffer_to_send);
 }
 
-void send_current_ind_set(struct broadcast_conn *broadcast, uchar how_many_edges) {
+void send_current_ind_set(struct trickle_conn *c, uchar how_many_edges) {
     pkg_hdr to_send;
     rimeaddr_t dest;
     uint16 len = sizeof (uchar);
@@ -256,7 +256,7 @@ void send_current_ind_set(struct broadcast_conn *broadcast, uchar how_many_edges
     packetbuf_clear();
     packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);
-    broadcast_send(broadcast);
+    trickle_send(c);
     free(buffer_to_send);
 }
 

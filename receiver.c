@@ -207,41 +207,11 @@ AUTOSTART_PROCESSES(&pebble_process);
 static void
 trickle_recv(struct trickle_conn *c)
 {
-  printf("%d.%d: trickle message received '%s'\n",
-	 rimeaddr_node_addr.u8[0], rimeaddr_node_addr.u8[1],
-	 (char *)packetbuf_dataptr());
-}
-const static struct trickle_callbacks trickle_call = {trickle_recv};
-
-/*\TODO: cut the switch using a case handler foreach case. Standard input
- and output structures should be written to feed/retrieve them to/from the functions*/
-
-/**
- * Callback function when a packet is received
- * @param c Connection
- * @param from Sender
- */
-
-static void
-timedout_runicast(struct runicast_conn *c, const rimeaddr_t *to, uint8_t retransmissions)
-{
-
-}
-
-static void
-sent_runicast(struct runicast_conn *c, const rimeaddr_t *to, uint8_t retransmissions)
-{
-
-}
-
-static void
-recv_runicast(struct broadcast_conn *c, const rimeaddr_t *from, uint8_t seqno) {
-    /*Header of the received packet*/
-    pkg_hdr rec_hdr;
+ pkg_hdr rec_hdr;
     /*Copy the broadcast buffer in the header structure*/
     memcpy(&rec_hdr, packetbuf_dataptr(), sizeof (pkg_hdr));
 
-    uchar bid, destination_id, sender_id, received_unique_id, received_ind_set_size;
+    uchar bid, sender_id, received_ind_set_size;
     /*Switch on the type of pkg*/
     switch (rec_hdr.type) {
 
@@ -269,7 +239,6 @@ recv_runicast(struct broadcast_conn *c, const rimeaddr_t *from, uint8_t seqno) {
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case LEADER_BID_PKG:
-
             memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             memcpy(&bid, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
 	    PRINTD ("Leader bid received by agent %d from %d amount %d\n",NODE_ID,sender_id,bid);
@@ -299,6 +268,52 @@ recv_runicast(struct broadcast_conn *c, const rimeaddr_t *from, uint8_t seqno) {
             PRINTD ("Ind Set received by agent %d amount %d\n",NODE_ID,num_ind_set);
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
+        case NOTIFY_RIGIDITY_PKG:
+            memcpy(&is_rigid, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+	    PRINTD ("Rigidity notification %d\n",is_rigid);
+            is_over = 1;
+            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
+            break;
+        default:
+            printf("Error in switch\n");
+            break;
+    }
+
+}
+const static struct trickle_callbacks trickle_call = {trickle_recv};
+
+/*\TODO: cut the switch using a case handler foreach case. Standard input
+ and output structures should be written to feed/retrieve them to/from the functions*/
+
+/**
+ * Callback function when a packet is received
+ * @param c Connection
+ * @param from Sender
+ */
+
+static void
+timedout_runicast(struct runicast_conn *c, const rimeaddr_t *to, uchar retransmissions)
+{
+
+}
+
+static void
+sent_runicast(struct runicast_conn *c, const rimeaddr_t *to, uchar retransmissions)
+{
+
+}
+
+static void
+recv_runicast(struct runicast_conn *c, const rimeaddr_t *from, uchar seqno) {
+    /*Header of the received packet*/
+    pkg_hdr rec_hdr;
+    /*Copy the broadcast buffer in the header structure*/
+    memcpy(&rec_hdr, packetbuf_dataptr(), sizeof (pkg_hdr));
+
+    uchar bid, destination_id, sender_id, received_unique_id, received_ind_set_size;
+    /*Switch on the type of pkg*/
+    switch (rec_hdr.type) {
+
         case REQUEST_PEBBLE_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if (destination_id == NODE_ID) {
@@ -335,12 +350,6 @@ recv_runicast(struct broadcast_conn *c, const rimeaddr_t *from, uint8_t seqno) {
             PRINTD ("Sent back a pebble to agent %d from \n",NODE_ID,sender_id);
                 manage_send_back_pebble(sender_id);
             }
-            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
-            break;
-        case NOTIFY_RIGIDITY_PKG:
-            memcpy(&is_rigid, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
-	    PRINTD ("Rigidity notification %d\n",is_rigid);
-            is_over = 1;
             process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case TAKE_BACK_PEBBLES_PKG:
