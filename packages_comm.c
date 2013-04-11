@@ -239,6 +239,11 @@ void send_back_pebble_pkg(struct runicast_conn *c, uchar to) {
     packetbuf_clear();
     packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);
+while(runicast_is_transmitting(c))
+	{
+	 PRINTD("Hangs in runicast_is_transmitting\n");
+         clock_wait(100);
+        }
     runicast_send(c, &(nodes_addr_list[to]), MAX_RETRANSMISSIONS);
     free(buffer_to_send);
 }
@@ -296,6 +301,11 @@ void send_take_back_pebbles(struct runicast_conn *c, uchar to, uchar from) {
     packetbuf_clear();
     packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);
+while(runicast_is_transmitting(c))
+	{
+	 PRINTD("Hangs in runicast_is_transmitting\n");
+         clock_wait(100);
+        }
     runicast_send(c, &(nodes_addr_list[to]), MAX_RETRANSMISSIONS);
     free(buffer_to_send);
 }
@@ -330,6 +340,11 @@ void send_pebble_msg(struct runicast_conn *c, uchar to, uchar from, uchar found)
     packetbuf_clear();
     packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);
+while(runicast_is_transmitting(c))
+	{
+	 PRINTD("Hangs in runicast_is_transmitting\n");
+         clock_wait(100);
+        }
     runicast_send(c, &(nodes_addr_list[to]), MAX_RETRANSMISSIONS);
     free(buffer_to_send);
 }

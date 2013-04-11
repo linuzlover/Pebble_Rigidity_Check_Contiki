@@ -139,18 +139,18 @@ void leader_init() {
             incident_edges[count].node_j = i;
             //Increment the counter of incident edges
             count++;
-            PRINTD("Agent %d, neighbor:%d\n",NODE_ID,i);
+            PRINTD("Agent %d, neighbor:%d\n",NODE_ID+1,i+1);
         }
     }
     //Keep track of the number of incident edges
 
     num_incident_edges = count;
-    #ifdef DEBUG
-    PRINTD("Agent %d num_inc_edges:%d\n",NODE_ID,num_incident_edges);
-    PRINTD("Peb assign 0: %d,%d\n",assign_pebble.assign_edges[0].node_i,assign_pebble.assign_edges[0].node_j);
-    PRINTD("Peb assign 1: %d,%d\n",assign_pebble.assign_edges[1].node_i,assign_pebble.assign_edges[1].node_j);
+
+    PRINTD("Agent %d num_inc_edges:%d\n",NODE_ID+1,num_incident_edges);
+    PRINTD("Peb assign 0: %d,%d\n",assign_pebble.assign_edges[0].node_i+1,assign_pebble.assign_edges[0].node_j+1);
+    PRINTD("Peb assign 1: %d,%d\n",assign_pebble.assign_edges[1].node_i+1,assign_pebble.assign_edges[1].node_j+1);
     PRINTD("Num pebbles %d Agent %d\n",pebbles,NODE_ID);
-    #endif
+
 }
 
 void agent_init() {
@@ -214,7 +214,7 @@ uchar leader_run(struct runicast_conn *c,struct trickle_conn *trick) {
                 PRINTD("Bef Send\n");
                 if(!send_pebble_request_pkg(c, assign_pebble.assign_edges[0].node_j, NODE_ID, uId))
 			return 0;
-                PRINTD("Sent pebble request to %d by %d with uId %d\n",assign_pebble.assign_edges[0].node_j,NODE_ID,uId);
+                PRINTD("Sent pebble request to %d by %d with uId %d\n",assign_pebble.assign_edges[0].node_j+1,NODE_ID+1,uId);
                 //Keep uId unique
                 uId++;
                 
@@ -260,7 +260,7 @@ void manage_pebble_request(struct runicast_conn *c, uchar from, uint16 rUid) {
     //Already requested
     if (request_id == rUid) {
         //Pebble not found msg
-        PRINTD("FOUND A MATCH IN REQUEST ID BY %d. SENDING A PEBBLE NOT FOUND to %d\n",NODE_ID,from);
+        PRINTD("FOUND A MATCH IN REQUEST ID BY %d. SENDING A PEBBLE NOT FOUND to %d\n",NODE_ID+1,from+1);
         send_pebble_msg(c, from, NODE_ID, 0);
         return;
     }
@@ -315,7 +315,7 @@ void manage_pebble_not_found(struct runicast_conn *c, uchar from) {
         //Pebble request message to the other path
 	paths_searched = 2;
 	send_pebble_request_pkg(c, assign_pebble.assign_edges[1].node_j, NODE_ID, uId);	
-	PRINTD("Looking on the second path: pebble request sent to %d by %d paths_searched %d\n",assign_pebble.assign_edges[1].node_j,NODE_ID,paths_searched);
+	PRINTD("Looking on the second path: pebble request sent to %d by %d paths_searched %d\n",assign_pebble.assign_edges[1].node_j+1,NODE_ID+1,paths_searched);
  	//Searched on the second path
 
     } else {
