@@ -99,6 +99,28 @@ static void set_addr_list() {
 
     nodes_addr_list[3].u8[0] = 4;
     nodes_addr_list[3].u8[1] = 0;
+    
+    nodes_addr_list[4].u8[0] = 5;
+    nodes_addr_list[4].u8[1] = 0;
+    
+    nodes_addr_list[5].u8[0] = 6;
+    nodes_addr_list[5].u8[1] = 0;
+
+    nodes_addr_list[6].u8[0] = 7;
+    nodes_addr_list[6].u8[1] = 0;
+
+    nodes_addr_list[7].u8[0] = 8;
+    nodes_addr_list[7].u8[1] = 0;
+
+    nodes_addr_list[8].u8[0] = 9;
+    nodes_addr_list[8].u8[1] = 0;
+
+    nodes_addr_list[9].u8[0] = 10;
+    nodes_addr_list[9].u8[1] = 0;
+
+
+
+
 
 
     /*/

@@ -8,14 +8,14 @@ DEPS=$(OBJECTDIR)/pebble_assign_set.o $(OBJECTDIR)/packages_comm.o $(OBJECTDIR)/
 include $(CONTIKI)/Makefile.include
 
 
-all: attilio_send attilio_receive
+all: sender receiver
 
-attilio_receive.$(TARGET): $(DEPS)
+receiver.$(TARGET): $(DEPS)
 
-attilio_send.$(TARGET): $(DEPS)
+sender.$(TARGET): $(DEPS)
 
 #Dirty Hack for cooja
-attilio_receive.elf: $(DEPS)
+receiver.elf: $(DEPS)
 
-attilio_send.elf: $(DEPS)
+sender.elf: $(DEPS)
 
