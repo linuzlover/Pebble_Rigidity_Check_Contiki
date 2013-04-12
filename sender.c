@@ -160,7 +160,7 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
 
     //Send start pkg in broadcast to all the agents
     trickle_open(&trickle, CLOCK_SECOND, 145, &trickle_call);
-    etimer_set(&et, 7*CLOCK_SECOND);
+    etimer_set(&et, CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
     send_start_pkg_broad(&trickle);
 
@@ -169,8 +169,8 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
     send_adj_pkg_broad(&trickle, adj);
-    etimer_set(&et, CLOCK_SECOND);
-    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+    //etimer_set(&et, 2*CLOCK_SECOND);
+    //PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
     //Send the token to the first agent
     to_send.type = LEADER_START_ELECTION_PKG;

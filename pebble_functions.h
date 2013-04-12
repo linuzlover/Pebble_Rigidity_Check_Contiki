@@ -26,8 +26,6 @@ extern "C" {
     
     extern uchar uId;
 
-    void leader_election_init();
-
     void leader_init();
     
     uchar leader_run(struct runicast_conn *c,struct trickle_conn *trick);
@@ -36,7 +34,7 @@ extern "C" {
 
     uchar all_been_leader();
 
-    uchar check_all_leader_pkgs_rec();
+    uchar check_all_bids_rec();
 
     void leader_close(struct trickle_conn *trick);
     

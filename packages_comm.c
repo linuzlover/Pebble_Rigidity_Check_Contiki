@@ -120,11 +120,10 @@ void send_leader_bid_pkg(struct trickle_conn *c, uchar id, uchar bid) {
     to_send.data_len = len;
     //Copying the header into the buffer
     memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
-
     memcpy(buffer_to_send + sizeof (pkg_hdr), &id, sizeof (uchar));
     memcpy(buffer_to_send + sizeof (pkg_hdr) + sizeof (uchar), &bid, sizeof (uchar));
     packetbuf_clear();
-    packetbuf_set_datalen(pkg_length);
+    //packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);
     trickle_send(c);
     free(buffer_to_send);
@@ -176,7 +175,9 @@ void send_rigidity_pkg(struct trickle_conn *c, uchar rigidity) {
 }
 
 uchar send_pebble_request_pkg(struct runicast_conn *c, uchar to, uchar from, uint16 uId) {
+    uchar to_cont=1;
     pkg_hdr to_send;
+    
     rimeaddr_t dest;
     uint16 len = sizeof (uchar)*2 + sizeof (uint16);
 
@@ -202,14 +203,15 @@ uchar send_pebble_request_pkg(struct runicast_conn *c, uchar to, uchar from, uin
     packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);
     
-
-    while(runicast_is_transmitting(c))
-	{
+    while(to_cont){
+        
+        to_cont=!runicast_is_transmitting(c);
+        
 	 PRINTD("Hangs in runicast_is_transmitting\n");
-         clock_wait(100);
+    //     clock_wait(100);
         }
 //	return 0;
-
+    PRINTD("Send Pebble req pkg from% d to %d, Addresses:%d.%d,%d.%d\n",NODE_ID,to,nodes_addr_list[NODE_ID].u8[0],nodes_addr_list[NODE_ID].u8[1],nodes_addr_list[to].u8[0],nodes_addr_list[to].u8[1]);
     runicast_send(c, &(nodes_addr_list[to]), MAX_RETRANSMISSIONS);
     free(buffer_to_send);
 return 1;
@@ -244,6 +246,7 @@ while(runicast_is_transmitting(c))
 	 PRINTD("Hangs in runicast_is_transmitting\n");
          clock_wait(100);
         }
+    PRINTD("Send Back Pebble pkg from% d to %d, Addresses:%d.%d,%d.%d\n",NODE_ID,to,nodes_addr_list[NODE_ID].u8[0],nodes_addr_list[NODE_ID].u8[1],nodes_addr_list[to].u8[0],nodes_addr_list[to].u8[1]);
     runicast_send(c, &(nodes_addr_list[to]), MAX_RETRANSMISSIONS);
     free(buffer_to_send);
 }
@@ -306,6 +309,7 @@ while(runicast_is_transmitting(c))
 	 PRINTD("Hangs in runicast_is_transmitting\n");
          clock_wait(100);
         }
+    PRINTD("Send Take Back Pebbles pkg from% d to %d, Addresses:%d.%d,%d.%d\n",NODE_ID,to,nodes_addr_list[NODE_ID].u8[0],nodes_addr_list[NODE_ID].u8[1],nodes_addr_list[to].u8[0],nodes_addr_list[to].u8[1]);
     runicast_send(c, &(nodes_addr_list[to]), MAX_RETRANSMISSIONS);
     free(buffer_to_send);
 }
@@ -345,6 +349,7 @@ while(runicast_is_transmitting(c))
 	 PRINTD("Hangs in runicast_is_transmitting\n");
          clock_wait(100);
         }
+    PRINTD("Send Pebble MSG from% d to %d, Addresses:%d.%d,%d.%d\n",NODE_ID,to,nodes_addr_list[NODE_ID].u8[0],nodes_addr_list[NODE_ID].u8[1],nodes_addr_list[to].u8[0],nodes_addr_list[to].u8[1]);
     runicast_send(c, &(nodes_addr_list[to]), MAX_RETRANSMISSIONS);
     free(buffer_to_send);
 }

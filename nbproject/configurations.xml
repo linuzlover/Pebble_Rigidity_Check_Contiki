@@ -1,12 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="88">
+<configurationDescriptor version="80">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
-    <df root="." name="Pebble_Rigidity_Check_Contiki">
+    <df name="Pebble_Rigidity_Check_Contiki" root=".">
+      <df name="obj_sky">
+        <in>abc.d</in>
+        <in>announcement.d</in>
+        <in>broadcast-announcement.d</in>
+        <in>broadcast.d</in>
+        <in>ipolite.d</in>
+        <in>netflood.d</in>
+        <in>polite-announcement.d</in>
+        <in>polite.d</in>
+        <in>rime.d</in>
+        <in>rimeaddr.d</in>
+        <in>rimestats.d</in>
+        <in>rucb.d</in>
+        <in>runicast.d</in>
+        <in>stbroadcast.d</in>
+        <in>stunicast.d</in>
+        <in>timesynch.d</in>
+        <in>unicast.d</in>
+      </df>
+      <in>attilio.c</in>
       <in>packages_comm.c</in>
       <in>packages_comm.h</in>
+      <in>pebble_assign_set.c</in>
+      <in>pebble_assign_set.h</in>
       <in>pebble_functions.c</in>
       <in>pebble_functions.h</in>
       <in>pebble_globals.h</in>
+      <in>receiver.c</in>
+      <in>sender.c</in>
+      <in>symbols.c</in>
+      <in>symbols.h</in>
     </df>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -30,8 +56,6 @@
         <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
         <compilerSet>default</compilerSet>
       </toolsSet>
-      <codeAssistance>
-      </codeAssistance>
       <makefileType>
         <makeTool>
           <buildCommandWorkingDir>.</buildCommandWorkingDir>
@@ -51,18 +75,6 @@
           </incDir>
         </cTool>
       </folder>
-      <item path="packages_comm.c" ex="false" tool="0" flavor2="2">
-        <cTool>
-        </cTool>
-      </item>
-      <item path="packages_comm.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="pebble_functions.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="pebble_functions.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="pebble_globals.h" ex="false" tool="3" flavor2="0">
-      </item>
     </conf>
   </confs>
 </configurationDescriptor>

@@ -84,14 +84,9 @@ uchar max_bid = 0;
 
 uchar LEADER_INIT_EL = 0;
 
-void leader_election_init() {
-    memset(received_leader_bid, 0, TOT_NUM_NODES * sizeof (uchar));
-    received_leader_bid[NODE_ID] = 1;
-    max_bid = 0;
-    max_id = 0;
-}
 
-uchar check_all_leader_pkgs_rec() {
+
+uchar check_all_bids_rec() {
     uchar i = 0;
     uchar considered = 0;
 
@@ -358,8 +353,7 @@ void leader_close(struct trickle_conn *trick) {
         send_rigidity_pkg(trick, is_rigid);
         //Init the auction
         is_over = 1;
-    } else
-        LEADER_INIT_EL = 1;
+    } 
 }
 
 void manage_send_back_pebble(uchar from)
