@@ -35,7 +35,7 @@ extern "C" {
 
     uchar check_all_bids_rec();
 
-    void leader_close(struct trickle_conn *trick);
+    void leader_close(struct broadcast_conn *c);
     
     void manage_pebble_request(struct runicast_conn *c, uchar from, uint16 rUid);
     

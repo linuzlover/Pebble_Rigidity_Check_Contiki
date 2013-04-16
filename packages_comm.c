@@ -74,7 +74,7 @@ void send_token_pkg(struct broadcast_conn *c, uchar i, uchar *adj, rimeaddr_t no
     rimeaddr_t dest;
     uchar j;
     uchar pkg_length = sizeof (pkg_hdr);
-    uchar *buffer_to_send = malloc(pkg_length);
+    uchar buffer_to_send[pkg_length];
 
     //Destination is set to the default value 255.255
     dest.u8[0] = 255;
@@ -97,7 +97,7 @@ void send_token_pkg(struct broadcast_conn *c, uchar i, uchar *adj, rimeaddr_t no
     broadcast_send(c);
     //Debugging
 
-    free(buffer_to_send);
+    
 }
 
 void send_leader_bid_pkg(struct broadcast_conn *c, uchar id, uchar bid) {
@@ -122,7 +122,6 @@ void send_leader_bid_pkg(struct broadcast_conn *c, uchar id, uchar bid) {
     //packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);
     broadcast_send(c);
-    free(buffer_to_send);
 }
 
 void send_leader_election_pkg(struct broadcast_conn *c) {
@@ -206,7 +205,7 @@ uchar send_pebble_request_pkg(struct runicast_conn *c, uchar to, uchar from, uin
     packetbuf_copyfrom(buffer_to_send, pkg_length);
     //Wait until the channel is free
     while (runicast_is_transmitting(c)) {
-        etimer_set(&et, CLOCK_SECOND);
+        etimer_set(&et, 10);
         PT_WAIT_WHILE(&pt, etimer_expired(&et));
         PRINTD("Hangs in runicast_is_transmitting\n");
     }
@@ -220,43 +219,54 @@ uchar send_pebble_request_pkg(struct runicast_conn *c, uchar to, uchar from, uin
 }
 
 void send_back_pebble_pkg(struct runicast_conn *c, uchar to) {
+    //Protothread structure
+    struct pt pt;
+    //Timer
+    static struct etimer et;
+    //Header to send
     pkg_hdr to_send;
-    rimeaddr_t dest;
+    //size of the payload
     uint16 len = sizeof (uchar)*2;
+    //Length of the whole packet
     uint16 pkg_length = sizeof (pkg_hdr) + len;
+    //Buffer to store the new package to be sent
     uchar buffer_to_send[pkg_length];
 
-    //TO BE FIXED
-    dest.u8[0] = 255;
-    dest.u8[1] = 255;
-    //-----------
-
+    //Begin protothread
+    PT_BEGIN(&pt);
+    //Setting the type of the pkg
     to_send.type = SEND_BACK_PEBBLE_PKG;
-    //to_send.receiver = dest;
+    //Setting the length
     to_send.data_len = len;
     //Copying the header into the buffer
     memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
-
+    //Copying the destination id
     memcpy(buffer_to_send + sizeof (pkg_hdr), &to, sizeof (uchar));
+    //Copying the NODE ID in the package
     memcpy(buffer_to_send + sizeof (pkg_hdr) + sizeof (uchar), &NODE_ID, sizeof (uchar));
+    //Clear the buffer
     packetbuf_clear();
+    //Set its length
     packetbuf_set_datalen(pkg_length);
+    //Copy the package from the buffer
     packetbuf_copyfrom(buffer_to_send, pkg_length);
+     //Wait until the channel is free
     while (runicast_is_transmitting(c)) {
+        etimer_set(&et, 10);
+        PT_WAIT_WHILE(&pt, etimer_expired(&et));
         PRINTD("Hangs in runicast_is_transmitting\n");
-        clock_wait(100);
     }
     PRINTD("Send Back Pebble pkg from% d to %d, Addresses:%d.%d,%d.%d\n", NODE_ID, to, nodes_addr_list[NODE_ID].u8[0], nodes_addr_list[NODE_ID].u8[1], nodes_addr_list[to].u8[0], nodes_addr_list[to].u8[1]);
+    //Send!
     runicast_send(c, &(nodes_addr_list[to]), MAX_RETRANSMISSIONS);
+    PT_END(&pt);
 }
 
 void send_current_ind_set(struct broadcast_conn *c, uchar how_many_edges) {
     pkg_hdr to_send;
     rimeaddr_t dest;
     uint16 len = sizeof (uchar);
-
     uint16 pkg_length = sizeof (pkg_hdr) + len;
-
     uchar buffer_to_send[pkg_length];
 
     //TO BE FIXED
@@ -277,50 +287,53 @@ void send_current_ind_set(struct broadcast_conn *c, uchar how_many_edges) {
 }
 
 void send_take_back_pebbles(struct runicast_conn *c, uchar to, uchar from) {
+    //Protothread structure
+    struct pt pt;
+    //Timer
+    static struct etimer et;
+    //Header to send
     pkg_hdr to_send;
-    rimeaddr_t dest;
+    //size of the payload
     uint16 len = 2 * sizeof (uchar);
-
     uint16 pkg_length = sizeof (pkg_hdr) + len;
     uchar buffer_to_send[pkg_length];
 
-    //TO BE FIXED
-    dest.u8[0] = 255;
-    dest.u8[1] = 255;
-    //-----------
-
+    //Begin protothread
+    PT_BEGIN(&pt);
 
     to_send.type = TAKE_BACK_PEBBLES_PKG;
     //to_send.receiver = dest;
     to_send.data_len = len;
     //Copying the header into the buffer
     memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
-
     memcpy(buffer_to_send + sizeof (pkg_hdr), &to, sizeof (uchar));
     memcpy(buffer_to_send + sizeof (pkg_hdr) + sizeof (uchar), &from, sizeof (uchar));
 
     packetbuf_clear();
     packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);
+     //Wait until the channel is free
     while (runicast_is_transmitting(c)) {
+        etimer_set(&et, 10);
+        PT_WAIT_WHILE(&pt, etimer_expired(&et));
         PRINTD("Hangs in runicast_is_transmitting\n");
-        clock_wait(100);
     }
     PRINTD("Send Take Back Pebbles pkg from% d to %d, Addresses:%d.%d,%d.%d\n", NODE_ID, to, nodes_addr_list[NODE_ID].u8[0], nodes_addr_list[NODE_ID].u8[1], nodes_addr_list[to].u8[0], nodes_addr_list[to].u8[1]);
     runicast_send(c, &(nodes_addr_list[to]), MAX_RETRANSMISSIONS);
+    PT_END(&pt);
 }
 
 void send_pebble_msg(struct runicast_conn *c, uchar to, uchar from, uchar found) {
+    //Protothread structure
+    struct pt pt;
+    //Timer
+    static struct etimer et;
     pkg_hdr to_send;
-    rimeaddr_t dest;
     uint16 len = 2 * sizeof (uchar);
-
     uint16 pkg_length = sizeof (pkg_hdr) + len;
     uchar buffer_to_send[pkg_length];
-    //TO BE FIXED
-    dest.u8[0] = 255;
-    dest.u8[1] = 255;
-    //-----------
+    //Begin protothread
+    PT_BEGIN(&pt);
 
     switch (found) {
         case 1:
@@ -340,11 +353,14 @@ void send_pebble_msg(struct runicast_conn *c, uchar to, uchar from, uchar found)
     packetbuf_clear();
     packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);
+     //Wait until the channel is free
     while (runicast_is_transmitting(c)) {
+        etimer_set(&et, 10);
+        PT_WAIT_WHILE(&pt, etimer_expired(&et));
         PRINTD("Hangs in runicast_is_transmitting\n");
-        clock_wait(100);
     }
     PRINTD("Send Pebble MSG from% d to %d, Addresses:%d.%d,%d.%d\n", NODE_ID, to, nodes_addr_list[NODE_ID].u8[0], nodes_addr_list[NODE_ID].u8[1], nodes_addr_list[to].u8[0], nodes_addr_list[to].u8[1]);
     runicast_send(c, &(nodes_addr_list[to]), MAX_RETRANSMISSIONS);
+    PT_END(&pt);
 }
 

@@ -36,6 +36,7 @@ typedef struct{
  */
 #define TOT_NUM_NODES 8
 
+extern uchar last_leader;
 
 extern uchar is_over;
 /**

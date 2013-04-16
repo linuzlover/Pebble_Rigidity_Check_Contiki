@@ -67,7 +67,8 @@ static process_event_t stop_evt;
  */
 void leader_election_reset() {
     memset(received_leader_bid, 0, TOT_NUM_NODES * sizeof (uchar));
-    received_leader_bid[NODE_ID]=1;
+    received_leader_bid[NODE_ID] = 1;
+    last_leader = 0;
 }
 
 /**
@@ -219,7 +220,7 @@ broadcast_recv(struct broadcast_conn *c) {
     pkg_hdr rec_hdr;
     /*Copy the broadcast buffer in the header structure*/
     memcpy(&rec_hdr, packetbuf_dataptr(), sizeof (pkg_hdr));
-    
+
     uchar bid, sender_id, received_ind_set_size;
     /*Switch on the type of pkg*/
     switch (rec_hdr.type) {
@@ -249,7 +250,7 @@ broadcast_recv(struct broadcast_conn *c) {
             memcpy(&bid, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
             PRINTD("Leader bid received by agent %d from %d amount %d\n", NODE_ID + 1, sender_id + 1, bid);
             received_leader_bid[sender_id] = 1;
-            
+
             if (max_bid < bid) {
                 max_bid = bid;
                 max_id = sender_id;
@@ -260,19 +261,19 @@ broadcast_recv(struct broadcast_conn *c) {
                 max_bid = NODE_ID;
                 max_id = NODE_ID;
             }
-            
+            process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case IND_SET_PKG:
             memcpy(&received_ind_set_size, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             num_ind_set = received_ind_set_size;
             PRINTD("Ind Set received by agent %d amount %d\n", NODE_ID, num_ind_set);
-            
+
             break;
         case NOTIFY_RIGIDITY_PKG:
             memcpy(&is_rigid, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             PRINTD("Rigidity notification %d\n", is_rigid);
             is_over = 1;
-            
+
             break;
         default:
             printf("Error in broadcast switch\n");
@@ -402,21 +403,30 @@ PROCESS_THREAD(pebble_process, ev, data) {
     //While all the agents have not been leader or no rigidity notifications
     //has been sent
     while (!all_been_leader() && !is_over) {
+        int iter = TOT_NUM_NODES;
         //Wait a start leader auction
-        PROCESS_WAIT_EVENT_UNTIL(ev == start_leader_election_evt);
+        if (!last_leader)
+            PROCESS_WAIT_EVENT_UNTIL(ev == start_leader_election_evt);
+        else
+        {
+            send_leader_election_pkg(&broadcast);
+
+        }
+
         //Reset the leader election structs
         leader_election_reset();
+
         //Desync the agents
-        etimer_set(&et, (NODE_ID + 1)* 10);
-        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-        
-        //Send the appropriate bid
+        etimer_set(&et, (NODE_ID + 1)* 25);
+            PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         if (been_leader)
+        {
             send_leader_bid_pkg(&broadcast, NODE_ID, 0);
+        }
         else
             send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID);
-        //------------------------
-        
+            
+
         //Until all the bids have not been received
         while (!check_all_bids_rec()) {
             //Wait 10 ticks to check again
@@ -429,8 +439,17 @@ PROCESS_THREAD(pebble_process, ev, data) {
         been_leader_tab[max_id] = 1;
         //Consider the new leader
         if (max_id == NODE_ID) {
-            
+            //Init the leadership structures
+            leader_init();
+            etimer_set(&et, 100);
+            PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+            //Close the leadership stage
+            leader_close(&broadcast);
         }
+        //Reset the bid variables
+        max_id = 0;
+        max_bid = 0;
+        //------------------------
     }
 
     PRINTD("OVER\n");
