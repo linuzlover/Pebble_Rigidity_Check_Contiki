@@ -420,7 +420,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
             send_leader_bid_pkg(&trickle, NODE_ID, 0);
         else
             send_leader_bid_pkg(&trickle, NODE_ID, NODE_ID);
-
+        
         //If all the bids have arrived
         while (!check_all_leader_pkgs_rec()) {
             etimer_set(&et, 10);

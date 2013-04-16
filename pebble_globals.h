@@ -9,6 +9,7 @@
 #define PRINTD(format, args...) ((void)0)
 #endif
 
+#define max(a,b) (a>b)?a:b
 
 #define MAX_RETRANSMISSIONS 8
 
@@ -33,7 +34,7 @@ typedef struct{
  *Define the total number of involved nodes. In future releases this will be a 
  * dynamic variable. \TODO: Change it to a variable instead of a define
  */
-#define TOT_NUM_NODES 7
+#define TOT_NUM_NODES 8
 
 
 extern uchar is_over;

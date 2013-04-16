@@ -82,7 +82,6 @@ uchar max_id = 0;
 
 uchar max_bid = 0;
 
-uchar LEADER_INIT_EL = 0;
 
 
 

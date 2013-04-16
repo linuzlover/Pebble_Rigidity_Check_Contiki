@@ -3,25 +3,9 @@
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df name="Pebble_Rigidity_Check_Contiki" root=".">
       <df name="obj_sky">
-        <in>abc.d</in>
-        <in>announcement.d</in>
-        <in>broadcast-announcement.d</in>
-        <in>broadcast.d</in>
-        <in>ipolite.d</in>
-        <in>netflood.d</in>
-        <in>polite-announcement.d</in>
-        <in>polite.d</in>
-        <in>rime.d</in>
-        <in>rimeaddr.d</in>
-        <in>rimestats.d</in>
-        <in>rucb.d</in>
-        <in>runicast.d</in>
-        <in>stbroadcast.d</in>
-        <in>stunicast.d</in>
-        <in>timesynch.d</in>
-        <in>unicast.d</in>
       </df>
       <in>attilio.c</in>
+      <in>new_receiver.c</in>
       <in>packages_comm.c</in>
       <in>packages_comm.h</in>
       <in>pebble_assign_set.c</in>

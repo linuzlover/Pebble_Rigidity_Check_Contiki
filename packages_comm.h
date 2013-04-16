@@ -27,7 +27,7 @@
 
 #include "contiki.h"
 #include "net/rime.h"
-#include "net/rime/trickle.h"
+
 #include "pebble_globals.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,19 +38,6 @@
  */
 
 extern rimeaddr_t nodes_addr_list[TOT_NUM_NODES];
-
-//-----------------------------------
-//Communication related variables
-/**
- * \var START_FLAG Variable to store the start Flag
- */
-extern uchar START_FLAG;
-/**
- * \var ADJ_FLAG Variable to store the adj Flag used to understand if an adjacency
- * matrix has been sent to the agent
- */
-extern uchar ADJ_FLAG;
-
 /**
  * \var GOT_TOKEN Variable to store the token
  */
@@ -117,18 +104,18 @@ enum {
  * This function sends the start package in broadcast
  * @param broadcast Broadcast channel
  */
-void send_start_pkg_broad(struct trickle_conn *c);
+void send_start_pkg_broad(struct broadcast_conn *c);
 /**
  * This function sends the stop package in broadcast
  * @param broadcast Broadcast channel
  */
-void send_stop_pkg_broad(struct trickle_conn *c);
+void send_stop_pkg_broad(struct broadcast_conn *c);
 /**
  * This function sends the adjacenty matrix in broadcast
  * @param broadcast Broadcast channel
  * @param adj Adjacency matrix represented as a single vector of TOT_NUM_NODES^2 elements
  */
-void send_adj_pkg_broad(struct trickle_conn *c, uchar *adj);
+void send_adj_pkg_broad(struct broadcast_conn *c, uchar *adj);
 /**
  * This function sends the token package to the i-th agent neighbors according to the adjacency
  * matrix adj.
@@ -140,19 +127,19 @@ void send_adj_pkg_broad(struct trickle_conn *c, uchar *adj);
  * a static array of rimeaddr_t TOT_NUM_NODES elements. The position in the array gives the short global index
  * of the agent (the "i").
  */
-void send_token_pkg(struct trickle_conn *c, uchar i, uchar *adj, rimeaddr_t *nodes_addr_list);
+void send_token_pkg(struct broadcast_conn *c, uchar i, uchar *adj, rimeaddr_t *nodes_addr_list);
 
-void send_leader_bid_pkg(struct trickle_conn *c, uchar id, uchar bid);
+void send_leader_bid_pkg(struct broadcast_conn *c, uchar id, uchar bid);
 
-void send_rigidity_pkg(struct trickle_conn *c, uchar rigidity);
+void send_rigidity_pkg(struct broadcast_conn *c, uchar rigidity);
 
-void send_leader_election_pkg(struct trickle_conn *c);
+void send_leader_election_pkg(struct broadcast_conn *c);
 
 uchar send_pebble_request_pkg(struct runicast_conn *c, uchar to,uchar from ,uint16 uId);
 
 void send_back_pebble_pkg(struct runicast_conn *c, uchar to);
 
-void send_current_ind_set(struct trickle_conn *c,uchar how_many_edges);
+void send_current_ind_set(struct broadcast_conn *c,uchar how_many_edges);
 
 void send_pebble_msg(struct runicast_conn *c,uchar to,uchar from,uchar found);
 

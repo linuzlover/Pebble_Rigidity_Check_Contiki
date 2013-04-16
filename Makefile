@@ -2,7 +2,7 @@ CONTIKI = ../..
 LD_LIBRARY_PATH+=./
 PORT=/dev/ttyUSB0
 DEPS=$(OBJECTDIR)/pebble_assign_set.o $(OBJECTDIR)/packages_comm.o $(OBJECTDIR)/pebble_functions.o
-
+CFLAGS += -DPROJECT_CONF_H=\"project-conf.h\"
 include $(CONTIKI)/Makefile.include
 
 

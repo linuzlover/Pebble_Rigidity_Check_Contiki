@@ -64,33 +64,36 @@ AUTOSTART_PROCESSES(&example_broadcast_process);
 //\TODO: Empty... this code will act also as a packet sniffer so it will be implemented later
 
 static void
-trickle_recv(struct trickle_conn *c)
-{
-
+broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
+    printf("The sender received a package\n");
 }
-const static struct trickle_callbacks trickle_call = {trickle_recv};
-static struct trickle_conn trickle;
+
+static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
+static struct broadcast_conn broadcast;
 //NEW
-static uchar temp_adj_matrix[TOT_NUM_NODES-1][TOT_NUM_NODES-1]={{0,1,0,1,1,1,1},{1,0,1,1,1,0,0},{0,1,0,1,0,1,0},{1,1,1,0,1,1,0},{1,1,0,1,0,1,0},{1,0,1,1,1,0,0},{1,0,0,0,0,0,0}};
+static uchar temp_adj_matrix[TOT_NUM_NODES - 1][TOT_NUM_NODES - 1] = {
+    {0, 1, 0, 1, 1, 1, 1},
+    {1, 0, 1, 1, 1, 0, 0},
+    {0, 1, 0, 1, 0, 1, 0},
+    {1, 1, 1, 0, 1, 1, 0},
+    {1, 1, 0, 1, 0, 1, 0},
+    {1, 0, 1, 1, 1, 0, 0},
+    {1, 0, 0, 0, 0, 0, 0}};
 
 //static uchar temp_adj_matrix[TOT_NUM_NODES-1][TOT_NUM_NODES-1]={{0,1,0,1,1,1},{1,0,1,1,1,0},{0,1,0,1,0,1},{1,1,1,0,1,1},{1,1,0,1,0,1},{1,0,1,1,1,0}};
 //static uchar temp_adj_matrix[TOT_NUM_NODES-1][TOT_NUM_NODES-1]={{0,1,1,1,0,0},{1,0,1,0,0,0},{1,0,0,1,0,1},{1,1,1,0,0,1},{0,0,0,0,0,1},{0,0,1,1,1,0}};
 //static uchar temp_adj_matrix[TOT_NUM_NODES-1][TOT_NUM_NODES-1]={{0,1,0,1,0,1},{1,0,1,0,0,0},{0,1,0,1,0,1},{1,1,1,0,0,1},{0,0,0,0,0,1},{0,0,1,1,1,0}};
 
-static void set_adj_matrix(uchar *adj)
-{
-	uchar i,j;
+static void set_adj_matrix(uchar *adj) {
+    uchar i, j;
 
-	for(i=0;i<TOT_NUM_NODES-1;i++)
-	{
-		for(j=0;j<TOT_NUM_NODES-1;j++)
-		{
-			if(temp_adj_matrix[i][j])
-			{
-				    adj[mat2vec(i, j)] = 1;
-			}		
-		}
-	}
+    for (i = 0; i < TOT_NUM_NODES - 1; i++) {
+        for (j = 0; j < TOT_NUM_NODES - 1; j++) {
+            if (temp_adj_matrix[i][j]) {
+                adj[mat2vec(i, j)] = 1;
+            }
+        }
+    }
 }
 
 //Callbacks and broadcast connection structure
@@ -112,63 +115,23 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
     memset(adj, 0, TOT_NUM_NODES * TOT_NUM_NODES);
 
     set_adj_matrix(adj);
-    //adj[mat2vec(0, 1)] = 1;
-
-/*    adj[mat2vec(0, 1)] = 1;
-
-    adj[mat2vec(1, 0)] = 1;
     
-    adj[mat2vec(1, 2)] = 1;
-
-    adj[mat2vec(2, 1)] = 1;
-    
-    adj[mat2vec(2, 3)] = 1;
-
-    adj[mat2vec(3, 2)] = 1;
-    
-    adj[mat2vec(3, 0)] = 1;
-    
-    adj[mat2vec(0, 3)] = 1;
-
-    adj[mat2vec(0, 2)] = 1;
-    
-    adj[mat2vec(2, 0)] = 1;
- 
-    adj[mat2vec(1, 4)] = 1;
-    
-    adj[mat2vec(4, 1)] = 1;
- 
-   // adj[mat2vec(1, 5)] = 1;
-    
-    adj[mat2vec(5, 1)] = 1;
-
-    adj[mat2vec(2, 4)] = 1;
-    
-    adj[mat2vec(4, 2)] = 1;
-
-    adj[mat2vec(5, 4)] = 1;
-    
-    adj[mat2vec(4, 5)] = 1;
-*/  
-  //adj[mat2vec(1, 0)] = 1;
-    //---
-
     //Setting handlers and begin
-    PROCESS_EXITHANDLER(trickle_close(&trickle);)
+    PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
 
     PROCESS_BEGIN();
 
     //Send start pkg in broadcast to all the agents
-    trickle_open(&trickle, CLOCK_SECOND, 145, &trickle_call);
+    broadcast_open(&broadcast, 129, &broadcast_call);
     etimer_set(&et, CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    send_start_pkg_broad(&trickle);
+    send_start_pkg_broad(&broadcast);
 
     //Send the adjacency matrix in broadcast to all the agents
     etimer_set(&et, CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
-    send_adj_pkg_broad(&trickle, adj);
+    send_adj_pkg_broad(&broadcast, adj);
     //etimer_set(&et, 2*CLOCK_SECOND);
     //PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
@@ -178,13 +141,11 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
     //to_send.receiver = dest;
     packetbuf_clear();
     packetbuf_copyfrom(&to_send, sizeof (pkg_hdr));
-    trickle_send(&trickle);
-    //NETSTACK_MAC.off(0);
-    //  while(1) {
-    //    etimer_set(&et, CLOCK_SECOND);
-    //    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    //    send_adj_pkg_broad(&broadcast,n,adj);
-    //  }
+    etimer_set(&et, 5 * CLOCK_SECOND);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+
+    broadcast_send(&broadcast);
+    
 
     PROCESS_END();
 }
