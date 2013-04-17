@@ -30,10 +30,9 @@ typedef struct{
  *Define the total number of involved nodes. In future releases this will be a 
  * dynamic variable. \TODO: Change it to a variable instead of a define
  */
-#define TOT_NUM_NODES 8
+#define TOT_NUM_NODES 7
 
 
-extern uchar is_over;
 /**
  * \var NODE Id or index of the node in global ordering
  */

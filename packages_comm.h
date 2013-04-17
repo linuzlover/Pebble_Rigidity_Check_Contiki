@@ -38,23 +38,6 @@
 
 extern rimeaddr_t nodes_addr_list[TOT_NUM_NODES];
 
-//-----------------------------------
-//Communication related variables
-/**
- * \var START_FLAG Variable to store the start Flag
- */
-extern uchar START_FLAG;
-/**
- * \var ADJ_FLAG Variable to store the adj Flag used to understand if an adjacency
- * matrix has been sent to the agent
- */
-extern uchar ADJ_FLAG;
-
-/**
- * \var GOT_TOKEN Variable to store the token
- */
-extern uchar GOT_TOKEN;
-
 /*! 
  * \struct pkg_hdr
  * This struct is intended to contain the header of the package to be sent from/to
@@ -65,14 +48,8 @@ typedef struct {
      * \var type Defines the type of the package (according to the enum)
      */
     uchar type;
-    /**
-     * \var receiver The rime address of the destination
-     */
-//    rimeaddr_t receiver;
-    /**
-     *\var data_len Length of the data in the payload
-     */
-    uint16 data_len;
+    
+    //TODO: Improve the header
 } pkg_hdr;
 
 
@@ -82,16 +59,8 @@ typedef struct {
 enum {
     //Pkg to start the algorithms
     START_PKG = 1,
-    //Pkg to stop the algorithms
-    STOP_PKG,
     //Pkg to send the desired ajacency matrix
     ADJ_MATR_PKG,
-    //To be defined \TODO:
-    RYAN_PKG,
-    //Pkg to toggle the LEDS
-    CHANGE_LED,
-    //Pkg to model the TOKEN
-    TOKEN_PKG,
     //Pkg to model the bid in the leader election process
     LEADER_BID_PKG,
     //Pkg to start the leader election
@@ -140,20 +109,58 @@ void send_adj_pkg_broad(struct broadcast_conn *broadcast, uchar *adj);
  * of the agent (the "i").
  */
 void send_token_pkg(struct broadcast_conn *broadcast, uchar i, uchar *adj, rimeaddr_t *nodes_addr_list);
-
-void send_leader_bid_pkg(struct broadcast_conn *broadcast, uchar id, uchar bid);
-
-void send_rigidity_pkg(struct broadcast_conn *broadcast, uchar rigidity);
-
+/**
+ * Send the leader election start pkg
+ * @param broadcast Broadcast channel
+ */
 void send_leader_election_pkg(struct broadcast_conn *broadcast);
-
+/**
+ * This function send the "bid" from agent "id" to the others for the leader election auction.
+ * @param broadcast Broadcast channel
+ * @param id ID of the sender
+ * @param bid Bid for the auction
+ */
+void send_leader_bid_pkg(struct broadcast_conn *broadcast, uchar id, uchar bid);
+/**
+ * This function sends the rigidity notification in broadcast
+ * @param broadcast Broadcast channel
+ * @param rigidity 1 if the communication graph is rigid, 0 otherwise
+ */
+void send_rigidity_pkg(struct broadcast_conn *broadcast, uchar rigidity);
+/**
+ * This function sends a pebble request from agent "from" adressed to agent "to"
+ * @param broadcast Broadcast channel
+ * @param to The ID the pebble request is addressed to
+ * @param from The ID the pebble request comes from
+ * @param uId Unique identifier for the package 
+ */
 void send_pebble_request_pkg(struct broadcast_conn *broadcast, uchar to,uchar from ,uint16 uId);
-
+/**
+ * This functions sends back a pebble to agent "to"
+ * @param broadcast Broadcast channel
+ * @param to Agent to send the pebble back to
+ */
 void send_back_pebble_pkg(struct broadcast_conn *broadcast, uchar to);
-
+/**
+ * This function sends the size of the independent set in broadcast
+ * TODO: This information should be sent in the leader auction.
+ * @param broadcast Broadcast channel
+ * @param how_many_edges Size of the independent set
+ */
 void send_current_ind_set(struct broadcast_conn *broadcast,uchar how_many_edges);
-
+/**
+ * This function sends a pebble found or a pebble not found msg
+ * @param broadcast Broadcast channel
+ * @param to The destination ID
+ * @param from The sender ID
+ * @param found 1 if a pebble found has to be sent, 0 otherwise
+ */
 void send_pebble_msg(struct broadcast_conn *broadcast,uchar to,uchar from,uchar found);
-
+/**
+ * This function sends back all the pebbles to the destination
+ * @param broadcast Broadcast channel
+ * @param to The destination ID
+ * @param from The sender ID
+ */
 void send_take_back_pebbles(struct broadcast_conn *broadcast,uchar to,uchar from);
 #endif

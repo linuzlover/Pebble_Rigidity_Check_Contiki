@@ -20,7 +20,7 @@
 extern "C" {
 #endif
 
-    extern uchar LEADER_INIT_EL;
+    extern uchar PREV_LEADER;
 
     extern uchar received_leader_bid[TOT_NUM_NODES];
     

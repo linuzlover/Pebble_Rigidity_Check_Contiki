@@ -40,26 +40,34 @@
  *         Adam Dunkels <adam@sics.se>
  */
 
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include "contiki.h"
 #include "net/rime.h"
 #include "random.h"
 #include "dev/button-sensor.h"
 #include "dev/leds.h"
 #include "packages_comm.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include "net/netstack.h"
 #include "pebble_functions.h"
 #include "pebble_globals.h"
-#include <math.h>
 
 
-
+/*Broadcast connection structure*/
 static struct broadcast_conn broadcast;
+/*Structure representing a start algorithm event*/
+static process_event_t start_alg_event;
+/*Structure representing that the adjacency matrix has been received*/
+static process_event_t adj_pkg_event;
+/*Structure representing the event triggering the leader election auction*/
+static process_event_t leader_election_event;
+
+//AUXILIARY FUNCTIONS - BEGIN
 
 /**
- * Function to retrieve the global ID
+ * Function to retrieve the global ID (used also as an array index).
  * @param from Rime address of the node used to retrieve the global ID
  * @return Return the global ID
  */
@@ -73,18 +81,9 @@ static uchar get_id(rimeaddr_t *from) {
     return 255;
 }
 
-/*static uchar is_directed_to_me(rimeaddr_t *from)
-{
-        if(adj_matrix==NULL)
-                return 0;
-        uchar from_id=get_id(from);
-        if(adj_matrix[MY_ID*TOT_NUM_NODES+from_id]==1)
-                return 1;
-}
- */
-
 /**
  * Function to initialize the global list of addresses.
+ * Cannot do this from file because I cannot upload file on the MicaZ
  */
 static void set_addr_list() {
 
@@ -99,10 +98,10 @@ static void set_addr_list() {
 
     nodes_addr_list[3].u8[0] = 4;
     nodes_addr_list[3].u8[1] = 0;
-    
+
     nodes_addr_list[4].u8[0] = 5;
     nodes_addr_list[4].u8[1] = 0;
-    
+
     nodes_addr_list[5].u8[0] = 6;
     nodes_addr_list[5].u8[1] = 0;
 
@@ -124,6 +123,8 @@ static void set_addr_list() {
 
 
     /*/
+     * REAL HARDWARE MAC ADDRESSES
+            
             temp.u8[0]=0;
             temp.u8[1]=0;
             nodes_addr_list[0]=temp;
@@ -190,6 +191,8 @@ static void set_addr_list() {
     //*/
 }
 
+//AUXILIARY FUNCTIONS - END
+
 /*
  * Main process
  */
@@ -201,54 +204,53 @@ AUTOSTART_PROCESSES(&pebble_process);
 
 /*---------------------------------------------------------------------------*/
 
-/*\TODO: cut the switch using a case handler foreach case. Standard input
- and output structures should be written to feed/retrieve them to/from the functions*/
-
 /**
- * Callback function when a packet is received
- * @param c Connection
+ * Callback function when a broadcast packet is received
+ * @param c Broadcast Connection
  * @param from Sender
  */
 static void
 broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
-    /*Header of the received packet*/
+    /**
+     * Header of the received packet
+     * @see pebble_comm.h
+     */
     pkg_hdr rec_hdr;
     /*Copy the broadcast buffer in the header structure*/
     memcpy(&rec_hdr, packetbuf_dataptr(), sizeof (pkg_hdr));
 
+    /*Temporary variables exctracted from the packages*/
     uchar bid, destination_id, sender_id, received_unique_id, received_ind_set_size;
     /*Switch on the type of pkg*/
     switch (rec_hdr.type) {
-
             /*PKG to start the algorithms*/
         case START_PKG:
-	PRINTD ("Start flag received by agent %d\n",NODE_ID);
-            /*Set flag and send an event*/
-            START_FLAG = 1;
+            PRINTD("Start flag received by agent %d\n", NODE_ID);
             /*Send the event to unlock the main process*/
-            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
-            //leds_toggle(LEDS_ALL);
+            process_post_synch(&pebble_process, start_alg_event, NULL);
             break;
-            /*PKG to stop the algorithms*/
-        case STOP_PKG:
-            /*Set flag and send an event*/
-            START_FLAG = 0;
-            /*Send the event to unlock the main process*/
-            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
-            break;
+            /*PKG with the adjacency matrix*/
         case ADJ_MATR_PKG:
-	PRINTD ("Adj Matrix received by agent %d\n",NODE_ID);
-            ADJ_FLAG = 1;
+            PRINTD("Adj Matrix received by agent %d\n", NODE_ID);
             memcpy(adj_matrix, packetbuf_dataptr() + sizeof (pkg_hdr), TOT_NUM_NODES * TOT_NUM_NODES);
             /*Send the event to unlock the main process*/
-            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
+            process_post_synch(&pebble_process, adj_pkg_event, NULL);
             break;
+            /*PKG to start the leader auction*/
+        case LEADER_START_ELECTION_PKG:
+            PRINTD("Leader start election received by agent %d\n", NODE_ID);
+            process_post_synch(&pebble_process, leader_election_event, NULL);
+            break;
+            /*PKG containing the bid
+             *TODO: INSERT THE IND_SET_SIZE
+             */
         case LEADER_BID_PKG:
-
             memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             memcpy(&bid, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
-	    PRINTD ("Leader bid received by agent %d from %d amount %d\n",NODE_ID,sender_id,bid);
+            PRINTD("Leader bid received by agent %d from %d amount %d\n", NODE_ID, sender_id, bid);
+            /*Set that it was received*/
             received_leader_bid[sender_id] = 1;
+            /*If the bid is geq than the possessed one... store it*/
             if (max_bid < bid) {
                 max_bid = bid;
                 max_id = sender_id;
@@ -260,71 +262,70 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
                 max_id = NODE_ID;
             }
 
-            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
-            break;
-        case LEADER_START_ELECTION_PKG:
-	    PRINTD ("Leader start election received by agent %d\n",NODE_ID);
-            leader_election_init();
-            LEADER_INIT_EL = 1;
-            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
+            process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case IND_SET_PKG:
-	    memcpy(&received_ind_set_size, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
-	    num_ind_set = received_ind_set_size;
-            PRINTD ("Ind Set received by agent %d amount %d\n",NODE_ID,num_ind_set);
-            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
+            memcpy(&received_ind_set_size, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+            num_ind_set = received_ind_set_size;
+            PRINTD("Ind Set received by agent %d amount %d\n", NODE_ID, num_ind_set);
+            process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case REQUEST_PEBBLE_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if (destination_id == NODE_ID) {
                 memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
                 memcpy(&received_unique_id, packetbuf_dataptr() + sizeof (pkg_hdr) + 2 * sizeof (uchar), sizeof (uint16));
-                PRINTD ("Requested pebble to agent %d from agent %d with ID %d\n",NODE_ID,sender_id,received_unique_id);
+                PRINTD("Requested pebble to agent %d from agent %d with ID %d\n", NODE_ID, sender_id, received_unique_id);
                 manage_pebble_request(&broadcast, sender_id, received_unique_id);
             }
-
+            process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case PEBBLE_FOUND_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
             if (destination_id == NODE_ID) {
-	        PRINTD ("Received a pebble found by agent %d from agent %d\n",NODE_ID,sender_id);
+                PRINTD("Received a pebble found by agent %d from agent %d\n", NODE_ID, sender_id);
                 manage_pebble_found(&broadcast, sender_id);
             }
-            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
+            process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case PEBBLE_NOT_FOUND_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if (destination_id == NODE_ID) {
                 memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
-	        PRINTD ("Received a pebble not found by agent %d from agent %d\n",NODE_ID,sender_id);
+                PRINTD("Received a pebble not found by agent %d from agent %d\n", NODE_ID, sender_id);
                 manage_pebble_not_found(&broadcast, sender_id);
             }
-            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
+            process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
 
         case SEND_BACK_PEBBLE_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if (destination_id == NODE_ID) {
-                memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr)+sizeof (uchar), sizeof (uchar));
-            PRINTD ("Sent back a pebble to agent %d from \n",NODE_ID,sender_id);
+                memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
+                PRINTD("Sent back a pebble to agent %d from %\n", NODE_ID, sender_id);
                 manage_send_back_pebble(sender_id);
             }
-            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
+            process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         case NOTIFY_RIGIDITY_PKG:
             memcpy(&is_rigid, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
-	    PRINTD ("Rigidity notification %d\n",is_rigid);
-            is_over = 1;
-            process_post(&pebble_process, PROCESS_EVENT_MSG, NULL);
+            PRINTD("Rigidity notification %d\n", is_rigid);
+
+            if (!is_rigid)
+                leds_on(LEDS_BLUE);
+            else
+                leds_on(LEDS_ALL);
+            process_exit(&pebble_process);
             break;
         case TAKE_BACK_PEBBLES_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if (destination_id == NODE_ID) {
                 memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
-	        PRINTD ("Take back pebbles to agent %d from %d\n",NODE_ID,sender_id);
+                PRINTD("Take back pebbles to agent %d from %d\n", NODE_ID, sender_id);
                 manage_take_back_pebbles(sender_id);
             }
+            process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         default:
             printf("Error in switch\n");
@@ -347,7 +348,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
     PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
     //Begin the process
     PROCESS_BEGIN();
-    
+
     //Open the broadcast channel on 129 and set the callback function
     broadcast_open(&broadcast, 129, &broadcast_call);
     //Init the address list statically
@@ -355,25 +356,26 @@ PROCESS_THREAD(pebble_process, ev, data) {
     //Get the global ID
     NODE_ID = get_id(&rimeaddr_node_addr);
     /*Start only when START_PKG has been received*/
-    PROCESS_WAIT_EVENT_UNTIL(START_FLAG);
+    PROCESS_WAIT_EVENT_UNTIL(ev == start_alg_event);
     /*Wait for the adjacency matrix to be received*/
-    PROCESS_WAIT_EVENT_UNTIL(ADJ_FLAG);
+    PROCESS_WAIT_EVENT_UNTIL(ev == adj_pkg_event);
     //Init each agent
     agent_init();
-    
+    //Init the structures for the leader election
+    leader_election_init();
     /*Main loop*/
     //iterate until or all the agents have been leader or the algorithm is over due
     //to the graph rigidity.
-    while (!all_been_leader() && !is_over) {
-      
-        //Init the structures for the leader election
-        leader_election_init();
+    while (!all_been_leader()) {
+
+
         //Wait for all the start pkgs to arrive
-        PROCESS_WAIT_EVENT_UNTIL(LEADER_INIT_EL || is_over);
-        if(is_over)
-            continue;
-        //Once the start has been received, set the flag to zero for future auctions
-        LEADER_INIT_EL = 0;
+        if (PREV_LEADER) {
+            PREV_LEADER = 0;
+        } else
+            PROCESS_WAIT_EVENT_UNTIL(ev == leader_election_event);
+        leader_election_init();
+
         //Wait for the start to be notified to all the nodes
         etimer_set(&et, CLOCK_SECOND);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
@@ -401,20 +403,11 @@ PROCESS_THREAD(pebble_process, ev, data) {
 
             //Init the leadership structures
             leader_init();
-	    uchar index1,index2;
-	    for(index1=0;index1<TOT_NUM_NODES;index1++)
-	    {
-		for(index2=0;index2<TOT_NUM_NODES;index2++)
-		{
-			printf("%d  ",adj_matrix[mat2vec(index1,index2)]);
-		}
-		printf("\n");
-	    }
-	
-            while (!leader_run(&broadcast)){
-		 etimer_set(&et, 100);
-        	 PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-	    }
+
+            while (!leader_run(&broadcast)) {
+                etimer_set(&et, 100);
+                PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+            }
 
             //Terminate the leadership phase
             leader_close(&broadcast);
@@ -424,8 +417,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
             //Start new election process
             send_leader_election_pkg(&broadcast);
         }
-        if (is_over)
-            continue;
+
 
     }
 

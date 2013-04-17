@@ -3,9 +3,10 @@
 #include "pebble_functions.h"
 #include "pebble_assign_set.h"
 
-uchar is_over = 0;
 
 edgeset assign_pebble;
+
+uchar PREV_LEADER=0;
 
 uchar is_rigid = 0;
 //Initialization i-th agent variables
@@ -82,7 +83,6 @@ uchar max_id = 0;
 
 uchar max_bid = 0;
 
-uchar LEADER_INIT_EL = 0;
 
 void leader_election_init() {
     memset(received_leader_bid, 0, TOT_NUM_NODES * sizeof (uchar));
@@ -353,10 +353,9 @@ void leader_close(struct broadcast_conn *broadcast) {
     send_current_ind_set(broadcast, num_ind_set);
     if (all_been_leader()) {
         send_rigidity_pkg(broadcast, is_rigid);
-        //Init the auction
-        is_over = 1;
-    } else
-        LEADER_INIT_EL = 1;
+    } 
+    else
+        PREV_LEADER=1;
 }
 
 void manage_send_back_pebble(uchar from)
