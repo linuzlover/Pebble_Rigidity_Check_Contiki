@@ -46,10 +46,9 @@ typedef struct {
      * \var type Defines the type of the package (according to the enum)
      */
     uchar type;
-    
+
     //TODO: Improve the header
 } pkg_hdr;
-
 
 /**
  *\enum type Enum describing the type of package to be sent/received
@@ -116,7 +115,7 @@ void send_leader_election_pkg(struct broadcast_conn *broadcast);
  * @param id ID of the sender
  * @param bid Bid for the auction
  */
-void send_leader_bid_pkg(struct broadcast_conn *broadcast, uchar id, uchar bid,uchar size_ind_set);
+void send_leader_bid_pkg(struct broadcast_conn *broadcast, uchar id, uchar bid, uchar size_ind_set);
 /**
  * This function sends the rigidity notification in broadcast
  * @param broadcast Broadcast channel
@@ -130,7 +129,7 @@ void send_rigidity_pkg(struct broadcast_conn *broadcast, uchar rigidity);
  * @param from The ID the pebble request comes from
  * @param uId Unique identifier for the package 
  */
-void send_pebble_request_pkg(struct broadcast_conn *broadcast, uchar to,uchar from ,uint16 uId);
+void send_pebble_request_pkg(struct broadcast_conn *broadcast, uchar to, uchar from, uint16 uId);
 /**
  * This functions sends back a pebble to agent "to"
  * @param broadcast Broadcast channel
@@ -144,12 +143,12 @@ void send_back_pebble_pkg(struct broadcast_conn *broadcast, uchar to);
  * @param from The sender ID
  * @param found 1 if a pebble found has to be sent, 0 otherwise
  */
-void send_pebble_msg(struct broadcast_conn *broadcast,uchar to,uchar from,uchar found);
+void send_pebble_msg(struct broadcast_conn *broadcast, uchar to, uchar from, uchar found);
 /**
  * This function sends back all the pebbles to the destination
  * @param broadcast Broadcast channel
  * @param to The destination ID
  * @param from The sender ID
  */
-void send_take_back_pebbles(struct broadcast_conn *broadcast,uchar to,uchar from);
+void send_take_back_pebbles(struct broadcast_conn *broadcast, uchar to, uchar from);
 #endif

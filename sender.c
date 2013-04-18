@@ -66,27 +66,40 @@ static void
 broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
 
 }
-//NEW
-static uchar temp_adj_matrix[TOT_NUM_NODES-1][TOT_NUM_NODES-1]={{0,1,0,1,1,1,1},{1,0,1,1,1,0,0},{0,1,0,1,0,1,0},{1,1,1,0,1,1,0},{1,1,0,1,0,1,0},{1,0,1,1,1,0,0},{1,0,0,0,0,0,0}};
 
-//static uchar temp_adj_matrix[TOT_NUM_NODES-1][TOT_NUM_NODES-1]={{0,1,0,1,1,1},{1,0,1,1,1,0},{0,1,0,1,0,1},{1,1,1,0,1,1},{1,1,0,1,0,1},{1,0,1,1,1,0}};
-//static uchar temp_adj_matrix[TOT_NUM_NODES-1][TOT_NUM_NODES-1]={{0,1,1,1,0,0},{1,0,1,0,0,0},{1,0,0,1,0,1},{1,1,1,0,0,1},{0,0,0,0,0,1},{0,0,1,1,1,0}};
-//static uchar temp_adj_matrix[TOT_NUM_NODES-1][TOT_NUM_NODES-1]={{0,1,0,1,0,1},{1,0,1,0,0,0},{0,1,0,1,0,1},{1,1,1,0,0,1},{0,0,0,0,0,1},{0,0,1,1,1,0}};
+//Not rigid 7 agents
+//*/
+static uchar temp_adj_matrix[TOT_NUM_NODES - 1][TOT_NUM_NODES - 1] = {
+    {0, 1, 0, 1, 1, 1, 1},
+    {1, 0, 1, 1, 1, 0, 0},
+    {0, 1, 0, 1, 0, 1, 0},
+    {1, 1, 1, 0, 1, 1, 0},
+    {1, 1, 0, 1, 0, 1, 0},
+    {1, 0, 1, 1, 1, 0, 0},
+    {1, 0, 0, 0, 0, 0, 0}};
+//*/
 
-static void set_adj_matrix(uchar *adj)
-{
-	uchar i,j;
+//Rigid 6 agents
+/*/
+static uchar temp_adj_matrix[TOT_NUM_NODES - 1][TOT_NUM_NODES - 1] = {
+    {0, 1, 0, 1, 1, 1},
+    {1, 0, 1, 1, 1, 0},
+    {0, 1, 0, 1, 0, 1},
+    {1, 1, 1, 0, 1, 1},
+    {1, 1, 0, 1, 0, 1},
+    {1, 0, 1, 1, 1, 0}};
+//*/
 
-	for(i=0;i<TOT_NUM_NODES-1;i++)
-	{
-		for(j=0;j<TOT_NUM_NODES-1;j++)
-		{
-			if(temp_adj_matrix[i][j])
-			{
-				    adj[mat2vec(i, j)] = 1;
-			}		
-		}
-	}
+static void set_adj_matrix(uchar *adj) {
+    uchar i, j;
+
+    for (i = 0; i < TOT_NUM_NODES - 1; i++) {
+        for (j = 0; j < TOT_NUM_NODES - 1; j++) {
+            if (temp_adj_matrix[i][j]) {
+                adj[mat2vec(i, j)] = 1;
+            }
+        }
+    }
 }
 
 //Callbacks and broadcast connection structure
@@ -112,43 +125,43 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
     set_adj_matrix(adj);
     //adj[mat2vec(0, 1)] = 1;
 
-/*    adj[mat2vec(0, 1)] = 1;
+    /*    adj[mat2vec(0, 1)] = 1;
 
-    adj[mat2vec(1, 0)] = 1;
+        adj[mat2vec(1, 0)] = 1;
     
-    adj[mat2vec(1, 2)] = 1;
+        adj[mat2vec(1, 2)] = 1;
 
-    adj[mat2vec(2, 1)] = 1;
+        adj[mat2vec(2, 1)] = 1;
     
-    adj[mat2vec(2, 3)] = 1;
+        adj[mat2vec(2, 3)] = 1;
 
-    adj[mat2vec(3, 2)] = 1;
+        adj[mat2vec(3, 2)] = 1;
     
-    adj[mat2vec(3, 0)] = 1;
+        adj[mat2vec(3, 0)] = 1;
     
-    adj[mat2vec(0, 3)] = 1;
+        adj[mat2vec(0, 3)] = 1;
 
-    adj[mat2vec(0, 2)] = 1;
+        adj[mat2vec(0, 2)] = 1;
     
-    adj[mat2vec(2, 0)] = 1;
+        adj[mat2vec(2, 0)] = 1;
  
-    adj[mat2vec(1, 4)] = 1;
+        adj[mat2vec(1, 4)] = 1;
     
-    adj[mat2vec(4, 1)] = 1;
+        adj[mat2vec(4, 1)] = 1;
  
-   // adj[mat2vec(1, 5)] = 1;
+       // adj[mat2vec(1, 5)] = 1;
     
-    adj[mat2vec(5, 1)] = 1;
+        adj[mat2vec(5, 1)] = 1;
 
-    adj[mat2vec(2, 4)] = 1;
+        adj[mat2vec(2, 4)] = 1;
     
-    adj[mat2vec(4, 2)] = 1;
+        adj[mat2vec(4, 2)] = 1;
 
-    adj[mat2vec(5, 4)] = 1;
+        adj[mat2vec(5, 4)] = 1;
     
-    adj[mat2vec(4, 5)] = 1;
-*/  
-  //adj[mat2vec(1, 0)] = 1;
+        adj[mat2vec(4, 5)] = 1;
+     */
+    //adj[mat2vec(1, 0)] = 1;
     //---
 
     //Setting handlers and begin
@@ -158,7 +171,7 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
 
     //Send start pkg in broadcast to all the agents
     broadcast_open(&broadcast, 129, &broadcast_call);
-    etimer_set(&et, 5*CLOCK_SECOND);
+    etimer_set(&et, 5 * CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
     send_start_pkg_broad(&broadcast);
 
@@ -177,11 +190,6 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
     packetbuf_copyfrom(&to_send, sizeof (pkg_hdr));
     broadcast_send(&broadcast);
     NETSTACK_MAC.off(0);
-    //  while(1) {
-    //    etimer_set(&et, CLOCK_SECOND);
-    //    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    //    send_adj_pkg_broad(&broadcast,n,adj);
-    //  }
 
     PROCESS_END();
 }

@@ -30,10 +30,10 @@ typedef unsigned char uchar;
 /**
  * !\struct edge An edge given by the global IDs of the two nodes
  */
-typedef struct{
+typedef struct {
     uchar node_i;
     uchar node_j;
-}edge;
+} edge;
 /*! 
  *Define the total number of involved nodes. In future releases this will be a 
  *dynamic variable. \TODO: Change it to a variable instead of a define
@@ -74,7 +74,7 @@ extern edge peb_assign[2];
 /**
  * \var independent set
  */
-extern edge ind_set[2*TOT_NUM_NODES-3];
+extern edge ind_set[2 * TOT_NUM_NODES - 3];
 /**
  * \var NUM_IND_SET size of the independent set
  */
@@ -98,7 +98,7 @@ extern uchar adj_matrix[TOT_NUM_NODES*TOT_NUM_NODES];
 /**
  * \var incident_edges array of incident edges to the current agent
  */
-extern edge incident_edges[TOT_NUM_NODES-1];
+extern edge incident_edges[TOT_NUM_NODES - 1];
 /**
  * \var NUM_INCIDENT_EDGES number of incident edges
  */
@@ -131,18 +131,19 @@ extern uchar neighbors_list[TOT_NUM_NODES];
  */
 extern uchar IS_RIGID;
 /**
-     * \var PREV_LEADER variable to keep track if in the previous algorithm loop the 
-     * agent was the leader
-     */
-    extern uchar PREV_LEADER;
-    /**
-     * \var received_leader_bid bids received by the other agents
-     */
-    extern uchar received_leader_bid[TOT_NUM_NODES];
-    /**
-     * \var uId unique identified for the pebble request package
-     */
-    extern uchar uId;
+ * \var PREV_LEADER variable to keep track if in the previous algorithm loop the 
+ * agent was the leader
+ */
+extern uchar PREV_LEADER;
+/**
+ * \var received_leader_bid bids received by the other agents
+ */
+extern uchar received_leader_bid[TOT_NUM_NODES];
+/**
+ * \var uId unique identified for the pebble request package
+ */
+extern uchar uId;
+
 /**
  * Inline function to get the index of the (i,j) element in the array from the matrix representation.
  * @param i I-th index

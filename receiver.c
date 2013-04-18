@@ -231,7 +231,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
         case LEADER_BID_PKG:
             memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             memcpy(&bid, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
-            memcpy(&size_ind_set, packetbuf_dataptr() + sizeof (pkg_hdr) + 2*sizeof (uchar), sizeof (uchar));
+            memcpy(&size_ind_set, packetbuf_dataptr() + sizeof (pkg_hdr) + 2 * sizeof (uchar), sizeof (uchar));
             PRINTD("Leader bid received by agent %d from %d amount %d\n", NODE_ID, sender_id, bid);
             /*Set that it was received*/
             received_leader_bid[sender_id] = 1;
@@ -247,7 +247,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
                 MAX_ID = NODE_ID;
             }
             //Check the received independent set size
-            NUM_IND_SET=(NUM_IND_SET<size_ind_set)?size_ind_set:NUM_IND_SET;
+            NUM_IND_SET = (NUM_IND_SET < size_ind_set) ? size_ind_set : NUM_IND_SET;
             process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
             /*Pkg containing a request of a pebble*/
@@ -284,7 +284,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             }
             process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
-        /*Pkg take back a pebble*/
+            /*Pkg take back a pebble*/
         case SEND_BACK_PEBBLE_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if (destination_id == NODE_ID) {
@@ -340,7 +340,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
     broadcast_open(&broadcast, 129, &broadcast_call);
     //Init the address list statically
     set_addr_list();
-    
+
     /*Start only when START_PKG has been received*/
     PROCESS_WAIT_EVENT_UNTIL(ev == start_alg_event);
     /*Wait for the adjacency matrix to be received*/
@@ -358,24 +358,23 @@ PROCESS_THREAD(pebble_process, ev, data) {
         //The algorithm is required
         if (PREV_LEADER) {
             PREV_LEADER = 0;
-        } else
-        {
+        } else {
             //Wait for all the start pkgs to arrive
             PROCESS_WAIT_EVENT_UNTIL(ev == leader_election_event);
         }
-        
+
         leader_election_reset();
 
         //Wait for the start to be notified to all the nodes
         //Desync the agents
-        etimer_set(&et, (NODE_ID + 1) *20*SCALE);
+        etimer_set(&et, (NODE_ID + 1) *20 * SCALE);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         //If the i-th agent has been a leader, set the bid to the lowest value,
         //otherwise set it to 1
         if (BEEN_LEADER)
-            send_leader_bid_pkg(&broadcast, NODE_ID, 0,NUM_IND_SET);
+            send_leader_bid_pkg(&broadcast, NODE_ID, 0, NUM_IND_SET);
         else
-            send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID,NUM_IND_SET);
+            send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID, NUM_IND_SET);
         //If all the bids have arrived (for the sake of reliability, retransmissions
         //should be inserted but problems related to transmission collisions could
         //arise).
@@ -389,7 +388,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
             //Init the leadership structures
             leader_init();
             while (!leader_run(&broadcast)) {
-                etimer_set(&et, 10*SCALE);
+                etimer_set(&et, 10 * SCALE);
                 PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
             }
             //Terminate the leadership phase
@@ -398,7 +397,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
             send_leader_election_pkg(&broadcast);
         }
     }
-    
+
     /*End the process*/
     PROCESS_END();
 }

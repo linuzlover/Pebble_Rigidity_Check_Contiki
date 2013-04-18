@@ -59,13 +59,13 @@ extern "C" {
      * @param from The sender of the request
      * @param rUid Unique id of the received package
      */
-    void manage_pebble_request(struct broadcast_conn *broadcast,uchar from,uint16 rUid);
+    void manage_pebble_request(struct broadcast_conn *broadcast, uchar from, uint16 rUid);
     /**
      * Function to manage the pebble found package
      * @param broadcast Broadcast channel to send data
      * @param from The sender of the request
      */
-    void manage_pebble_found(struct broadcast_conn *broadcast,uchar from);
+    void manage_pebble_found(struct broadcast_conn *broadcast, uchar from);
     /**
      * Function to manage the pebble not found
      * @param broadcast Broadcast channel to send data
