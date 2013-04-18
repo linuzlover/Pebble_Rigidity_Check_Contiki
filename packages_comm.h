@@ -21,8 +21,6 @@
 #ifndef _PACKAGES_H_
 #define _PACKAGES_H_
 
-
-
 /*Including C libraries*/
 
 #include "contiki.h"
@@ -71,8 +69,6 @@ enum {
     REQUEST_PEBBLE_PKG,
     //Pkg to send back a pebble to an agent
     SEND_BACK_PEBBLE_PKG,
-    //Pkg to send the independent set in broadcast
-    IND_SET_PKG,
     //Pkg to notify that a pebble has been found
     PEBBLE_FOUND_PKG,
     //Pkg to notify that a pebble hasn't been found
@@ -141,13 +137,6 @@ void send_pebble_request_pkg(struct broadcast_conn *broadcast, uchar to,uchar fr
  * @param to Agent to send the pebble back to
  */
 void send_back_pebble_pkg(struct broadcast_conn *broadcast, uchar to);
-/**
- * This function sends the size of the independent set in broadcast
- * TODO: This information should be sent in the leader auction.
- * @param broadcast Broadcast channel
- * @param how_many_edges Size of the independent set
- */
-void send_current_ind_set(struct broadcast_conn *broadcast,uchar how_many_edges);
 /**
  * This function sends a pebble found or a pebble not found msg
  * @param broadcast Broadcast channel

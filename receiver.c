@@ -204,7 +204,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
     /*Copy the broadcast buffer in the header structure*/
     memcpy(&rec_hdr, packetbuf_dataptr(), sizeof (pkg_hdr));
     /*Temporary variables exctracted from the packages*/
-    uchar bid, destination_id, sender_id, received_unique_id, received_ind_set_size, size_ind_set;
+    uchar bid, destination_id, sender_id, received_unique_id, size_ind_set;
     /*Switch on the type of pkg*/
     switch (rec_hdr.type) {
             /*PKG to start the algorithms*/
@@ -236,26 +236,18 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             /*Set that it was received*/
             received_leader_bid[sender_id] = 1;
             /*If the bid is geq than the possessed one... store it*/
-            if (max_bid < bid) {
-                max_bid = bid;
-                max_id = sender_id;
+            if (MAX_BID < bid) {
+                MAX_BID = bid;
+                MAX_ID = sender_id;
             }
             //Check if i-th agent hasn't been a leader and has the highest bid
             //(it doesn't receive its own packet)
-            if (NODE_ID > max_bid && !been_leader) {
-                max_bid = NODE_ID;
-                max_id = NODE_ID;
+            if (NODE_ID > MAX_BID && !BEEN_LEADER) {
+                MAX_BID = NODE_ID;
+                MAX_ID = NODE_ID;
             }
-            
-            num_ind_set=(num_ind_set<size_ind_set)?size_ind_set:num_ind_set;
-            
-            process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
-            break;
-            /*Pkg containing the size of the independent set*/
-        case IND_SET_PKG:
-            memcpy(&received_ind_set_size, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
-            num_ind_set = received_ind_set_size;
-            PRINTD("Ind Set received by agent %d amount %d\n", NODE_ID, num_ind_set);
+            //Check the received independent set size
+            NUM_IND_SET=(NUM_IND_SET<size_ind_set)?size_ind_set:NUM_IND_SET;
             process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
             /*Pkg containing a request of a pebble*/
@@ -297,7 +289,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if (destination_id == NODE_ID) {
                 memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
-                PRINTD("Sent back a pebble to agent %d from %\n", NODE_ID, sender_id);
+                PRINTD("Sent back a pebble to agent %d from %d\n", NODE_ID, sender_id);
                 manage_send_back_pebble(sender_id);
             }
             process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
@@ -314,9 +306,9 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             break;
             /*Pkg for the notification of the rigidity*/
         case NOTIFY_RIGIDITY_PKG:
-            memcpy(&is_rigid, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
-            PRINTD("Rigidity notification %d\n", is_rigid);
-            if (!is_rigid)
+            memcpy(&IS_RIGID, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+            PRINTD("Rigidity notification %d\n", IS_RIGID);
+            if (!IS_RIGID)
                 leds_on(LEDS_BLUE);
             else
                 leds_on(LEDS_ALL);
@@ -344,7 +336,6 @@ PROCESS_THREAD(pebble_process, ev, data) {
     PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
     //Begin the process
     PROCESS_BEGIN();
-
     //Open the broadcast channel on 129 and set the callback function
     broadcast_open(&broadcast, 129, &broadcast_call);
     //Init the address list statically
@@ -376,58 +367,38 @@ PROCESS_THREAD(pebble_process, ev, data) {
         leader_election_reset();
 
         //Wait for the start to be notified to all the nodes
-        //etimer_set(&et, CLOCK_SECOND);
-        //PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         //Desync the agents
-        etimer_set(&et, (NODE_ID + 1) *20);
+        etimer_set(&et, (NODE_ID + 1) *20*SCALE);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         //If the i-th agent has been a leader, set the bid to the lowest value,
         //otherwise set it to 1
-        if (been_leader)
-            send_leader_bid_pkg(&broadcast, NODE_ID, 0,num_ind_set);
+        if (BEEN_LEADER)
+            send_leader_bid_pkg(&broadcast, NODE_ID, 0,NUM_IND_SET);
         else
-            send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID,num_ind_set);
-
+            send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID,NUM_IND_SET);
         //If all the bids have arrived (for the sake of reliability, retransmissions
         //should be inserted but problems related to transmission collisions could
         //arise).
         while (!check_all_leader_pkgs_rec()) {
             PROCESS_WAIT_EVENT();
         }
-        //Clear the receiverd_leader_bid
-        //memset(received_leader_bid, 0, TOT_NUM_NODES);
         //Fill the been leader tab with the new leader ID
-        been_leader_tab[max_id] = 1;
-        //Debug TODO:remove
-        //printf("New Leader:%d\n", max_id);
+        been_leader_tab[MAX_ID] = 1;
         //If the i-th agent is the leader..
-        if (max_id == NODE_ID) {
-
+        if (MAX_ID == NODE_ID) {
             //Init the leadership structures
             leader_init();
-
             while (!leader_run(&broadcast)) {
-                etimer_set(&et, 100);
+                etimer_set(&et, 10*SCALE);
                 PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
             }
-
             //Terminate the leadership phase
             leader_close(&broadcast);
-            //Wait to send the leader election packet
-            //etimer_set(&et, CLOCK_SECOND);
-            //PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
             //Start new election process
             send_leader_election_pkg(&broadcast);
         }
-
-
     }
-
-    if (!is_rigid)
-        leds_on(LEDS_BLUE);
-    else
-        leds_on(LEDS_ALL);
-
+    
     /*End the process*/
     PROCESS_END();
 }

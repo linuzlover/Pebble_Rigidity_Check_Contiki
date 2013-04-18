@@ -1,13 +1,20 @@
 #ifndef _PEBBLE_GLOBALS_H_
 #define _PEBBLE_GLOBALS_H_
 
+//Debugging define. If deactivated, turns off all the printf
 #define DEBUG
-
 #ifdef DEBUG
 #define PRINTD printf
 #else
 #define PRINTD(format, args...) ((void)0)
 #endif
+//----------------------------------------------------------
+
+/**
+ * This define scales the pauses inside the receiver.c. It must be a positive
+ * integer.
+ */
+#define SCALE 1
 
 /*Typedefs for 2 byte and single byte information*/
 /*!\typedef  
@@ -20,71 +27,109 @@ typedef unsigned short uint16;
  */
 typedef unsigned char uchar;
 
+/**
+ * !\struct edge An edge given by the global IDs of the two nodes
+ */
 typedef struct{
     uchar node_i;
     uchar node_j;
 }edge;
-
-
 /*! 
  *Define the total number of involved nodes. In future releases this will be a 
- * dynamic variable. \TODO: Change it to a variable instead of a define
+ *dynamic variable. \TODO: Change it to a variable instead of a define
  */
-#define TOT_NUM_NODES 7
+#define TOT_NUM_NODES 8
 /**
- * \var NODE Id or index of the node in global ordering
+ * \var NODE ID or index of the node in global ordering
  */
 extern uchar NODE_ID;
 /**
  * \var is_leader Variable to represent the current leadership
  */
-extern uchar is_leader;
+extern uchar IS_LEADER;
 /**
  * \var been_leader Variable to represent the past leadership
  */
-extern uchar been_leader;
-
-extern uchar requester;
-
-extern uchar paths_searched;
+extern uchar BEEN_LEADER;
+/**
+ * \var requester
+ */
+extern uchar REQUESTER;
+/**
+ * \var paths_searched
+ */
+extern uchar PATHS_SEARCHED;
 /**
  * \var request_id unique identifier of the packet
  */
-extern uint16 request_id;
+extern uint16 REQUEST_ID;
 /**
  * \var pebbles for the pebble game
  */
-extern uchar pebbles;
-
+extern uchar PEBBLES;
+/**
+ * \var peb_assign assignment of the pebbles
+ */
 extern edge peb_assign[2];
-
+/**
+ * \var independent set
+ */
 extern edge ind_set[2*TOT_NUM_NODES-3];
-
-extern uchar num_ind_set;
-
-extern uchar request_wait;
-
-extern uchar quad;
-
+/**
+ * \var NUM_IND_SET size of the independent set
+ */
+extern uchar NUM_IND_SET;
+/**
+ * \var REQUEST_WAIT
+ */
+extern uchar REQUEST_WAIT;
+/**
+ * \var QUAD
+ */
+extern uchar QUAD;
+/**
+ * \var been_leader_tab Array containing 1 if an agent has been a leader
+ */
 extern uchar been_leader_tab[TOT_NUM_NODES];
-
+/**
+ * \var adj_matrix adjacency matrix
+ */
 extern uchar adj_matrix[TOT_NUM_NODES*TOT_NUM_NODES];
-
+/**
+ * \var incident_edges array of incident edges to the current agent
+ */
 extern edge incident_edges[TOT_NUM_NODES-1];
+/**
+ * \var NUM_INCIDENT_EDGES number of incident edges
+ */
+extern uchar NUM_INCIDENT_EDGES;
+/**
+ * \var CONSIDERED_EDGE currently considered edge
+ */
+extern edge CONSIDERED_EDGE;
+/**
+ * \var MAX_ID ID of the maximum bidder
+ */
+extern uchar MAX_ID;
+/**
+ * \var MAX_BID BID of the maximum bidder
+ */
 
-extern uchar num_incident_edges;
+extern uchar MAX_BID;
+/**
+ * \var NUM_NEIGHBORS number of neighbors of each agent.
+ */
 
-extern edge considered_edge;
-
-extern uchar max_id;
-
-extern uchar max_bid;
-
-extern uchar num_neighbors;
-
+extern uchar NUM_NEIGHBORS;
+/**
+ * \var neighbors_list List of neighbors to each agent.
+ */
 extern uchar neighbors_list[TOT_NUM_NODES];
 
-extern uchar is_rigid;
+/**
+ * \var IS_RIGID Variable representing the rigidity of the graph.
+ */
+extern uchar IS_RIGID;
 /**
  * Inline function to get the index of the (i,j) element in the array from the matrix representation.
  * @param i I-th index
@@ -96,7 +141,5 @@ static inline uint16 mat2vec(uchar i, uchar j) {
     res = i * TOT_NUM_NODES + j;
     return res;
 }
-
-
 
 #endif

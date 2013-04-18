@@ -48,6 +48,7 @@ extern "C" {
     
     void manage_take_back_pebbles(uchar from);
     
+    void manage_send_back_pebble(uchar from);
 #ifdef	__cplusplus
 }
 #endif
