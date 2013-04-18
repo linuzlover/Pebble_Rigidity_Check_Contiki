@@ -36,6 +36,7 @@
  *         Implementing the Pebble Rigidity Check over Rime
  * \author
  *         Attilio Priolo <priolo@dia.uniroma3.it>
+ *         .... ANDREA E RYAN ....
  * Based on the original work by
  *         Adam Dunkels <adam@sics.se>
  */
@@ -225,9 +226,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             PRINTD("Leader start election received by agent %d\n", NODE_ID);
             process_post_synch(&pebble_process, leader_election_event, NULL);
             break;
-            /*PKG containing the bid
-             *TODO: INSERT THE IND_SET_SIZE
-             */
+            /*PKG containing the bid*/
         case LEADER_BID_PKG:
             memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             memcpy(&bid, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
@@ -338,9 +337,8 @@ PROCESS_THREAD(pebble_process, ev, data) {
     PROCESS_BEGIN();
     //Open the broadcast channel on 129 and set the callback function
     broadcast_open(&broadcast, 129, &broadcast_call);
-    //Init the address list statically
+    //Init the address list statically (something cool must replace this)
     set_addr_list();
-
     /*Start only when START_PKG has been received*/
     PROCESS_WAIT_EVENT_UNTIL(ev == start_alg_event);
     /*Wait for the adjacency matrix to be received*/
@@ -362,12 +360,11 @@ PROCESS_THREAD(pebble_process, ev, data) {
             //Wait for all the start pkgs to arrive
             PROCESS_WAIT_EVENT_UNTIL(ev == leader_election_event);
         }
-
+        //Init the structures for the leader election
         leader_election_reset();
-
         //Wait for the start to be notified to all the nodes
         //Desync the agents
-        etimer_set(&et, (NODE_ID + 1) *20 * SCALE);
+        etimer_set(&et, (NODE_ID + 1) *1 * SCALE);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         //If the i-th agent has been a leader, set the bid to the lowest value,
         //otherwise set it to 1
@@ -388,7 +385,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
             //Init the leadership structures
             leader_init();
             while (!leader_run(&broadcast)) {
-                etimer_set(&et, 10 * SCALE);
+                etimer_set(&et, 1 * SCALE);
                 PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
             }
             //Terminate the leadership phase

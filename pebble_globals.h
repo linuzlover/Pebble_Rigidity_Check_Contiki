@@ -37,6 +37,7 @@ typedef struct {
 /*! 
  *Define the total number of involved nodes. In future releases this will be a 
  *dynamic variable. \TODO: Change it to a variable instead of a define
+ * TOT_NUM_NODES=(RECEIVERS+SENDER)=RECEIVERS+1
  */
 #define TOT_NUM_NODES 8
 /**

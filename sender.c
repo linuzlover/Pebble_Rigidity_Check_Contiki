@@ -64,7 +64,7 @@ AUTOSTART_PROCESSES(&example_broadcast_process);
 
 static void
 broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
-
+    //This will represent our logger in the real hardware experiments
 }
 
 //Not rigid 7 agents
@@ -109,60 +109,13 @@ struct broadcast_conn broadcast;
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(example_broadcast_process, ev, data) {
     static struct etimer et;
-    rimeaddr_t dest;
-
     pkg_hdr to_send;
-    //This address will be used to send the token to the first node
-    dest.u8[0] = 255;
-    dest.u8[1] = 255;
-
-
     //Adjacency matrix to be sent
     uchar adj[TOT_NUM_NODES * TOT_NUM_NODES];
     //Filling it
     memset(adj, 0, TOT_NUM_NODES * TOT_NUM_NODES);
-
     set_adj_matrix(adj);
-    //adj[mat2vec(0, 1)] = 1;
-
-    /*    adj[mat2vec(0, 1)] = 1;
-
-        adj[mat2vec(1, 0)] = 1;
     
-        adj[mat2vec(1, 2)] = 1;
-
-        adj[mat2vec(2, 1)] = 1;
-    
-        adj[mat2vec(2, 3)] = 1;
-
-        adj[mat2vec(3, 2)] = 1;
-    
-        adj[mat2vec(3, 0)] = 1;
-    
-        adj[mat2vec(0, 3)] = 1;
-
-        adj[mat2vec(0, 2)] = 1;
-    
-        adj[mat2vec(2, 0)] = 1;
- 
-        adj[mat2vec(1, 4)] = 1;
-    
-        adj[mat2vec(4, 1)] = 1;
- 
-       // adj[mat2vec(1, 5)] = 1;
-    
-        adj[mat2vec(5, 1)] = 1;
-
-        adj[mat2vec(2, 4)] = 1;
-    
-        adj[mat2vec(4, 2)] = 1;
-
-        adj[mat2vec(5, 4)] = 1;
-    
-        adj[mat2vec(4, 5)] = 1;
-     */
-    //adj[mat2vec(1, 0)] = 1;
-    //---
 
     //Setting handlers and begin
     PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
@@ -189,8 +142,8 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
     packetbuf_clear();
     packetbuf_copyfrom(&to_send, sizeof (pkg_hdr));
     broadcast_send(&broadcast);
-    NETSTACK_MAC.off(0);
-
+    //Turn off something
+    //NETSTACK_MAC.off(0);
     PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
