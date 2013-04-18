@@ -98,7 +98,7 @@ static uchar get_id(rimeaddr_t *from) {
     return 255;
 }
 
-void leader_election_init() {
+void leader_election_reset() {
     memset(received_leader_bid, 0, TOT_NUM_NODES * sizeof (uchar));
     received_leader_bid[NODE_ID] = 1;
     max_bid = 0;

@@ -42,9 +42,9 @@ void send_adj_pkg_broad(struct broadcast_conn *broadcast, uchar *adj) {
 }
 
 
-void send_leader_bid_pkg(struct broadcast_conn *broadcast, uchar id, uchar bid) {
+void send_leader_bid_pkg(struct broadcast_conn *broadcast, uchar id, uchar bid,uchar size_ind_set) {
     pkg_hdr to_send;
-    uint16 len = sizeof (uchar)*2;
+    uint16 len = sizeof (uchar)*3;
 
     uint16 pkg_length = sizeof (pkg_hdr) + len;
     uchar buffer_to_send[pkg_length];
@@ -55,6 +55,7 @@ void send_leader_bid_pkg(struct broadcast_conn *broadcast, uchar id, uchar bid) 
 
     memcpy(buffer_to_send + sizeof (pkg_hdr), &id, sizeof (uchar));
     memcpy(buffer_to_send + sizeof (pkg_hdr) + sizeof (uchar), &bid, sizeof (uchar));
+    memcpy(buffer_to_send + sizeof (pkg_hdr) + 2*sizeof (uchar), &size_ind_set, sizeof (uchar));
     packetbuf_clear();
     packetbuf_set_datalen(pkg_length);
     packetbuf_copyfrom(buffer_to_send, pkg_length);

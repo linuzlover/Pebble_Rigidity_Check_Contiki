@@ -31,8 +31,6 @@ typedef struct{
  * dynamic variable. \TODO: Change it to a variable instead of a define
  */
 #define TOT_NUM_NODES 7
-
-
 /**
  * \var NODE Id or index of the node in global ordering
  */

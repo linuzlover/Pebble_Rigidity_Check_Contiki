@@ -26,7 +26,7 @@ extern "C" {
     
     extern uchar uId;
 
-    void leader_election_init();
+    void leader_election_reset();
 
     void leader_init();
     

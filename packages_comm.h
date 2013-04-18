@@ -120,7 +120,7 @@ void send_leader_election_pkg(struct broadcast_conn *broadcast);
  * @param id ID of the sender
  * @param bid Bid for the auction
  */
-void send_leader_bid_pkg(struct broadcast_conn *broadcast, uchar id, uchar bid);
+void send_leader_bid_pkg(struct broadcast_conn *broadcast, uchar id, uchar bid,uchar size_ind_set);
 /**
  * This function sends the rigidity notification in broadcast
  * @param broadcast Broadcast channel

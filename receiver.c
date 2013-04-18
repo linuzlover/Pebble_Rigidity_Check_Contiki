@@ -204,7 +204,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
     /*Copy the broadcast buffer in the header structure*/
     memcpy(&rec_hdr, packetbuf_dataptr(), sizeof (pkg_hdr));
     /*Temporary variables exctracted from the packages*/
-    uchar bid, destination_id, sender_id, received_unique_id, received_ind_set_size;
+    uchar bid, destination_id, sender_id, received_unique_id, received_ind_set_size, size_ind_set;
     /*Switch on the type of pkg*/
     switch (rec_hdr.type) {
             /*PKG to start the algorithms*/
@@ -231,6 +231,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
         case LEADER_BID_PKG:
             memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             memcpy(&bid, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
+            memcpy(&size_ind_set, packetbuf_dataptr() + sizeof (pkg_hdr) + 2*sizeof (uchar), sizeof (uchar));
             PRINTD("Leader bid received by agent %d from %d amount %d\n", NODE_ID, sender_id, bid);
             /*Set that it was received*/
             received_leader_bid[sender_id] = 1;
@@ -245,7 +246,9 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
                 max_bid = NODE_ID;
                 max_id = NODE_ID;
             }
-
+            
+            num_ind_set=(num_ind_set<size_ind_set)?size_ind_set:num_ind_set;
+            
             process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
             /*Pkg containing the size of the independent set*/
@@ -354,42 +357,49 @@ PROCESS_THREAD(pebble_process, ev, data) {
     //Init each agent
     agent_init();
     //Init the structures for the leader election
-    leader_election_init();
+    leader_election_reset();
     /*Main loop*/
     //iterate until or all the agents have been leader or the algorithm is over due
     //to the graph rigidity.
     while (!all_been_leader()) {
-
-
-        //Wait for all the start pkgs to arrive
+        //The previous leader is not receiving the leader election event. So a flag
+        //to understand if the current agent was the the leader in the previous loop of
+        //The algorithm is required
         if (PREV_LEADER) {
             PREV_LEADER = 0;
         } else
+        {
+            //Wait for all the start pkgs to arrive
             PROCESS_WAIT_EVENT_UNTIL(ev == leader_election_event);
-        leader_election_init();
+        }
+        
+        leader_election_reset();
 
         //Wait for the start to be notified to all the nodes
-        etimer_set(&et, CLOCK_SECOND);
-        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+        //etimer_set(&et, CLOCK_SECOND);
+        //PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         //Desync the agents
-        etimer_set(&et, (NODE_ID + 1) *500);
+        etimer_set(&et, (NODE_ID + 1) *20);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-        //If the i-th agent has been a leader, set the bid to the lowest value
+        //If the i-th agent has been a leader, set the bid to the lowest value,
+        //otherwise set it to 1
         if (been_leader)
-            send_leader_bid_pkg(&broadcast, NODE_ID, 0);
+            send_leader_bid_pkg(&broadcast, NODE_ID, 0,num_ind_set);
         else
-            send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID);
+            send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID,num_ind_set);
 
-        //If all the bids have arrived
+        //If all the bids have arrived (for the sake of reliability, retransmissions
+        //should be inserted but problems related to transmission collisions could
+        //arise).
         while (!check_all_leader_pkgs_rec()) {
             PROCESS_WAIT_EVENT();
         }
         //Clear the receiverd_leader_bid
-        memset(received_leader_bid, 0, TOT_NUM_NODES);
+        //memset(received_leader_bid, 0, TOT_NUM_NODES);
         //Fill the been leader tab with the new leader ID
         been_leader_tab[max_id] = 1;
         //Debug TODO:remove
-        printf("New Leader:%d\n", max_id);
+        //printf("New Leader:%d\n", max_id);
         //If the i-th agent is the leader..
         if (max_id == NODE_ID) {
 
@@ -404,8 +414,8 @@ PROCESS_THREAD(pebble_process, ev, data) {
             //Terminate the leadership phase
             leader_close(&broadcast);
             //Wait to send the leader election packet
-            etimer_set(&et, CLOCK_SECOND);
-            PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+            //etimer_set(&et, CLOCK_SECOND);
+            //PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
             //Start new election process
             send_leader_election_pkg(&broadcast);
         }
