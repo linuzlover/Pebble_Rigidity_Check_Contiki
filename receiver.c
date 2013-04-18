@@ -67,21 +67,6 @@ static process_event_t leader_election_event;
 //AUXILIARY FUNCTIONS - BEGIN
 
 /**
- * Function to retrieve the global ID (used also as an array index).
- * @param from Rime address of the node used to retrieve the global ID
- * @return Return the global ID
- */
-static uchar get_id(rimeaddr_t *from) {
-    uchar i;
-
-    for (i = 0; i < TOT_NUM_NODES; i++) {
-        if (rimeaddr_cmp(&nodes_addr_list[i], from))
-            return i;
-    }
-    return 255;
-}
-
-/**
  * Function to initialize the global list of addresses.
  * Cannot do this from file because I cannot upload file on the MicaZ
  */
@@ -218,7 +203,6 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
     pkg_hdr rec_hdr;
     /*Copy the broadcast buffer in the header structure*/
     memcpy(&rec_hdr, packetbuf_dataptr(), sizeof (pkg_hdr));
-
     /*Temporary variables exctracted from the packages*/
     uchar bid, destination_id, sender_id, received_unique_id, received_ind_set_size;
     /*Switch on the type of pkg*/
@@ -264,14 +248,19 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
 
             process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
+            /*Pkg containing the size of the independent set*/
         case IND_SET_PKG:
             memcpy(&received_ind_set_size, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             num_ind_set = received_ind_set_size;
             PRINTD("Ind Set received by agent %d amount %d\n", NODE_ID, num_ind_set);
             process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
+            /*Pkg containing a request of a pebble*/
         case REQUEST_PEBBLE_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+            /*The communication is unidirectional. I avoided to use the runicast because of the 
+             deadlock issue on the communication. So, if the package is not adressed to the current
+             agent, the manage... function is not called and the package is not parsed*/
             if (destination_id == NODE_ID) {
                 memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
                 memcpy(&received_unique_id, packetbuf_dataptr() + sizeof (pkg_hdr) + 2 * sizeof (uchar), sizeof (uint16));
@@ -280,6 +269,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             }
             process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
+            /*Pkg pebble found*/
         case PEBBLE_FOUND_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
@@ -289,6 +279,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             }
             process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
+            /*Pkg pebble found*/
         case PEBBLE_NOT_FOUND_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if (destination_id == NODE_ID) {
@@ -298,7 +289,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             }
             process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
-
+        /*Pkg take back a pebble*/
         case SEND_BACK_PEBBLE_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if (destination_id == NODE_ID) {
@@ -308,16 +299,7 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             }
             process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
-        case NOTIFY_RIGIDITY_PKG:
-            memcpy(&is_rigid, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
-            PRINTD("Rigidity notification %d\n", is_rigid);
-
-            if (!is_rigid)
-                leds_on(LEDS_BLUE);
-            else
-                leds_on(LEDS_ALL);
-            process_exit(&pebble_process);
-            break;
+            /*Pkg take back all the pebbles*/
         case TAKE_BACK_PEBBLES_PKG:
             memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
             if (destination_id == NODE_ID) {
@@ -326,6 +308,17 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
                 manage_take_back_pebbles(sender_id);
             }
             process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
+            break;
+            /*Pkg for the notification of the rigidity*/
+        case NOTIFY_RIGIDITY_PKG:
+            memcpy(&is_rigid, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+            PRINTD("Rigidity notification %d\n", is_rigid);
+            if (!is_rigid)
+                leds_on(LEDS_BLUE);
+            else
+                leds_on(LEDS_ALL);
+            //Once the rigidity check is over, kill the main process
+            process_exit(&pebble_process);
             break;
         default:
             printf("Error in switch\n");
@@ -353,8 +346,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
     broadcast_open(&broadcast, 129, &broadcast_call);
     //Init the address list statically
     set_addr_list();
-    //Get the global ID
-    NODE_ID = get_id(&rimeaddr_node_addr);
+    
     /*Start only when START_PKG has been received*/
     PROCESS_WAIT_EVENT_UNTIL(ev == start_alg_event);
     /*Wait for the adjacency matrix to be received*/

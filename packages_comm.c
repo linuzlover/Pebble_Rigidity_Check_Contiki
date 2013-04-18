@@ -8,7 +8,6 @@ rimeaddr_t nodes_addr_list[TOT_NUM_NODES];
 
 void send_start_pkg_broad(struct broadcast_conn *broadcast) {
     
-
     //Header to be sent
     pkg_hdr to_send;
     //Setting the header, the receiver and the length of the payload

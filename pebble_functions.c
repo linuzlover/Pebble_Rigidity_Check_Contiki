@@ -83,6 +83,20 @@ uchar max_id = 0;
 
 uchar max_bid = 0;
 
+/**
+ * Function to retrieve the global ID (used also as an array index).
+ * @param from Rime address of the node used to retrieve the global ID
+ * @return Return the global ID
+ */
+static uchar get_id(rimeaddr_t *from) {
+    uchar i;
+
+    for (i = 0; i < TOT_NUM_NODES; i++) {
+        if (rimeaddr_cmp(&nodes_addr_list[i], from))
+            return i;
+    }
+    return 255;
+}
 
 void leader_election_init() {
     memset(received_leader_bid, 0, TOT_NUM_NODES * sizeof (uchar));
@@ -154,7 +168,8 @@ void leader_init() {
 }
 
 void agent_init() {
-
+//Get the global ID
+    NODE_ID = get_id(&rimeaddr_node_addr);
     uId = NODE_ID * (TOT_NUM_NODES * TOT_NUM_NODES);
     //Not the leader
     is_leader = 0;
@@ -353,6 +368,10 @@ void leader_close(struct broadcast_conn *broadcast) {
     send_current_ind_set(broadcast, num_ind_set);
     if (all_been_leader()) {
         send_rigidity_pkg(broadcast, is_rigid);
+        if(is_rigid)
+            leds_on(LEDS_ALL);
+        else
+            leds_on(LEDS_BLUE);
     } 
     else
         PREV_LEADER=1;
