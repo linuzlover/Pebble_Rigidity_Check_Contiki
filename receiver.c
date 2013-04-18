@@ -379,7 +379,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
         //If all the bids have arrived (for the sake of reliability, retransmissions
         //should be inserted but problems related to transmission collisions could
         //arise).
-        while (!check_all_leader_pkgs_rec()) {
+        while (!check_all_bids_rec()) {
             PROCESS_WAIT_EVENT();
         }
         //Fill the been leader tab with the new leader ID

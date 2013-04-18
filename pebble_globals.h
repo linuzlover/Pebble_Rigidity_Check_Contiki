@@ -131,6 +131,19 @@ extern uchar neighbors_list[TOT_NUM_NODES];
  */
 extern uchar IS_RIGID;
 /**
+     * \var PREV_LEADER variable to keep track if in the previous algorithm loop the 
+     * agent was the leader
+     */
+    extern uchar PREV_LEADER;
+    /**
+     * \var received_leader_bid bids received by the other agents
+     */
+    extern uchar received_leader_bid[TOT_NUM_NODES];
+    /**
+     * \var uId unique identified for the pebble request package
+     */
+    extern uchar uId;
+/**
  * Inline function to get the index of the (i,j) element in the array from the matrix representation.
  * @param i I-th index
  * @param j J-th index

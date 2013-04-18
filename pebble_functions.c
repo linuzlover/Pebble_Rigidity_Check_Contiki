@@ -55,7 +55,8 @@ uchar MAX_ID = 0;
 uchar MAX_BID = 0;
 
 /**
- * Function to retrieve the global ID (used also as an array index).
+ * Function to retrieve the global ID (used also as an array index). The scope of this
+ * function is within the file. Auxiliary function.
  * @param from Rime address of the node used to retrieve the global ID
  * @return Return the global ID
  */
@@ -76,7 +77,7 @@ void leader_election_reset() {
     MAX_ID = 0;
 }
 
-uchar check_all_leader_pkgs_rec() {
+uchar check_all_bids_rec() {
     uchar i = 0;
     uchar considered = 0;
 

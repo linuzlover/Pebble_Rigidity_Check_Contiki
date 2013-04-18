@@ -20,34 +20,67 @@
 extern "C" {
 #endif
 
-    extern uchar PREV_LEADER;
-
-    extern uchar received_leader_bid[TOT_NUM_NODES];
-    
-    extern uchar uId;
-
+    /**
+     * Function to reset the leader election algorithm.
+     */
     void leader_election_reset();
-
+    /**
+     * Function to init the leader structures
+     */
     void leader_init();
-    
+    /**
+     * Leader main algorithm
+     * @param broadcast Broadcast channel to send data.
+     * @return 1 if the execution is over, 0 if the leader has something else to do.
+     */
     uchar leader_run(struct broadcast_conn *broadcast);
-
+    /**
+     * Function to init each agent data structure
+     */
     void agent_init();
-
+    /**
+     * Function to check if all the agent have been leader
+     * @return 1 if all the agents have been leader 0 otherwise.
+     */
     uchar all_been_leader();
-
-    uchar check_all_leader_pkgs_rec();
-
+    /**
+     * Function to check if all the bids have been received
+     * @return 1 if all have been received 0 otherwise.
+     */
+    uchar check_all_bids_rec();
+    /**
+     * Function to close the leadership
+     * @param broadcast Broadcast channel to send data.
+     */
     void leader_close(struct broadcast_conn *broadcast);
-    
+    /**
+     * Function to manage the pebble request
+     * @param broadcast Broadcast channel to send data
+     * @param from The sender of the request
+     * @param rUid Unique id of the received package
+     */
     void manage_pebble_request(struct broadcast_conn *broadcast,uchar from,uint16 rUid);
-    
+    /**
+     * Function to manage the pebble found package
+     * @param broadcast Broadcast channel to send data
+     * @param from The sender of the request
+     */
     void manage_pebble_found(struct broadcast_conn *broadcast,uchar from);
-    
+    /**
+     * Function to manage the pebble not found
+     * @param broadcast Broadcast channel to send data
+     * @param from The sender of the request
+     */
     void manage_pebble_not_found(struct broadcast_conn *broadcast, uchar from);
-    
+    /**
+     * Function to manage the package take back your pebbles
+     * @param from The sender of the request
+     */
     void manage_take_back_pebbles(uchar from);
-    
+    /**
+     * Function to manage the package take back a pebble
+     * @param from The sender of the request
+     */
     void manage_send_back_pebble(uchar from);
 #ifdef	__cplusplus
 }
