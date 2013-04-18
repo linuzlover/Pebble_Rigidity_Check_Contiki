@@ -3,6 +3,7 @@
 void init_edge(edgeset *ed)
 {
     uchar i;
+    //255 is the default value
     for(i=0;i<2;i++)
     {
         ed->assign_edges[i].node_i=255;
@@ -21,6 +22,7 @@ void print_pebble_assign(edgeset *ed)
 
 void add_edge(edgeset *ed,edge ed_to_add)
 {
+    //If it is full, print an error message
     if(ed->num_assigned==2)
     {
         PRINTD("Error in adding the edge\n");
@@ -36,6 +38,7 @@ void add_edge(edgeset *ed,edge ed_to_add)
 uchar remove_single_edge(edgeset *ed,edge ed_to_add)
 {
     uchar res=0;
+    //Check the second assignment
     if(ed->assign_edges[1].node_i==ed_to_add.node_i && ed->assign_edges[1].node_j==ed_to_add.node_j)
     {
         ed->assign_edges[1].node_i=255;
@@ -43,6 +46,7 @@ uchar remove_single_edge(edgeset *ed,edge ed_to_add)
         ed->num_assigned--;
 	res= 1;
     }
+    //Check the first assignment if the first fails
     else if(ed->assign_edges[0].node_i==ed_to_add.node_i && ed->assign_edges[0].node_j==ed_to_add.node_j)
     {
         ed->assign_edges[0].node_i=ed->assign_edges[1].node_i;
@@ -58,6 +62,7 @@ uchar remove_single_edge(edgeset *ed,edge ed_to_add)
 uchar remove_edge(edgeset *ed,edge ed_to_add)
 {
     uchar res=0;
+    //Check the second assignment
     if(ed->assign_edges[1].node_i==ed_to_add.node_i && ed->assign_edges[1].node_j==ed_to_add.node_j)
     {
         ed->assign_edges[1].node_i=255;
@@ -65,6 +70,7 @@ uchar remove_edge(edgeset *ed,edge ed_to_add)
         ed->num_assigned--;
         res++;
     }
+    //Check the first assignment
     if(ed->assign_edges[0].node_i==ed_to_add.node_i && ed->assign_edges[0].node_j==ed_to_add.node_j)
     {
         ed->assign_edges[0].node_i=ed->assign_edges[1].node_i;

@@ -72,6 +72,7 @@ static uchar get_id(rimeaddr_t *from) {
 
 void leader_election_reset() {
     memset(received_leader_bid, 0, TOT_NUM_NODES * sizeof (uchar));
+    //Each one simulates that its own bid has been received
     received_leader_bid[NODE_ID] = 1;
     MAX_BID = 0;
     MAX_ID = 0;
@@ -275,8 +276,10 @@ void manage_pebble_found(struct broadcast_conn *broadcast, uchar from) {
     temp.node_i=NODE_ID;
     temp.node_j=from;
     
+    //Remove the edge
     remove_single_edge(&assign_pebble,temp);
     PRINTD("In %d\n",NODE_ID);
+    //print the assignment for debug
     print_pebble_assign(&assign_pebble);
         
     if (IS_LEADER) {
@@ -338,12 +341,15 @@ void leader_close(struct broadcast_conn *broadcast) {
     //Not leader anymore
     IS_LEADER = 0;
     if (all_been_leader()) {
+        //Send the rigidity pkg to all the agents
         send_rigidity_pkg(broadcast, IS_RIGID);
+        //Turns the leds on according to the rigidity
         if(IS_RIGID)
             leds_on(LEDS_ALL);
         else
             leds_on(LEDS_BLUE);
     } 
+    //Else... keep going
     else
         PREV_LEADER=1;
 }
