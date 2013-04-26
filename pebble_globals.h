@@ -39,7 +39,7 @@ typedef struct {
  *dynamic variable. \TODO: Change it to a variable instead of a define
  * TOT_NUM_NODES=(RECEIVERS+SENDER)=RECEIVERS+1
  */
-#define TOT_NUM_NODES 8
+#define TOT_NUM_NODES 7
 /**
  * \var NODE ID or index of the node in global ordering
  */

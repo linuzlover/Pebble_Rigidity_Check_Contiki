@@ -2,13 +2,14 @@
 
 #include "pebble_functions.h"
 #include "pebble_assign_set.h"
+#include "incident_edgeset.h"
 
 
 /**
  * @see pebble_globals.h for comments
  */
 
-edgeset assign_pebble;
+assignment_edgeset assign_pebble;
 
 uchar PREV_LEADER=0;
 
@@ -42,9 +43,8 @@ uchar uId;
 
 uchar adj_matrix[TOT_NUM_NODES*TOT_NUM_NODES];
 
-edge incident_edges[TOT_NUM_NODES-1];
+incident_edgeset incident_es;
 
-uchar NUM_INCIDENT_EDGES = 0;
 
 uchar count_incident_edges = 0;
 
@@ -105,9 +105,7 @@ uchar all_been_leader() {
 void leader_init() {
     //INdex
     uint16 i = 0;
-    
-    //Counter
-    uchar count = 0;
+    edge temp;
     //Setting the variables
     IS_LEADER = 1;
     BEEN_LEADER = 1;
@@ -121,19 +119,15 @@ void leader_init() {
         //If the agents are neighbors
         if (adj_matrix[mat2vec(NODE_ID, i)] && !been_leader_tab[i]) {
             //Set the first endpoint
-            incident_edges[count].node_i = NODE_ID;
-            //Sent the second endpoint
-            incident_edges[count].node_j = i;
-            //Increment the counter of incident edges
-            count++;
+            temp.node_i=NODE_ID;
+            temp.node_j=i;
+            add_edge_incident_es(&incident_es,temp);
             PRINTD("Agent %d, neighbor:%d\n",NODE_ID,i);
         }
     }
-    //Keep track of the number of incident edges
-
-    NUM_INCIDENT_EDGES = count;
+    
     #ifdef DEBUG
-    PRINTD("Agent %d num_inc_edges:%d\n",NODE_ID,NUM_INCIDENT_EDGES);
+    PRINTD("Agent %d num_inc_edges:%d\n",NODE_ID,incident_es.num_incident);
     PRINTD("Peb assign 0: %d,%d\n",assign_pebble.assign_edges[0].node_i,assign_pebble.assign_edges[0].node_j);
     PRINTD("Peb assign 1: %d,%d\n",assign_pebble.assign_edges[1].node_i,assign_pebble.assign_edges[1].node_j);
     PRINTD("Num pebbles %d Agent %d\n",PEBBLES,NODE_ID);
@@ -164,7 +158,7 @@ void agent_init() {
 
     //Clearing the assignment set
     init_edge(&assign_pebble);
-
+    init_incident_es(&incident_es);
     //No ind edges
     NUM_IND_SET = 0;
 }
@@ -178,14 +172,14 @@ uchar leader_run(struct broadcast_conn *broadcast) {
     }
 
     //Inspecting all the incident edges
-    while (count_incident_edges < NUM_INCIDENT_EDGES) {
+    while (count_incident_edges < incident_es.num_incident) {
 
         //Quadrupling
         while (QUAD <= 4) {
             //If the i-th agent has a free pebble
             if (PEBBLES > 0) {
                 //Add edge to P_i
-                add_edge(&assign_pebble,incident_edges[count_incident_edges]);
+                add_edge(&assign_pebble,incident_es.incident_edges[count_incident_edges]);
 		//Decrement the free pebbles
                 PEBBLES--;
                 //Next step of quadruplication
@@ -213,9 +207,9 @@ uchar leader_run(struct broadcast_conn *broadcast) {
         //------------------------------
 
         //Send back a pebble to e_i(2)
-        send_back_pebble_pkg(broadcast, incident_edges[count_incident_edges].node_j);
+        send_back_pebble_pkg(broadcast,incident_es.incident_edges[count_incident_edges].node_j);
         //Add edge to ind set
-        ind_set[NUM_IND_SET] = incident_edges[count_incident_edges];
+        ind_set[NUM_IND_SET] = incident_es.incident_edges[count_incident_edges];
         //increment the ind_set_size
         NUM_IND_SET++;
 
@@ -283,7 +277,7 @@ void manage_pebble_found(struct broadcast_conn *broadcast, uchar from) {
     print_pebble_assign(&assign_pebble);
 
     if (IS_LEADER) {
-        add_edge(&assign_pebble, incident_edges[count_incident_edges]);
+        add_edge(&assign_pebble, incident_es.incident_edges[count_incident_edges]);
         PRINTD("In pebble Found leader Num assigned %d\n", assign_pebble.num_assigned);
         QUAD++;
         REQUEST_WAIT = 0;
@@ -310,13 +304,11 @@ void manage_pebble_not_found(struct broadcast_conn *broadcast, uchar from) {
             //Maintain the uId
             uId++;
             //Return pebbles to e_i
-            uchar temp_res = remove_edge(&assign_pebble, incident_edges[count_incident_edges]);
+            uchar temp_res = remove_edge(&assign_pebble, incident_es.incident_edges[count_incident_edges]);
             PEBBLES += temp_res;
-            send_take_back_pebbles(broadcast, incident_edges[count_incident_edges].node_j, NODE_ID);
+            send_take_back_pebbles(broadcast, incident_es.incident_edges[count_incident_edges].node_j, NODE_ID);
             //---------------------
             //Remove the edge
-            //incident_edges[count_incident_edges].node_i = 255;
-            //incident_edges[count_incident_edges].node_j = 255;
             count_incident_edges++;
             //Starting over with the quadruplication process
             QUAD = 1;

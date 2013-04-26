@@ -68,7 +68,8 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
 }
 
 //Not rigid 7 agents
-//*/
+
+/*/
 static uchar temp_adj_matrix[TOT_NUM_NODES - 1][TOT_NUM_NODES - 1] = {
     {0, 1, 0, 1, 1, 1, 1},
     {1, 0, 1, 1, 1, 0, 0},
@@ -80,7 +81,7 @@ static uchar temp_adj_matrix[TOT_NUM_NODES - 1][TOT_NUM_NODES - 1] = {
 //*/
 
 //Rigid 6 agents
-/*/
+//*/
 static uchar temp_adj_matrix[TOT_NUM_NODES - 1][TOT_NUM_NODES - 1] = {
     {0, 1, 0, 1, 1, 1},
     {1, 0, 1, 1, 1, 0},

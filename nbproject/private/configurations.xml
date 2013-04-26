@@ -1,22 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="88">
-  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
-    <df root="." name="Pebble_Rigidity_Check_Contiki">
-      <df name="obj_micaz">
-      </df>
-      <in>attilio.c</in>
-      <in>attilio_receive.c</in>
-      <in>attilio_send.c</in>
-      <in>packages_comm.c</in>
-      <in>packages_comm.h</in>
-      <in>pebble_functions.c</in>
-      <in>pebble_functions.h</in>
-      <in>pebble_globals.h</in>
-      <in>project-conf.h</in>
-      <in>symbols.c</in>
-      <in>symbols.h</in>
-    </df>
-  </logicalFolder>
+<configurationDescriptor version="80">
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="Default" type="0">
@@ -36,6 +19,8 @@
         </gdb_options>
         <gdb_buildfirst gdb_buildfirst_overriden="false" gdb_buildfirst_old="false"/>
       </dbx_gdbdebugger>
+      <gizmo_options version="3">
+      </gizmo_options>
       <nativedebugger version="1">
         <engine>gdb</engine>
       </nativedebugger>
