@@ -55,7 +55,6 @@
 #include "pebble_functions.h"
 #include "pebble_globals.h"
 
-
 /*Broadcast connection structure*/
 static struct broadcast_conn broadcast;
 /*Structure representing a start algorithm event*/
@@ -103,78 +102,73 @@ static void set_addr_list() {
     nodes_addr_list[9].u8[0] = 10;
     nodes_addr_list[9].u8[1] = 0;
 
-
-
-
-
-
     /*/
      * REAL HARDWARE MAC ADDRESSES
-            
-            temp.u8[0]=0;
-            temp.u8[1]=0;
-            nodes_addr_list[0]=temp;
 
-            temp.u8[0]=0;
-            temp.u8[1]=15;
-            nodes_addr_list[1]=temp;
+     temp.u8[0]=0;
+     temp.u8[1]=0;
+     nodes_addr_list[0]=temp;
 
-            temp.u8[0]=6;
-            temp.u8[1]=251;
-            nodes_addr_list[2]=temp;
+     temp.u8[0]=0;
+     temp.u8[1]=15;
+     nodes_addr_list[1]=temp;
 
-            temp.u8[0]=13;
-            temp.u8[1]=4;
-            nodes_addr_list[3]=temp;
+     temp.u8[0]=6;
+     temp.u8[1]=251;
+     nodes_addr_list[2]=temp;
 
-            temp.u8[0]=31;
-            temp.u8[1]=70;
-            nodes_addr_list[4]=temp;
+     temp.u8[0]=13;
+     temp.u8[1]=4;
+     nodes_addr_list[3]=temp;
 
-            temp.u8[0]=83;
-            temp.u8[1]=12;
-            nodes_addr_list[5]=temp;
+     temp.u8[0]=31;
+     temp.u8[1]=70;
+     nodes_addr_list[4]=temp;
 
-            temp.u8[0]=91;
-            temp.u8[1]=19;
-            nodes_addr_list[6]=temp;
+     temp.u8[0]=83;
+     temp.u8[1]=12;
+     nodes_addr_list[5]=temp;
 
-            temp.u8[0]=127;
-            temp.u8[1]=108;
-            nodes_addr_list[7]=temp;
+     temp.u8[0]=91;
+     temp.u8[1]=19;
+     nodes_addr_list[6]=temp;
 
-            temp.u8[0]=128;
-            temp.u8[1]=101;
-            nodes_addr_list[8]=temp;
+     temp.u8[0]=127;
+     temp.u8[1]=108;
+     nodes_addr_list[7]=temp;
 
-            temp.u8[0]=158;
-            temp.u8[1]=128;
-            nodes_addr_list[9]=temp;
+     temp.u8[0]=128;
+     temp.u8[1]=101;
+     nodes_addr_list[8]=temp;
 
-            temp.u8[0]=196;
-            temp.u8[1]=115;
-            nodes_addr_list[10]=temp;
+     temp.u8[0]=158;
+     temp.u8[1]=128;
+     nodes_addr_list[9]=temp;
 
-            temp.u8[0]=212;
-            temp.u8[1]=108;
-            nodes_addr_list[11]=temp;
+     temp.u8[0]=196;
+     temp.u8[1]=115;
+     nodes_addr_list[10]=temp;
 
-            temp.u8[0]=217;
-            temp.u8[1]=209;
-            nodes_addr_list[12]=temp;
+     temp.u8[0]=212;
+     temp.u8[1]=108;
+     nodes_addr_list[11]=temp;
 
-            temp.u8[0]=226;
-            temp.u8[1]=100;
-            nodes_addr_list[13]=temp;
+     temp.u8[0]=217;
+     temp.u8[1]=209;
+     nodes_addr_list[12]=temp;
 
-            temp.u8[0]=255;
-            temp.u8[1]=255;
-            nodes_addr_list[14]=temp;
-	
-            temp.u8[0]=255;
-            temp.u8[1]=255;
-            nodes_addr_list[15]=temp;
-    //*/
+     temp.u8[0]=226;
+     temp.u8[1]=100;
+     nodes_addr_list[13]=temp;
+
+     temp.u8[0]=255;
+     temp.u8[1]=255;
+     nodes_addr_list[14]=temp;
+
+     temp.u8[0]=255;
+     temp.u8[1]=255;
+     nodes_addr_list[15]=temp;
+     //*/
 }
 
 //AUXILIARY FUNCTIONS - END
@@ -195,8 +189,7 @@ AUTOSTART_PROCESSES(&pebble_process);
  * @param c Broadcast Connection
  * @param from Sender
  */
-static void
-broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
+static void broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
     /**
      * Header of the received packet
      * @see pebble_comm.h
@@ -205,7 +198,8 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
     /*Copy the broadcast buffer in the header structure*/
     memcpy(&rec_hdr, packetbuf_dataptr(), sizeof (pkg_hdr));
     /*Temporary variables exctracted from the packages*/
-    uchar bid, destination_id, sender_id, received_unique_id, size_ind_set;
+    uchar bid, destination_id, sender_id, received_unique_id, size_ind_set,
+            res_value;
     /*Switch on the type of pkg*/
     switch (rec_hdr.type) {
             /*PKG to start the algorithms*/
@@ -217,7 +211,8 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             /*PKG with the adjacency matrix*/
         case ADJ_MATR_PKG:
             PRINTD("Adj Matrix received by agent %d\n", NODE_ID);
-            memcpy(adj_matrix, packetbuf_dataptr() + sizeof (pkg_hdr), TOT_NUM_NODES * TOT_NUM_NODES);
+            memcpy(adj_matrix, packetbuf_dataptr() + sizeof (pkg_hdr),
+                    TOT_NUM_NODES * TOT_NUM_NODES);
             /*Send the event to unlock the main process*/
             process_post_synch(&pebble_process, adj_pkg_event, NULL);
             break;
@@ -229,9 +224,13 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             /*PKG containing the bid*/
         case LEADER_BID_PKG:
             memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
-            memcpy(&bid, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
-            memcpy(&size_ind_set, packetbuf_dataptr() + sizeof (pkg_hdr) + 2 * sizeof (uchar), sizeof (uchar));
-            PRINTD("Leader bid received by agent %d from %d amount %d\n", NODE_ID, sender_id, bid);
+            memcpy(&bid, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar),
+                    sizeof (uchar));
+            memcpy(&size_ind_set,
+                    packetbuf_dataptr() + sizeof (pkg_hdr) + 2 * sizeof (uchar),
+                    sizeof (uchar));
+            PRINTD("Leader bid received by agent %d from %d amount %d\n", NODE_ID,
+                    sender_id, bid);
             /*Set that it was received*/
             received_leader_bid[sender_id] = 1;
             /*If the bid is geq than the possessed one... store it*/
@@ -251,43 +250,56 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             break;
             /*Pkg containing a request of a pebble*/
         case REQUEST_PEBBLE_PKG:
-            memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
-            /*The communication is unidirectional. I avoided to use the runicast because of the 
+            memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr),
+                    sizeof (uchar));
+            /*The communication is unidirectional. I avoided to use the runicast because of the
              deadlock issue on the communication. So, if the package is not adressed to the current
              agent, the manage... function is not called and the package is not parsed*/
             if (destination_id == NODE_ID) {
-                memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
-                memcpy(&received_unique_id, packetbuf_dataptr() + sizeof (pkg_hdr) + 2 * sizeof (uchar), sizeof (uint16));
-                PRINTD("Requested pebble to agent %d from agent %d with ID %d\n", NODE_ID, sender_id, received_unique_id);
+                memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar),
+                        sizeof (uchar));
+                memcpy(&received_unique_id,
+                        packetbuf_dataptr() + sizeof (pkg_hdr) + 2 * sizeof (uchar),
+                        sizeof (uint16));
+                PRINTD("Requested pebble to agent %d from agent %d with ID %d\n", NODE_ID,
+                        sender_id, received_unique_id);
                 manage_pebble_request(&broadcast, sender_id, received_unique_id);
             }
             process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
             /*Pkg pebble found*/
         case PEBBLE_FOUND_PKG:
-            memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
-            memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
+            memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr),
+                    sizeof (uchar));
+            memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar),
+                    sizeof (uchar));
             if (destination_id == NODE_ID) {
-                PRINTD("Received a pebble found by agent %d from agent %d\n", NODE_ID, sender_id);
+                PRINTD("Received a pebble found by agent %d from agent %d\n", NODE_ID,
+                        sender_id);
                 manage_pebble_found(&broadcast, sender_id);
             }
             process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
             /*Pkg pebble found*/
         case PEBBLE_NOT_FOUND_PKG:
-            memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+            memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr),
+                    sizeof (uchar));
             if (destination_id == NODE_ID) {
-                memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
-                PRINTD("Received a pebble not found by agent %d from agent %d\n", NODE_ID, sender_id);
+                memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar),
+                        sizeof (uchar));
+                PRINTD("Received a pebble not found by agent %d from agent %d\n", NODE_ID,
+                        sender_id);
                 manage_pebble_not_found(&broadcast, sender_id);
             }
             process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
             /*Pkg take back a pebble*/
         case SEND_BACK_PEBBLE_PKG:
-            memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+            memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr),
+                    sizeof (uchar));
             if (destination_id == NODE_ID) {
-                memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
+                memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar),
+                        sizeof (uchar));
                 PRINTD("Sent back a pebble to agent %d from %d\n", NODE_ID, sender_id);
                 manage_send_back_pebble(sender_id);
             }
@@ -295,9 +307,11 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             break;
             /*Pkg take back all the pebbles*/
         case TAKE_BACK_PEBBLES_PKG:
-            memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr), sizeof (uchar));
+            memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr),
+                    sizeof (uchar));
             if (destination_id == NODE_ID) {
-                memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar), sizeof (uchar));
+                memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar),
+                        sizeof (uchar));
                 PRINTD("Take back pebbles to agent %d from %d\n", NODE_ID, sender_id);
                 manage_take_back_pebbles(sender_id);
             }
@@ -314,6 +328,37 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
             //Once the rigidity check is over, kill the main process
             process_exit(&pebble_process);
             break;
+        case CHECK_YOUR_IS_PKG:
+            //Check the destination
+            memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr),
+                    sizeof (uchar));
+            if (destination_id == NODE_ID) {
+                memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar),
+                        sizeof (uchar));
+                PRINTD("Parallel check req to agent %d from %d\n", NODE_ID, sender_id);
+                //Invoke the management function
+                manage_check_is(&broadcast,sender_id);
+            }
+            process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
+
+            break;
+        case CHECK_YOUR_IS_RES_PKG:
+            //Check the destination
+            memcpy(&destination_id, packetbuf_dataptr() + sizeof (pkg_hdr),
+                    sizeof (uchar));
+            if (destination_id == NODE_ID) {
+                memcpy(&sender_id, packetbuf_dataptr() + sizeof (pkg_hdr) + sizeof (uchar),
+                        sizeof (uchar));
+                memcpy(&res_value,
+                        packetbuf_dataptr() + sizeof (pkg_hdr) + 2 * sizeof (uchar),
+                        sizeof (uchar));
+                PRINTD("Parallel check response to agent %d from %d\n", NODE_ID,
+                        sender_id);
+                //Invoke the management function
+                manage_check_is_res(sender_id, res_value);
+            }
+            process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
+            break;
         default:
             printf("Error in switch\n");
             break;
@@ -322,7 +367,6 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
 }
 
 static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
-
 
 /*---------------------------------------------------------------------------*/
 
@@ -364,7 +408,7 @@ PROCESS_THREAD(pebble_process, ev, data) {
         leader_election_reset();
         //Wait for the start to be notified to all the nodes
         //Desync the agents
-        etimer_set(&et, (NODE_ID + 1) *1 * SCALE);
+        etimer_set(&et, (NODE_ID + 1) * 1 * SCALE);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         //If the i-th agent has been a leader, set the bid to the lowest value,
         //otherwise set it to 1

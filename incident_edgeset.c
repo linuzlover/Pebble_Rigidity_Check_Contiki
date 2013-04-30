@@ -42,7 +42,7 @@ void remove_edge_incident_es(incident_edgeset* es, edge to_remove)
     for(i=0;i<(es->num_incident-1) && !stop;i++)
     {
             
-        if(es->incident_edges[i].node_i==to_remove.node_i && es->incident_edges[i].node_j==to_remove.node_j)
+        if((es->incident_edges[i].node_i==to_remove.node_i) && (es->incident_edges[i].node_j==to_remove.node_j))
         {
             stop=1;
             //Avoid the last element
@@ -51,7 +51,8 @@ void remove_edge_incident_es(incident_edgeset* es, edge to_remove)
             es->num_incident--;        
         }
     }
-    
+    if(es->incident_edges[es->num_incident-1].node_i==to_remove.node_i && es->incident_edges[es->num_incident-1].node_j==to_remove.node_j)
+      es->num_incident--;
 }
 
 uchar is_contained_incident_es(incident_edgeset* es, edge to_find)
