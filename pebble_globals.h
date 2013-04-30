@@ -14,7 +14,7 @@
  * This define scales the pauses inside the receiver.c. It must be a positive
  * integer.
  */
-#define SCALE 1
+#define SCALE 2
 
 /*Typedefs for 2 byte and single byte information*/
 /*!\typedef  
@@ -39,7 +39,7 @@ typedef struct {
  *dynamic variable. \TODO: Change it to a variable instead of a define
  * TOT_NUM_NODES=(RECEIVERS+SENDER)=RECEIVERS+1
  */
-#define TOT_NUM_NODES 7
+#define TOT_NUM_NODES 8
 /**
  * \var NODE ID or index of the node in global ordering
  */

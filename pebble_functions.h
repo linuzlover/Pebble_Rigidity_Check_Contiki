@@ -82,6 +82,27 @@ extern "C" {
      * @param from The sender of the request
      */
     void manage_send_back_pebble(uchar from);
+
+    /**
+     * Function to manage the check indipendent set response package
+     * @param from The global ID of the sender
+     * @param res Value of the response
+     */
+    void manage_check_is_res(uchar from,uchar res);
+
+    /**
+     * Function to manage the check indipendent set package
+     * @param broadcast Broadcast channel to send data
+     * @param from The global ID of the sender
+     */
+
+    void manage_check_is(struct broadcast_conn *broadcast,uchar from);
+    /**
+     * This function returns 1 if the edge to_find is contained in the Ind Set
+     * @param to_find Edge to find
+     * @return 1 if the edge is contained, 0 otherwise
+     */
+    uchar is_edge_in_ind_set(edge to_find);
 #ifdef	__cplusplus
 }
 #endif

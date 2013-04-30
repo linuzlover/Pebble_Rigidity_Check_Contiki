@@ -78,6 +78,18 @@ void leader_election_reset() {
     MAX_ID = 0;
 }
 
+uchar is_edge_in_ind_set(edge to_find)
+{
+  uchar i;
+  uchar result=0;
+
+  for(i=0;i<(NUM_IND_SET);i++)
+  {
+    result=result||(to_find.node_i==ind_set[i].node_i && to_find.node_j==ind_set[i].node_j);
+  }
+  return result;
+}
+
 uchar check_all_bids_rec() {
     uchar i = 0;
     uchar considered = 0;
@@ -113,19 +125,16 @@ void leader_init() {
     QUAD = 1;
     been_leader_tab[NODE_ID] = 1;
 
-    //Init the incident edges set
-    for (i = 0; i < TOT_NUM_NODES-1; i++) {
-        
-        //If the agents are neighbors
-        if (adj_matrix[mat2vec(NODE_ID, i)] && !been_leader_tab[i]) {
-            //Set the first endpoint
-            temp.node_i=NODE_ID;
-            temp.node_j=i;
-            add_edge_incident_es(&incident_es,temp);
-            PRINTD("Agent %d, neighbor:%d\n",NODE_ID,i);
-        }
+    for(i=0;i<incident_es.num_incident;i++)
+    {
+      if(been_leader_tab[incident_es.incident_edges[i].node_j])
+      {
+        temp.node_i=NODE_ID;
+        temp.node_j=incident_es.incident_edges[i].node_j;
+        remove_edge_incident_es(&incident_es,temp);
+      }
     }
-    
+
     #ifdef DEBUG
     PRINTD("Agent %d num_inc_edges:%d\n",NODE_ID,incident_es.num_incident);
     PRINTD("Peb assign 0: %d,%d\n",assign_pebble.assign_edges[0].node_i,assign_pebble.assign_edges[0].node_j);
@@ -136,6 +145,8 @@ void leader_init() {
 
 void agent_init() {
 //Get the global ID
+    uchar i;
+    edge temp;
     NODE_ID = get_id(&rimeaddr_node_addr);
     uId = NODE_ID * (TOT_NUM_NODES * TOT_NUM_NODES);
     //Not the leader
@@ -159,6 +170,19 @@ void agent_init() {
     //Clearing the assignment set
     init_edge(&assign_pebble);
     init_incident_es(&incident_es);
+
+    //Init the incident edges set
+        for (i = 0; i < TOT_NUM_NODES-1; i++) {
+
+            //If the agents are neighbors
+            if (adj_matrix[mat2vec(NODE_ID, i)]) {
+                //Set the first endpoint
+                temp.node_i=NODE_ID;
+                temp.node_j=i;
+                add_edge_incident_es(&incident_es,temp);
+                PRINTD("Agent %d, neighbor:%d\n",NODE_ID,i);
+            }
+        }
     //No ind edges
     NUM_IND_SET = 0;
 }
@@ -354,4 +378,17 @@ void manage_send_back_pebble(uchar from) {
     uchar res;
     res = remove_single_edge(&assign_pebble, temp);
     PEBBLES += res;
+}
+
+void manage_check_is(struct broadcast_conn *broadcast,uchar from)
+{
+    edge temp;
+    uchar res;
+    
+    temp.node_i=NODE_ID;
+    temp.node_j=from;
+    
+    res=is_edge_in_ind_set(temp);
+    send_check_is_res_pkg(broadcast,from,NODE_ID,res);
+           
 }
