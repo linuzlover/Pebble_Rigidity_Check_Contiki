@@ -5,10 +5,20 @@
 #include "incident_edgeset.h"
 
 
+
+
 /**
  * @see pebble_globals.h for comments
  */
 
+uchar PARALLEL_WAIT=0;
+
+uchar UPPER_NEIGHS=0;
+
+uchar IS_MEMBER=0;
+
+uchar upper_neighs_array[TOT_NUM_NODES];
+ 
 assignment_edgeset assign_pebble;
 
 uchar PREV_LEADER=0;
@@ -83,9 +93,9 @@ uchar is_edge_in_ind_set(edge to_find)
   uchar i;
   uchar result=0;
 
-  for(i=0;i<(NUM_IND_SET);i++)
+  for(i=0;i<NUM_IND_SET && !result;i++)
   {
-    result=result||(to_find.node_i==ind_set[i].node_i && to_find.node_j==ind_set[i].node_j);
+    result=(to_find.node_i==ind_set[i].node_i && to_find.node_j==ind_set[i].node_j);
   }
   return result;
 }
@@ -171,24 +181,32 @@ void agent_init() {
     init_edge(&assign_pebble);
     init_incident_es(&incident_es);
 
+    //Set the first endpoint
+    temp.node_i=NODE_ID;
     //Init the incident edges set
         for (i = 0; i < TOT_NUM_NODES-1; i++) {
 
             //If the agents are neighbors
             if (adj_matrix[mat2vec(NODE_ID, i)]) {
-                //Set the first endpoint
-                temp.node_i=NODE_ID;
+                //Set the second endpoint
                 temp.node_j=i;
+                //Add the edge
                 add_edge_incident_es(&incident_es,temp);
                 PRINTD("Agent %d, neighbor:%d\n",NODE_ID,i);
+                //Keep track of the upper neighbors (neighbors with a greater ID)
+                if(i>NODE_ID)
+                {
+                     upper_neighs_array[UPPER_NEIGHS]=i;
+                     UPPER_NEIGHS++;
+                }
             }
         }
+    
     //No ind edges
     NUM_IND_SET = 0;
 }
 
 //Returns 1 when completed
-
 uchar leader_run(struct broadcast_conn *broadcast) {
     //If there is a pending request
     if (REQUEST_WAIT) {
@@ -364,8 +382,7 @@ void leader_close(struct broadcast_conn *broadcast) {
             leds_on(LEDS_ALL);
         else
             leds_on(LEDS_BLUE);
-    }
-        //Else... keep going
+    }        //Else... keep going
     else
         PREV_LEADER = 1;
 }
@@ -380,15 +397,14 @@ void manage_send_back_pebble(uchar from) {
     PEBBLES += res;
 }
 
-void manage_check_is(struct broadcast_conn *broadcast,uchar from)
-{
+void manage_check_is(struct broadcast_conn *broadcast, uchar from) {
     edge temp;
     uchar res;
-    
-    temp.node_i=NODE_ID;
-    temp.node_j=from;
-    
-    res=is_edge_in_ind_set(temp);
-    send_check_is_res_pkg(broadcast,from,NODE_ID,res);
-           
+
+    temp.node_i = NODE_ID;
+    temp.node_j = from;
+
+    res = is_edge_in_ind_set(temp);
+    send_check_is_res_pkg(broadcast, from, NODE_ID, res);
+
 }

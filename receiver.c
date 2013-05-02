@@ -54,6 +54,7 @@
 #include "net/netstack.h"
 #include "pebble_functions.h"
 #include "pebble_globals.h"
+#include "incident_edgeset.h"
 
 /*Broadcast connection structure*/
 static struct broadcast_conn broadcast;
@@ -337,7 +338,7 @@ static void broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
                         sizeof (uchar));
                 PRINTD("Parallel check req to agent %d from %d\n", NODE_ID, sender_id);
                 //Invoke the management function
-                manage_check_is(&broadcast,sender_id);
+                manage_check_is(&broadcast, sender_id);
             }
             process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
 
@@ -357,6 +358,7 @@ static void broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
                 //Invoke the management function
                 manage_check_is_res(sender_id, res_value);
             }
+            PARALLEL_WAIT=0;
             process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
         default:
@@ -372,7 +374,10 @@ static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
 
 /*Main thread of the process*/
 PROCESS_THREAD(pebble_process, ev, data) {
-
+    //Counter
+    uchar i;
+    //Auxiliary edge variable
+    edge temp;
     //Timer structure
     static struct etimer et;
     //Set the exit handler
@@ -389,6 +394,35 @@ PROCESS_THREAD(pebble_process, ev, data) {
     PROCESS_WAIT_EVENT_UNTIL(ev == adj_pkg_event);
     //Init each agent
     agent_init();
+    //Set the first endpoint of the edge
+    temp.node_i = NODE_ID;
+    
+    //This delay has to be veryfied (can be not sufficient)
+    //It is related to the broadcast bug
+    etimer_set(&et, (NODE_ID + 1) * 1 * SCALE);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+    //----------------------------- 
+    
+    //While all neighbors checked
+    for (i = 0; i < UPPER_NEIGHS; i++) {
+        //Set the second endpoint
+        temp.node_j = upper_neighs_array[i];
+        //Check the IS
+        IS_MEMBER = is_edge_in_ind_set(temp);
+        //If the agent is not member (the edge is not contained)  
+        if(!IS_MEMBER)
+        {
+            //Send the message and wait
+            send_check_is_pkg(&broadcast,upper_neighs_array[i],NODE_ID);
+            PARALLEL_WAIT=1;
+            while(PARALLEL_WAIT)
+            {
+                etimer_set(&et, 1 * SCALE);
+                PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+            }
+        }
+        
+    }
     //Init the structures for the leader election
     leader_election_reset();
     /*Main loop*/

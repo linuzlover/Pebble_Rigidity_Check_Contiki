@@ -85,6 +85,11 @@ extern uchar NUM_IND_SET;
  */
 extern uchar REQUEST_WAIT;
 /**
+ * \var PARALLEL_WAIT
+ */
+extern uchar PARALLEL_WAIT;
+
+/**
  * \var QUAD
  */
 extern uchar QUAD;
@@ -145,6 +150,18 @@ extern uchar received_leader_bid[TOT_NUM_NODES];
  */
 extern uchar uId;
 
+ /**
+  * \var upper_neighs Number of neighbors with greater ID
+  */
+ extern uchar UPPER_NEIGHS;
+ /**
+  * \var is_member Is the current agent member
+  */
+ extern uchar IS_MEMBER;
+ /**
+  * \var upper_neighs_array Array containing the upper neighbors
+  */   
+ extern   uchar upper_neighs_array[TOT_NUM_NODES];
 /**
  * Inline function to get the index of the (i,j) element in the array from the matrix representation.
  * @param i I-th index
