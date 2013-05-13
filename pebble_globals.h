@@ -39,7 +39,7 @@ typedef struct {
  *dynamic variable. \TODO: Change it to a variable instead of a define
  * TOT_NUM_NODES=(RECEIVERS+SENDER)=RECEIVERS+1
  */
-#define TOT_NUM_NODES 8
+#define TOT_NUM_NODES 7
 /**
  * \var NODE ID or index of the node in global ordering
  */
@@ -73,14 +73,6 @@ extern uchar PEBBLES;
  */
 extern edge peb_assign[2];
 /**
- * \var independent set
- */
-extern edge ind_set[2 * TOT_NUM_NODES - 3];
-/**
- * \var NUM_IND_SET size of the independent set
- */
-extern uchar NUM_IND_SET;
-/**
  * \var REQUEST_WAIT
  */
 extern uchar REQUEST_WAIT;
@@ -101,14 +93,6 @@ extern uchar been_leader_tab[TOT_NUM_NODES];
  * \var adj_matrix adjacency matrix
  */
 extern uchar adj_matrix[TOT_NUM_NODES*TOT_NUM_NODES];
-/**
- * \var incident_edges array of incident edges to the current agent
- */
-extern edge incident_edges[TOT_NUM_NODES - 1];
-/**
- * \var NUM_INCIDENT_EDGES number of incident edges
- */
-extern uchar NUM_INCIDENT_EDGES;
 /**
  * \var CONSIDERED_EDGE currently considered edge
  */

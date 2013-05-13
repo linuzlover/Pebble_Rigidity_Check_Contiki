@@ -3,6 +3,7 @@
 #include "pebble_functions.h"
 #include "pebble_assign_set.h"
 #include "incident_edgeset.h"
+#include "independent_edgeset.h"
 
 
 
@@ -37,10 +38,6 @@ uint16 REQUEST_ID = 0;
 
 uchar PEBBLES = 2;
 
-edge ind_set[2 * (TOT_NUM_NODES) - 3];
-
-uchar NUM_IND_SET = 0;
-
 uchar REQUEST_WAIT = 0;
 
 uchar QUAD = 1;
@@ -55,6 +52,7 @@ uchar adj_matrix[TOT_NUM_NODES*TOT_NUM_NODES];
 
 incident_edgeset incident_es;
 
+independent_edgeset independent_es;
 
 uchar count_incident_edges = 0;
 
@@ -86,18 +84,6 @@ void leader_election_reset() {
     received_leader_bid[NODE_ID] = 1;
     MAX_BID = 0;
     MAX_ID = 0;
-}
-
-uchar is_edge_in_ind_set(edge to_find)
-{
-  uchar i;
-  uchar result=0;
-
-  for(i=0;i<NUM_IND_SET && !result;i++)
-  {
-    result=(to_find.node_i==ind_set[i].node_i && to_find.node_j==ind_set[i].node_j);
-  }
-  return result;
 }
 
 uchar check_all_bids_rec() {
@@ -180,7 +166,8 @@ void agent_init() {
     //Clearing the assignment set
     init_edge(&assign_pebble);
     init_incident_es(&incident_es);
-
+    init_independent_es(&independent_es);
+    
     //Set the first endpoint
     temp.node_i=NODE_ID;
     //Init the incident edges set
@@ -202,8 +189,6 @@ void agent_init() {
             }
         }
     
-    //No ind edges
-    NUM_IND_SET = 0;
 }
 
 //Returns 1 when completed
@@ -250,13 +235,10 @@ uchar leader_run(struct broadcast_conn *broadcast) {
 
         //Send back a pebble to e_i(2)
         send_back_pebble_pkg(broadcast,incident_es.incident_edges[count_incident_edges].node_j);
-        //Add edge to ind set
-        ind_set[NUM_IND_SET] = incident_es.incident_edges[count_incident_edges];
-        //increment the ind_set_size
-        NUM_IND_SET++;
-
+        add_edge_independent_es(&independent_es,incident_es.incident_edges[count_incident_edges]);
+        
         //If there are 2N-3 in the independent set..the graph is rigid
-        if (NUM_IND_SET == 2 * (TOT_NUM_NODES-1) - 3) {
+        if (independent_es.num_independent == 2 * (TOT_NUM_NODES-1) - 3) {
             send_rigidity_pkg(broadcast, 1);
             IS_RIGID = 1;
             leds_on(LEDS_ALL);

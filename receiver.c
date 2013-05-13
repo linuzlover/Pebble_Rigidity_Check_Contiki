@@ -55,6 +55,7 @@
 #include "pebble_functions.h"
 #include "pebble_globals.h"
 #include "incident_edgeset.h"
+#include "independent_edgeset.h"
 
 /*Broadcast connection structure*/
 static struct broadcast_conn broadcast;
@@ -246,7 +247,7 @@ static void broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
                 MAX_ID = NODE_ID;
             }
             //Check the received independent set size
-            NUM_IND_SET = (NUM_IND_SET < size_ind_set) ? size_ind_set : NUM_IND_SET;
+            independent_es.num_independent=(independent_es.num_independent < size_ind_set) ? size_ind_set : independent_es.num_independent;
             process_post_synch(&pebble_process, PROCESS_EVENT_MSG, NULL);
             break;
             /*Pkg containing a request of a pebble*/
@@ -382,9 +383,9 @@ PROCESS_THREAD(pebble_process, ev, data) {
         //If the i-th agent has been a leader, set the bid to the lowest value,
         //otherwise set it to 1
         if (BEEN_LEADER)
-            send_leader_bid_pkg(&broadcast, NODE_ID, 0, NUM_IND_SET);
+            send_leader_bid_pkg(&broadcast, NODE_ID, 0, independent_es.num_independent);
         else
-            send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID, NUM_IND_SET);
+            send_leader_bid_pkg(&broadcast, NODE_ID, NODE_ID, independent_es.num_independent);
         //If all the bids have arrived (for the sake of reliability, retransmissions
         //should be inserted but problems related to transmission collisions could
         //arise).
