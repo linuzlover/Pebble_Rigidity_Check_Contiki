@@ -97,46 +97,6 @@ void send_rigidity_pkg(struct broadcast_conn *broadcast, uchar rigidity) {
     
 }
 
-void send_check_is_pkg(struct broadcast_conn *broadcast, uchar to,uchar from) {
-      pkg_hdr to_send;
-      uint16 len = sizeof (uchar)*2;
-
-      uint16 pkg_length = sizeof (pkg_hdr) + len;
-      uchar buffer_to_send[pkg_length];
-
-      to_send.type = CHECK_YOUR_IS_PKG;
-
-      memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
-      memcpy(buffer_to_send + sizeof (pkg_hdr), &to, sizeof (uchar));
-      memcpy(buffer_to_send + sizeof (pkg_hdr) + sizeof (uchar), &from, sizeof (uchar));
-
-      packetbuf_clear();
-      packetbuf_set_datalen(pkg_length);
-      packetbuf_copyfrom(buffer_to_send, pkg_length);
-      broadcast_send(broadcast);
-
-}
-
-void send_check_is_res_pkg(struct broadcast_conn *broadcast, uchar to,uchar from,uchar response) {
-      pkg_hdr to_send;
-      uint16 len = sizeof (uchar)*3;
-
-      uint16 pkg_length = sizeof (pkg_hdr) + len;
-      uchar buffer_to_send[pkg_length];
-
-      to_send.type = CHECK_YOUR_IS_RES_PKG;
-
-      memcpy(buffer_to_send, &to_send, sizeof (pkg_hdr));
-      memcpy(buffer_to_send + sizeof (pkg_hdr), &to, sizeof (uchar));
-      memcpy(buffer_to_send + sizeof (pkg_hdr) + sizeof (uchar), &from, sizeof (uchar));
-      memcpy(buffer_to_send + sizeof (pkg_hdr) + 2*sizeof (uchar), &response, sizeof (uchar));
-
-      packetbuf_clear();
-      packetbuf_set_datalen(pkg_length);
-      packetbuf_copyfrom(buffer_to_send, pkg_length);
-      broadcast_send(broadcast);
-
-}
 
 void send_pebble_request_pkg(struct broadcast_conn *broadcast, uchar to, uchar from, uint16 uId) {
     pkg_hdr to_send;

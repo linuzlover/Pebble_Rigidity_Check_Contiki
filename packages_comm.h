@@ -74,10 +74,6 @@ enum {
     PEBBLE_NOT_FOUND_PKG,
     //Pkg to inform an agent to get back its pebbles :-)
     TAKE_BACK_PEBBLES_PKG,
-    //Pkg to ask to your neighbor if the indipendent set contains this edge
-    CHECK_YOUR_IS_PKG,
-    //Response package
-    CHECK_YOUR_IS_RES_PKG
 };
 
 /**
@@ -155,10 +151,5 @@ void send_pebble_msg(struct broadcast_conn *broadcast, uchar to, uchar from, uch
  * @param from The sender ID
  */
 void send_take_back_pebbles(struct broadcast_conn *broadcast, uchar to, uchar from);
-
-void send_check_is_pkg(struct broadcast_conn *broadcast, uchar to,uchar from);
-
-void send_check_is_res_pkg(struct broadcast_conn *broadcast, uchar to,uchar from,uchar response);
-
 
 #endif

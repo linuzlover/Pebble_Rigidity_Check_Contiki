@@ -397,14 +397,3 @@ void manage_send_back_pebble(uchar from) {
     PEBBLES += res;
 }
 
-void manage_check_is(struct broadcast_conn *broadcast, uchar from) {
-    edge temp;
-    uchar res;
-
-    temp.node_i = NODE_ID;
-    temp.node_j = from;
-
-    res = is_edge_in_ind_set(temp);
-    send_check_is_res_pkg(broadcast, from, NODE_ID, res);
-
-}
