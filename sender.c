@@ -47,6 +47,7 @@
 #include "net/netstack.h"
 #include "dev/leds.h"
 #include "packages_comm.h"
+#include "lib/random.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -69,7 +70,97 @@ broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from) {
 
 //Not rigid 7 agents
 
-/*/
+uchar choose_random_edge(uchar v1, uchar *adj) {
+    uchar i, random_value, diff_zero = 0;
+    uchar aux[TOT_NUM_NODES];
+
+    for (i = 0; i < TOT_NUM_NODES; i++) {
+        if (adj[mat2vec(v1, i)]) {
+            aux[diff_zero] = i;
+            diff_zero++;
+        }
+    }
+    if (!diff_zero)
+        return 0;
+    else {
+        random_value = (uchar) (random_rand() % diff_zero);
+    }
+    return aux[random_value];
+}
+
+/**
+ * %HENNEBURGGRAPH Randomly generates a rigid graph with Henneburg operations
+ * @param adj Adjacency matrix
+ */
+void henneburgGraph(uchar *adj) {
+    uchar i, op, v1, v2, v3;
+    //Add first bar between first 2 nodes
+    adj[mat2vec(0, 1)] = 1;
+    adj[mat2vec(1, 0)] = 1;
+
+
+    //Perform N-2 random Henneburg operations to generate graph
+    for (i = 2; i < TOT_NUM_NODES; i++) {
+
+        if (i > 2)
+            op = (uchar) (random_rand() % 2) + 1;
+        else
+            op = 1;
+        // Perform the 2-valent operation
+        if (op == 1) {
+            //Choose vertices
+            v1 = (uchar) random_rand() % i;
+            v2 = (uchar) random_rand() % i;
+            while (v2 == v1) {
+                v2 = (uchar) random_rand() % i;
+            }
+
+
+            //% Add new edges 
+            adj[mat2vec(i, v1)] = 1;
+            adj[mat2vec(v1, i)] = 1;
+            adj[mat2vec(i, v2)] = 1;
+            adj[mat2vec(v2, i)] = 1;
+
+
+        }
+
+        // Perform the 3-valent operation
+        if (op == 2) {
+
+            // Choose an edge
+            v1 = (uchar) random_rand() % i;
+
+            v2 = choose_random_edge(v1, adj);
+
+            // Choose a third vertex
+            v3 = (uchar) random_rand() % i;
+            while (v3 == v1 || v3 == v2) {
+                v3 = (uchar) random_rand() % i;
+            }
+
+            //Remove edge (v1,v2) and add edges (v1,i), (v2,i), (v3,i)
+            adj[mat2vec(v1, v2)] = 0;
+            adj[mat2vec(v2, v1)] = 0;
+
+            adj[mat2vec(v1, i)] = 1;
+            adj[mat2vec(i, v1)] = 1;
+
+            adj[mat2vec(v2, i)] = 1;
+            adj[mat2vec(i, v2)] = 1;
+
+            adj[mat2vec(v3, i)] = 1;
+            adj[mat2vec(i, v3)] = 1;
+
+        }
+
+
+    }
+
+
+}
+
+//*/
 static uchar temp_adj_matrix[TOT_NUM_NODES - 1][TOT_NUM_NODES - 1] = {
     {0, 1, 0, 1, 1, 1, 1},
     {1, 0, 1, 1, 1, 0, 0},
@@ -77,11 +168,13 @@ static uchar temp_adj_matrix[TOT_NUM_NODES - 1][TOT_NUM_NODES - 1] = {
     {1, 1, 1, 0, 1, 1, 0},
     {1, 1, 0, 1, 0, 1, 0},
     {1, 0, 1, 1, 1, 0, 0},
-    {1, 0, 0, 0, 0, 0, 0}};
+    {1, 0, 0, 0, 0, 0, 0}
+};
 //*/
 
 //Rigid 6 agents
-//*/
+
+/*/
 static uchar temp_adj_matrix[TOT_NUM_NODES - 1][TOT_NUM_NODES - 1] = {
     {0, 1, 0, 1, 1, 1},
     {1, 0, 1, 1, 1, 0},
@@ -111,18 +204,34 @@ struct broadcast_conn broadcast;
 PROCESS_THREAD(example_broadcast_process, ev, data) {
     static struct etimer et;
     pkg_hdr to_send;
+    int q = 0;
     //Adjacency matrix to be sent
     uchar adj[TOT_NUM_NODES * TOT_NUM_NODES];
     //Filling it
     memset(adj, 0, TOT_NUM_NODES * TOT_NUM_NODES);
-    set_adj_matrix(adj);
+    //set_adj_matrix(adj);
+
+    henneburgGraph(adj);
     
+    uchar i,j;
+    
+    printf("[ ");
+    for(i=0;i<TOT_NUM_NODES;i++)
+    {
+        for(j=0;j<TOT_NUM_NODES;j++)
+        {
+            printf("%d,\t",adj[mat2vec(i,j)]);
+        }
+        printf("\n");
+    }
+    printf("]\n");
 
     //Setting handlers and begin
     PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
 
     PROCESS_BEGIN();
 
+    
     //Send start pkg in broadcast to all the agents
     broadcast_open(&broadcast, 129, &broadcast_call);
     etimer_set(&et, 5 * CLOCK_SECOND);
@@ -145,6 +254,7 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
     broadcast_send(&broadcast);
     //Turn off something
     //NETSTACK_MAC.off(0);
+    
     PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
