@@ -176,13 +176,13 @@ void henneburgGraph(uchar *adj) {
 
 }
 static uchar temp_adj_matrix[TOT_NUM_NODES - 1][TOT_NUM_NODES - 1] = {
-{0, 1, 1, 0, 1, 1, 0 },
-{1, 0, 0, 1, 1, 0, 0 },
-{1, 0, 0, 0, 1, 1, 1 },
-{0, 1, 0, 0, 0, 1, 0 },
-{1, 1, 1, 0, 0, 0, 1 },
-{1, 0, 1, 1, 0, 0, 0 },
-{0, 0, 1, 0, 1, 0, 0 }
+{0, 1, 0, 1, 0, 0, 1 },
+{1, 0, 1, 0, 1, 0, 0 },
+{0, 1, 0, 0, 1, 1, 0 },
+{1, 0, 0, 0, 0, 1, 1 },
+{0, 1, 1, 0, 0, 0, 1 },
+{0, 0, 1, 1, 0, 0, 0 },
+{1, 0, 0, 1, 1, 0, 0 }
 };
 
 static void set_adj_matrix(uchar *adj) {
@@ -235,7 +235,7 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
         }
     }
     
-*/    
+    
     printf("[ ");
     for (i = 0; i < TOT_NUM_NODES; i++) {
         for (j = 0; j < TOT_NUM_NODES; j++) {
@@ -244,7 +244,7 @@ PROCESS_THREAD(example_broadcast_process, ev, data) {
         printf("\n");
     }
     printf("]\n");
-
+*/
 
 
     //Send start pkg in broadcast to all the agents
